@@ -1669,6 +1669,46 @@ cd LocalMediaPlayer
 
 ## 📋 版本历史
 
+### v1.0.9 (2025-12-23)
+
+#### 🔧 修复 Git 合并冲突和 Gradle 弃用警告
+
+**问题描述**：
+项目在合并代码时产生了 Git 合并冲突，导致 `build.gradle.kts` 文件包含冲突标记，无法正常编译。同时存在 Gradle 弃用警告。
+
+**修复内容**：
+
+1. **解决 Git 合并冲突**
+   - 移除了所有冲突标记（`<<<<<<< HEAD`、`=======`、`>>>>>>> commit`）
+   - 选择使用更新的 Android Gradle Plugin 版本（8.5.2）
+   - 保留了 clean 任务配置
+
+2. **修复 Gradle 弃用警告**
+   - 将 `rootProject.buildDir` 替换为 `rootProject.layout.buildDirectory`
+   - `buildDir` 属性在 Gradle 8.0+ 中已弃用，应使用新的 `layout.buildDirectory` API
+
+**修复后的代码**：
+
+```kotlin
+// build.gradle.kts
+plugins {
+    id("com.android.application") version "8.5.2" apply false
+    id("org.jetbrains.kotlin.android") version "1.9.20" apply false
+    id("com.google.devtools.ksp") version "1.9.20-1.0.14" apply false
+}
+
+tasks.register("clean", Delete::class) {
+    delete(rootProject.layout.buildDirectory)  // ✅ 使用新的 API
+}
+```
+
+**修复的文件**：
+- `build.gradle.kts` - 解决合并冲突并修复弃用警告
+
+**编译状态**：✅ 编译成功，无错误和警告
+
+---
+
 ### v1.0.8 (2025-12-23)
 
 #### 🔧 修复编译错误
