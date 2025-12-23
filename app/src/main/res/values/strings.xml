@@ -1,8 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">本地播放器</string>
+<<<<<<< HEAD
     <string name="notification_channel_name">播放控制</string>
     <string name="notification_channel_description">音视频播放通知</string>
     <string name="playback_notification_title">正在播放</string>
+=======
+    <string name="notification_channel_name">媒体播放</string>
+    <string name="notification_channel_description">显示媒体播放控制</string>
+>>>>>>> 2cfdab441d0f865a9efbdae55c2613ef495acca5
 </resources>
 
