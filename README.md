@@ -740,6 +740,410 @@ splits {
 
 ## 📋 版本历史
 
+### v1.0.8 (2025-12-23)
+
+#### 🔧 修复编译错误
+
+**问题描述**：
+在 v1.0.7 中恢复完整功能时，使用的 API 接口与实际代码不匹配，导致编译失败。
+
+**编译错误修复**：
+
+1. **数据库初始化**
+   - 修正：`AppDatabase.getInstance(context)` ✓（原错误：`getDatabase()`）
+
+2. **MediaRepository 构造函数**
+   - 修正：需要两个参数 `mediaItemDao` 和 `categoryDao` ✓
+   ```kotlin
+   MediaRepository(
+       mediaItemDao = database.mediaItemDao(),
+       categoryDao = database.categoryDao()
+   )
+   ```
+
+3. **ViewModel 创建**
+   - 修正：使用 `remember` 手动创建 ViewModel（没有专用的 ViewModelFactory）✓
+   ```kotlin
+   val libraryViewModel = remember {
+       LibraryViewModel(repository, context)
+   }
+   
+   val playerViewModel = remember {
+       PlayerViewModel(playerManager, repository)
+   }
+   ```
+
+4. **LibraryViewModel 方法**
+   - 修正：`importMediaFile(uri)` ✓（原错误：`addMediaItem()`）
+
+5. **MediaRepository 方法**
+   - 修正：`getItemById(id)` ✓（原错误：`getMediaItemById()`）
+
+6. **PlayerViewModel 方法**
+   - 修正：`loadAndPlay(mediaItem)` ✓（原错误：`loadMedia()` + `play()`）
+
+7. **PlayerScreen 参数**
+   - 修正：需要 `viewModel` 和 `playerManager` 两个参数 ✓
+   - 移除了不存在的 `onBackClick` 参数
+
+**修复后的关键代码**：
+
+```kotlin
+// 正确的数据库和仓库初始化
+val database = AppDatabase.getInstance(context)
+val repository = MediaRepository(
+    mediaItemDao = database.mediaItemDao(),
+    categoryDao = database.categoryDao()
+)
+
+// 正确的 ViewModel 创建
+val libraryViewModel = remember {
+    LibraryViewModel(repository, context)
+}
+
+// 正确的文件导入
+libraryViewModel.importMediaFile(uri)
+
+// 正确的播放器调用
+val mediaItem = repository.getItemById(mediaItemId)
+mediaItem?.let { 
+    playerViewModel.loadAndPlay(it)
+}
+
+// 正确的 PlayerScreen 参数
+PlayerScreen(
+    viewModel = playerViewModel,
+    playerManager = playerManager
+)
+```
+
+**修复的文件**：
+- `app/src/main/java/com/local/mediaplayer/AppNavigation.kt` - 修正所有 API 调用
+
+**编译状态**：✅ 编译成功，无错误
+
+---
+
+### v1.0.7 (2025-12-23)
+
+#### ✅ 恢复完整应用功能
+
+**问题描述**：
+在 v1.0.5 中为了诊断崩溃问题，将 `AppNavigation` 简化为只显示一个测试按钮的版本。现在除零错误已经在 v1.0.6 中修复，可以恢复完整的应用功能。
+
+**本次更新**：
+
+##### 1. 恢复完整的 AppNavigation
+
+- ✅ 恢复媒体库页面 (`LibraryScreen`)
+- ✅ 恢复播放器页面 (`PlayerScreen`)
+- ✅ 恢复文件选择功能
+- ✅ 恢复导航功能
+- ✅ 保留完整的生命周期管理
+- ✅ 保留所有日志记录
+
+**恢复的功能**：
+
+```kotlin
+NavHost(navController, startDestination = "library") {
+    // 媒体库页面
+    composable("library") {
+        LibraryScreen(
+            viewModel = libraryViewModel,
+            onMediaItemClick = { mediaItem ->
+                navController.navigate("player/${mediaItem.id}")
+            },
+            onAddMediaClick = {
+                fileLauncher.launch("video/*")
+            }
+        )
+    }
+    
+    // 播放器页面
+    composable("player/{mediaItemId}") { backStackEntry ->
+        val mediaItemId = backStackEntry.arguments?.getLong("mediaItemId")
+        // ... 播放逻辑
+        PlayerScreen(
+            viewModel = playerViewModel,
+            onBackClick = {
+                playerViewModel.pause()
+                navController.popBackStack()
+            }
+        )
+    }
+}
+```
+
+**主要组件**：
+
+1. **媒体库** - 显示所有媒体文件，支持点击播放
+2. **播放器** - 全功能视频/音频播放器，支持手势控制
+3. **文件选择** - 支持从设备中选择媒体文件
+4. **生命周期管理** - 自动管理播放器资源，防止内存泄漏
+
+**测试说明**：
+1. 启动应用后会显示媒体库页面（目前为空）
+2. 点击右上角的 **+** 按钮添加媒体文件
+3. 选择视频或音频文件后自动开始播放
+4. 在播放器界面可以：
+   - 点击返回按钮回到媒体库
+   - 使用播放控制（播放/暂停/快进/快退）
+   - 左右滑动调节亮度和音量
+   - 双击快进/快退
+
+**修复的文件**：
+- `app/src/main/java/com/local/mediaplayer/AppNavigation.kt` - 恢复完整功能
+
+---
+
+### v1.0.6 (2025-12-23)
+
+#### 🐛 修复致命 Bug：除零错误
+
+**问题诊断**：
+通过 logcat 日志分析，发现应用闪退的根本原因是：
+```
+java.lang.ArithmeticException: divide by zero
+at com.local.mediaplayer.ui.library.LibraryScreenKt$MediaItemCard$1.invoke(LibraryScreen.kt:124)
+```
+
+**问题根源**：
+在 `LibraryScreen.kt` 的 `MediaItemCard` 组件中，计算播放进度时没有检查 `mediaItem.duration` 是否为 0：
+```kotlin
+// 问题代码（第 124 行）
+if (mediaItem.lastPosition > 0) {
+    val progress = (mediaItem.lastPosition * 100 / mediaItem.duration).toInt()  // ❌ duration 为 0 时崩溃
+    Text("已播放 $progress%")
+}
+```
+
+当媒体文件的 `duration` 为 0 时（例如损坏的文件、元数据缺失的文件），执行除法运算会抛出 `ArithmeticException`，导致应用崩溃。
+
+**修复方案**：
+添加对 `duration` 的验证，确保只有在 `duration > 0` 时才计算进度：
+
+```kotlin
+// 修复后的代码
+if (mediaItem.lastPosition > 0 && mediaItem.duration > 0) {  // ✅ 同时检查两个条件
+    val progress = (mediaItem.lastPosition * 100 / mediaItem.duration).toInt()
+    Text("已播放 $progress%")
+}
+```
+
+**修复的文件**：
+- `app/src/main/java/com/local/mediaplayer/ui/library/LibraryScreen.kt` (第 123 行)
+
+**其他改进**：
+- 更新了 `清理并编译.bat` 脚本，使用全局 `gradle` 命令代替 `gradlew.bat`（项目中缺少 Gradle Wrapper 文件）
+
+**测试建议**：
+1. 编译并安装新版本：
+   ```bash
+   gradle clean assembleDebug
+   adb install -r app/build/outputs/apk/debug/app-debug.apk
+   ```
+2. 测试各种媒体文件，特别是：
+   - 元数据不完整的文件
+   - duration 为 0 的文件
+   - 损坏的媒体文件
+3. 使用 `get_logs.bat` 查看日志，确认不再出现 `ArithmeticException`
+
+**影响范围**：
+- ✅ 修复了应用启动时加载媒体列表的崩溃问题
+- ✅ 提高了应用对异常媒体文件的容错能力
+- ✅ 保证了播放进度显示的稳定性
+
+---
+
+### v1.0.5 (2025-12-23)
+
+#### 🛠️ 创建测试版本用于诊断
+
+**当前状态**：
+应用仍然闪退，需要获取详细的崩溃日志来诊断问题。
+
+**本次更新**：
+
+##### 1. 简化 AppNavigation（临时诊断版）
+
+为了隔离问题，创建了一个极简版本的 AppNavigation：
+- ✅ 移除了所有复杂的初始化代码
+- ✅ 只显示一个简单的测试界面
+- ✅ 添加了详细的日志输出
+
+**简化后的代码**：
+```kotlin
+@Composable
+fun AppNavigation() {
+    Log.d(TAG, "AppNavigation composing...")
+    
+    // 只显示测试界面
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text("本地播放器")
+        Text("应用启动成功！")
+        Button(onClick = { Log.d(TAG, "Test button clicked") }) {
+            Text("测试按钮")
+        }
+    }
+}
+```
+
+##### 2. 创建编译脚本
+
+新增 `清理并编译.bat`，简化编译流程：
+```batch
+清理并编译.bat
+```
+
+步骤：
+1. 清理项目（gradlew clean）
+2. 编译 Debug 版本（gradlew assembleDebug）
+3. 显示 APK 位置
+
+##### 3. 诊断步骤
+
+**方法 A：使用简化版本测试**
+```bash
+# 1. 清理并编译
+清理并编译.bat
+
+# 2. 安装 APK
+adb install -r app\build\outputs\apk\debug\app-debug.apk
+
+# 3. 启动日志监控
+get_logs.bat
+
+# 4. 手动启动应用
+```
+
+**方法 B：通过 Android Studio**
+1. 打开项目
+2. 运行应用（Shift+F10）
+3. 查看 Logcat 窗口
+
+**预期结果**：
+- ✅ 如果应用能启动：说明问题在数据库或播放器初始化
+- ❌ 如果还是崩溃：说明是更基础的问题（依赖、系统兼容性等）
+
+##### 4. 关键日志点
+
+如果应用启动，应该看到：
+```
+D/MainActivity: MainActivity onCreate
+D/MainActivity: MainActivity setContent completed
+D/AppNavigation: AppNavigation composing...
+D/AppNavigation: AppNavigation composed successfully
+```
+
+如果崩溃，日志会显示在哪一步失败：
+```
+E/AndroidRuntime: FATAL EXCEPTION: main
+E/AndroidRuntime: Process: com.local.mediaplayer, PID: xxxxx
+E/AndroidRuntime: java.lang.RuntimeException: ...
+```
+
+##### 5. 常见问题排查
+
+**如果 gradlew 命令不存在**：
+```bash
+# Windows
+# 确保在项目根目录
+dir gradlew.bat  # 应该能看到这个文件
+
+# 如果没有，需要重新生成 gradle wrapper
+gradle wrapper
+```
+
+**如果 adb 命令不存在**：
+- 需要安装 Android SDK Platform Tools
+- 或通过 Android Studio 安装 APK
+
+**如果设备未连接**：
+```bash
+adb devices  # 应该显示设备列表
+```
+
+---
+
+### v1.0.4 (2025-12-23)
+
+#### 🔥 关键修复：应用图标资源错误
+
+**问题根源**：
+应用闪退的根本原因找到了！`mipmap-*` 文件夹中的图标资源使用了 **XML 格式**，但这些文件夹应该包含 **PNG 图片文件**。Android 系统在加载图标时会因为格式错误而崩溃。
+
+**错误的文件**：
+```
+mipmap-hdpi/ic_launcher.xml       ❌ 错误格式
+mipmap-mdpi/ic_launcher.xml       ❌ 错误格式
+mipmap-xhdpi/ic_launcher.xml      ❌ 错误格式
+mipmap-xxhdpi/ic_launcher.xml     ❌ 错误格式
+mipmap-xxxhdpi/ic_launcher.xml    ❌ 错误格式
+```
+
+**修复方案**：
+1. ✅ 删除所有 `mipmap-hdpi/mdpi/xhdpi/xxhdpi/xxxhdpi` 中的 XML 文件
+2. ✅ 保留 `mipmap-anydpi-v26` 中的自适应图标配置（正确格式）
+3. ✅ 使用 vector drawable 作为前景和背景（兼容所有设备）
+
+**修复后的图标结构**：
+```
+res/
+├── mipmap-anydpi-v26/         # Android 8.0+ 自适应图标
+│   ├── ic_launcher.xml        ✓ 正确（adaptive-icon配置）
+│   └── ic_launcher_round.xml  ✓ 正确（adaptive-icon配置）
+├── drawable/
+│   ├── ic_launcher_background.xml  ✓ 背景 vector drawable
+│   └── ic_launcher_foreground.xml  ✓ 前景 vector drawable
+```
+
+**技术说明**：
+
+Android 图标资源的正确格式：
+- **mipmap-[density]/** 文件夹 → 应该包含 PNG 或 WebP 图片
+- **mipmap-anydpi-v26/** → 可以使用 XML（adaptive-icon 配置）
+- **drawable/** → 可以使用 vector drawable XML
+
+错误示例（导致崩溃）：
+```xml
+<!-- mipmap-hdpi/ic_launcher.xml - 错误！ -->
+<bitmap xmlns:android="http://schemas.android.com/apk/res/android"
+    android:src="@drawable/ic_launcher_legacy" />
+```
+
+正确示例：
+```xml
+<!-- mipmap-anydpi-v26/ic_launcher.xml - 正确！ -->
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@drawable/ic_launcher_background" />
+    <foreground android:drawable="@drawable/ic_launcher_foreground" />
+</adaptive-icon>
+```
+
+**为什么会导致崩溃**：
+1. Android PackageManager 期望在 mipmap 文件夹中找到位图资源
+2. XML 文件引用 `@drawable/ic_launcher_legacy` 导致资源循环引用
+3. 系统无法正确加载应用图标，导致应用启动失败
+
+**验证修复**：
+修复后的应用应该能够正常启动。如果仍有问题，请运行 `get_logs.bat` 获取详细日志。
+
+**日志获取工具**：
+创建了 `get_logs.bat` 脚本，方便获取应用日志：
+```bash
+# 运行日志脚本
+get_logs.bat
+
+# 或手动运行
+adb logcat -s MainActivity:D AppNavigation:D AppDatabase:D AndroidRuntime:E
+```
+
+---
+
 ### v1.0.3 (2025-12-23)
 
 #### 增强错误处理和日志系统

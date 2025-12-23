@@ -120,7 +120,7 @@ fun MediaItemCard(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     
-                    if (mediaItem.lastPosition > 0) {
+                    if (mediaItem.lastPosition > 0 && mediaItem.duration > 0) {
                         val progress = (mediaItem.lastPosition * 100 / mediaItem.duration).toInt()
                         Text(
                             text = "已播放 $progress%",
