@@ -15,6 +15,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.localmedia.player.data.entity.MediaItem
 import com.localmedia.player.data.entity.MediaType
@@ -28,6 +29,8 @@ fun MediaListScreen(
     onMediaItemClick: (Long) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
+    
     // 示例数据，实际使用需要从 ViewModel 获取
     var mediaItems by remember { mutableStateOf<List<MediaItem>>(emptyList()) }
     
@@ -36,8 +39,19 @@ fun MediaListScreen(
         contract = ActivityResultContracts.OpenDocument()
     ) { uri: Uri? ->
         uri?.let {
-            // 处理选择的文件
-            // 实际使用需要保存到数据库
+            try {
+                // 获取持久化 URI 权限
+                context.contentResolver.takePersistableUriPermission(
+                    it,
+                    android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
+                )
+                // 处理选择的文件
+                // 实际使用需要保存到数据库
+            } catch (e: SecurityException) {
+                // 权限获取失败，使用临时权限
+                android.util.Log.w("MediaListScreen", "Failed to take persistable permission: ${e.message}")
+                // 仍然可以使用临时权限访问文件
+            }
         }
     }
     

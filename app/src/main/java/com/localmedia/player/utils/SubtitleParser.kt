@@ -63,7 +63,8 @@ class SubtitleParser(private val context: Context) {
             }
             
             // 读取索引
-            val index = line.toIntOrNull() ?: run {
+            val index = line.toIntOrNull()
+            if (index == null) {
                 i++
                 continue
             }

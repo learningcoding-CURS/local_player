@@ -2,6 +2,7 @@ package com.localmedia.player.ui.screen
 
 import android.app.Activity
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -23,6 +24,8 @@ import com.localmedia.player.player.ExoPlayerManager
 import com.localmedia.player.utils.BrightnessManager
 import com.localmedia.player.utils.GestureHandler
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlin.math.abs
 
 /**
@@ -123,7 +126,7 @@ fun PlayerScreen(
                 if (isLocked) return@pointerInput
                 
                 // 检测拖动手势
-                androidx.compose.foundation.gestures.detectDragGestures(
+                detectDragGestures(
                     onDragStart = { offset ->
                         dragStartOffset = offset
                         isDragging = true
@@ -195,7 +198,7 @@ fun PlayerScreen(
                         gestureType = GestureHandler.GestureType.NONE
                         
                         // 隐藏指示器
-                        kotlinx.coroutines.GlobalScope.launch {
+                        GlobalScope.launch {
                             delay(1000)
                             showBrightnessIndicator = false
                             showVolumeIndicator = false

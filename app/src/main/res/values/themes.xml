@@ -1,11 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-<<<<<<< HEAD
     <style name="Theme.LocalMediaPlayer" parent="android:Theme.Material.Light.NoActionBar">
         <item name="android:statusBarColor">@android:color/transparent</item>
     </style>
-=======
-    <style name="Theme.LocalMediaPlayer" parent="android:Theme.Material.Light.NoActionBar" />
->>>>>>> 2cfdab441d0f865a9efbdae55c2613ef495acca5
 </resources>
 

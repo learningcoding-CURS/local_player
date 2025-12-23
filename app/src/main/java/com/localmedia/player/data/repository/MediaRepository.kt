@@ -8,8 +8,6 @@ import com.localmedia.player.data.entity.MediaItem
 import com.localmedia.player.data.entity.MediaType
 import com.localmedia.player.data.entity.PlaybackHistory
 import kotlinx.coroutines.flow.Flow
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * 媒体数据仓库
