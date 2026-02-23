@@ -147,18 +147,15 @@
                     <RadioButton android:id="@+id/rbViewList" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="@string/settings_view_list" android:textColor="@color/textPrimary" android:paddingStart="4dp" android:paddingTop="6dp" android:paddingBottom="6dp" />
                 </RadioGroup>
                 <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/settings_grid_size" android:textColor="@color/colorAccentLight" android:textSize="13sp" android:paddingTop="12dp" android:paddingBottom="4dp" />
+                <TextView android:id="@+id/tvGridCellWidthLibrary" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/textSecondary" android:textSize="12sp" android:paddingBottom="2dp" />
+                <SeekBar android:id="@+id/sbGridCellWidthLibrary" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="140" android:progressTint="@color/colorAccent" android:thumbTint="@color/colorAccent" android:layout_marginBottom="6dp" />
+                <TextView android:id="@+id/tvGridCellWidthBuiltin" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/textSecondary" android:textSize="12sp" android:paddingBottom="2dp" />
+                <SeekBar android:id="@+id/sbGridCellWidthBuiltin" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="140" android:progressTint="@color/colorAccent" android:thumbTint="@color/colorAccent" android:layout_marginBottom="6dp" />
                 <TextView android:id="@+id/tvGridCellWidthPlaylist" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/textSecondary" android:textSize="12sp" android:paddingBottom="2dp" />
                 <SeekBar android:id="@+id/sbGridCellWidthPlaylist" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="140" android:progressTint="@color/colorAccent" android:thumbTint="@color/colorAccent" android:layout_marginBottom="6dp" />
                 <TextView android:id="@+id/tvGridCellWidthPlaylistItems" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/textSecondary" android:textSize="12sp" android:paddingBottom="2dp" />
                 <SeekBar android:id="@+id/sbGridCellWidthPlaylistItems" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="140" android:progressTint="@color/colorAccent" android:thumbTint="@color/colorAccent" android:layout_marginBottom="6dp" />
             </LinearLayout>
-
-            <!-- ── 音视频库 / 内置媒体 方格大小（始终可见） ── -->
-            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/settings_grid_size" android:textColor="@color/colorAccentLight" android:textSize="13sp" android:paddingTop="12dp" android:paddingBottom="4dp" />
-            <TextView android:id="@+id/tvGridCellWidthLibrary" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/textSecondary" android:textSize="12sp" android:paddingBottom="2dp" />
-            <SeekBar android:id="@+id/sbGridCellWidthLibrary" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="140" android:progressTint="@color/colorAccent" android:thumbTint="@color/colorAccent" android:layout_marginBottom="6dp" />
-            <TextView android:id="@+id/tvGridCellWidthBuiltin" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/textSecondary" android:textSize="12sp" android:paddingBottom="2dp" />
-            <SeekBar android:id="@+id/sbGridCellWidthBuiltin" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="140" android:progressTint="@color/colorAccent" android:thumbTint="@color/colorAccent" android:layout_marginBottom="6dp" />
 
             <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/divider" android:layout_marginTop="4dp" android:layout_marginBottom="4dp" />
 
@@ -346,7 +343,24 @@
                 android:layout_marginTop="4dp"
                 android:layout_marginBottom="4dp" />
 
-            <!-- ── 字幕面板/字幕默认/播放控件/设置页背景（可折叠标签切换） ── -->
+            <!-- ── 设置页背景（单独一行，位于进度条之下、字幕面板之上） ── -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp">
+
+                <TextView android:id="@+id/tabSettingsBg" android:layout_width="match_parent" android:layout_height="36dp" android:text="设置页背景" android:textColor="@color/textPrimary" android:textSize="12sp" android:gravity="center" android:background="@drawable/bg_speed_badge" />
+
+            </LinearLayout>
+
+            <LinearLayout android:id="@+id/sectionSettingsBg" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone">
+                <TextView android:id="@+id/tvSettingsBgAlphaLabel" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/colorAccentLight" android:textSize="13sp" android:paddingTop="4dp" android:paddingBottom="4dp" />
+                <SeekBar android:id="@+id/sbSettingsBgAlpha" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="100" android:progressTint="@color/colorAccent" android:thumbTint="@color/colorAccent" android:layout_marginBottom="6dp" />
+            </LinearLayout>
+
+            <!-- ── 字幕面板/字幕默认/播放控件（可折叠标签切换） ── -->
             <LinearLayout
                 android:id="@+id/miscTabRow"
                 android:layout_width="match_parent"
@@ -357,8 +371,7 @@
 
                 <TextView android:id="@+id/tabSubtitlePanel" android:layout_width="0dp" android:layout_weight="1" android:layout_height="36dp" android:text="字幕面板" android:textColor="@color/textPrimary" android:textSize="12sp" android:gravity="center" android:background="@drawable/bg_speed_badge" android:layout_marginEnd="4dp" />
                 <TextView android:id="@+id/tabSubtitleDefault" android:layout_width="0dp" android:layout_weight="1" android:layout_height="36dp" android:text="字幕默认" android:textColor="@color/textPrimary" android:textSize="12sp" android:gravity="center" android:background="@drawable/bg_speed_badge" android:layout_marginEnd="4dp" />
-                <TextView android:id="@+id/tabPlayerControls" android:layout_width="0dp" android:layout_weight="1" android:layout_height="36dp" android:text="播放控件" android:textColor="@color/textPrimary" android:textSize="12sp" android:gravity="center" android:background="@drawable/bg_speed_badge" android:layout_marginEnd="4dp" />
-                <TextView android:id="@+id/tabSettingsBg" android:layout_width="0dp" android:layout_weight="1" android:layout_height="36dp" android:text="设置页背景" android:textColor="@color/textPrimary" android:textSize="12sp" android:gravity="center" android:background="@drawable/bg_speed_badge" />
+                <TextView android:id="@+id/tabPlayerControls" android:layout_width="0dp" android:layout_weight="1" android:layout_height="36dp" android:text="播放控件" android:textColor="@color/textPrimary" android:textSize="12sp" android:gravity="center" android:background="@drawable/bg_speed_badge" />
 
             </LinearLayout>
 
@@ -377,11 +390,6 @@
             <LinearLayout android:id="@+id/sectionPlayerControls" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone">
                 <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/settings_section_player_controls" android:textColor="@color/colorAccentLight" android:textSize="13sp" android:paddingTop="4dp" android:paddingBottom="4dp" />
                 <LinearLayout android:id="@+id/playerControlsContainer" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" />
-            </LinearLayout>
-
-            <LinearLayout android:id="@+id/sectionSettingsBg" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone">
-                <TextView android:id="@+id/tvSettingsBgAlphaLabel" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/colorAccentLight" android:textSize="13sp" android:paddingTop="4dp" android:paddingBottom="4dp" />
-                <SeekBar android:id="@+id/sbSettingsBgAlpha" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="100" android:progressTint="@color/colorAccent" android:thumbTint="@color/colorAccent" android:layout_marginBottom="6dp" />
             </LinearLayout>
 
             <!-- 恢复进入前的设置（位于设置页背景那栏下方、顶栏/中央上方） -->
