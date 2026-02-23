@@ -66,6 +66,17 @@ public class SettingsActivity extends AppCompatActivity {
     public static final String PREF_PANEL_DIR_PORTRAIT  = "panel_dir_portrait";
     public static final String PREF_PANEL_DIR_LANDSCAPE = "panel_dir_landscape";
     // Possible values: "TOP" | "BOTTOM" | "LEFT" | "RIGHT"
+
+    // Playlist panel appearance (in-player)
+    public static final String PREF_PLAYLIST_PANEL_BG_ALPHA    = "playlist_panel_bg_alpha";
+    public static final String PREF_PLAYLIST_PANEL_WIDTH_DP    = "playlist_panel_width_dp";
+    public static final String PREF_PLAYLIST_PANEL_HEIGHT_DP   = "playlist_panel_height_dp";
+    public static final String PREF_PLAYLIST_PANEL_ORIENTATION = "playlist_panel_orientation";
+    public static final int    DEFAULT_PLAYLIST_PANEL_BG_ALPHA  = 87;   // #DD ≈ 87%
+    public static final int    DEFAULT_PLAYLIST_PANEL_WIDTH_DP   = 260;
+    public static final int    DEFAULT_PLAYLIST_PANEL_HEIGHT_DP  = 300;
+    public static final String PLAYLIST_PANEL_ORIENTATION_VERTICAL   = "VERTICAL";
+    public static final String PLAYLIST_PANEL_ORIENTATION_HORIZONTAL = "HORIZONTAL";
     public static final String PANEL_DIR_TOP    = "TOP";
     public static final String PANEL_DIR_BOTTOM = "BOTTOM";
     public static final String PANEL_DIR_LEFT   = "LEFT";
@@ -252,6 +263,10 @@ public class SettingsActivity extends AppCompatActivity {
         int    savedProgAlpha      = prefs.getInt(PREF_SEEKBAR_PROGRESS_ALPHA, DEFAULT_SEEKBAR_PROGRESS_ALPHA);
         int    savedPanelAlpha     = prefs.getInt(PREF_SUBTITLE_PANEL_ALPHA,   DEFAULT_SUBTITLE_PANEL_ALPHA);
         boolean savedSubDefaultVisible = prefs.getBoolean(PREF_SUBTITLE_DEFAULT_VISIBLE, true);
+        int    savedPlaylistPanelBgAlpha = prefs.getInt(PREF_PLAYLIST_PANEL_BG_ALPHA, DEFAULT_PLAYLIST_PANEL_BG_ALPHA);
+        int    savedPlaylistPanelWidth   = prefs.getInt(PREF_PLAYLIST_PANEL_WIDTH_DP,  DEFAULT_PLAYLIST_PANEL_WIDTH_DP);
+        int    savedPlaylistPanelHeight  = prefs.getInt(PREF_PLAYLIST_PANEL_HEIGHT_DP, DEFAULT_PLAYLIST_PANEL_HEIGHT_DP);
+        String savedPlaylistPanelOrientation = prefs.getString(PREF_PLAYLIST_PANEL_ORIENTATION, PLAYLIST_PANEL_ORIENTATION_VERTICAL);
 
         tabOrder       = savedOrderStr.split(",");
         shortcutOrder  = migrateShortcutOrder(
@@ -338,12 +353,14 @@ public class SettingsActivity extends AppCompatActivity {
             View sectionLandscapeSwipe  = findViewById(R.id.sectionLandscapeSwipe);
             View sectionPanelPortrait  = findViewById(R.id.sectionPanelPortrait);
             View sectionPanelLandscape = findViewById(R.id.sectionPanelLandscape);
+            View sectionPlaylistPanel  = findViewById(R.id.sectionPlaylistPanel);
 
             TextView tabViewMode       = findViewById(R.id.tabViewMode);
             TextView tabPortraitSwipe  = findViewById(R.id.tabPortraitSwipe);
             TextView tabLandscapeSwipe  = findViewById(R.id.tabLandscapeSwipe);
             TextView tabPanelPortrait  = findViewById(R.id.tabPanelPortrait);
             TextView tabPanelLandscape = findViewById(R.id.tabPanelLandscape);
+            TextView tabPlaylistPanel  = findViewById(R.id.tabPlaylistPanel);
 
             View.OnClickListener generalTabToggle = v -> {
                 View section;
@@ -351,7 +368,8 @@ public class SettingsActivity extends AppCompatActivity {
                 else if (v == tabPortraitSwipe)  section = sectionPortraitSwipe;
                 else if (v == tabLandscapeSwipe) section = sectionLandscapeSwipe;
                 else if (v == tabPanelPortrait)  section = sectionPanelPortrait;
-                else                             section = sectionPanelLandscape;
+                else if (v == tabPanelLandscape) section = sectionPanelLandscape;
+                else                             section = sectionPlaylistPanel;
 
                 boolean wasVisible = section.getVisibility() == View.VISIBLE;
                 section.setVisibility(wasVisible ? View.GONE : View.VISIBLE);
@@ -365,6 +383,7 @@ public class SettingsActivity extends AppCompatActivity {
             tabLandscapeSwipe.setOnClickListener(generalTabToggle);
             tabPanelPortrait.setOnClickListener(generalTabToggle);
             tabPanelLandscape.setOnClickListener(generalTabToggle);
+            tabPlaylistPanel.setOnClickListener(generalTabToggle);
         }
 
         // ── View mode ─────────────────────────────────────────────────────────
@@ -422,6 +441,60 @@ public class SettingsActivity extends AppCompatActivity {
                         findViewById(R.id.rbPanelDirLandscapeRight)},
                 new String[]{PANEL_DIR_TOP, PANEL_DIR_BOTTOM, PANEL_DIR_LEFT, PANEL_DIR_RIGHT},
                 savedPanelDirLandscape, PREF_PANEL_DIR_LANDSCAPE);
+
+        // ── 播放列表面板（背景透明度、宽高、排列方向）────────────────────────────
+        savedPlaylistPanelBgAlpha = Math.max(0, Math.min(100, savedPlaylistPanelBgAlpha));
+        savedPlaylistPanelWidth   = Math.max(200, Math.min(450, savedPlaylistPanelWidth));
+        savedPlaylistPanelHeight  = Math.max(200, Math.min(550, savedPlaylistPanelHeight));
+        SeekBar sbPlaylistBgAlpha = findViewById(R.id.sbPlaylistPanelBgAlpha);
+        TextView tvPlaylistBgAlphaLabel = findViewById(R.id.tvPlaylistPanelBgAlphaLabel);
+        sbPlaylistBgAlpha.setMax(100);
+        sbPlaylistBgAlpha.setProgress(savedPlaylistPanelBgAlpha);
+        tvPlaylistBgAlphaLabel.setText(getString(R.string.settings_playlist_panel_bg_alpha, savedPlaylistPanelBgAlpha));
+        sbPlaylistBgAlpha.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override public void onProgressChanged(SeekBar sb, int p, boolean user) {
+                tvPlaylistBgAlphaLabel.setText(getString(R.string.settings_playlist_panel_bg_alpha, p));
+            }
+            @Override public void onStartTrackingTouch(SeekBar sb) {}
+            @Override public void onStopTrackingTouch(SeekBar sb) {
+                prefs.edit().putInt(PREF_PLAYLIST_PANEL_BG_ALPHA, sb.getProgress()).apply();
+            }
+        });
+        SeekBar sbPlaylistWidth = findViewById(R.id.sbPlaylistPanelWidth);
+        TextView tvPlaylistWidthLabel = findViewById(R.id.tvPlaylistPanelWidthLabel);
+        sbPlaylistWidth.setMax(250);
+        sbPlaylistWidth.setProgress(savedPlaylistPanelWidth - 200);
+        tvPlaylistWidthLabel.setText(getString(R.string.settings_playlist_panel_width, savedPlaylistPanelWidth));
+        sbPlaylistWidth.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override public void onProgressChanged(SeekBar sb, int p, boolean user) {
+                tvPlaylistWidthLabel.setText(getString(R.string.settings_playlist_panel_width, 200 + p));
+            }
+            @Override public void onStartTrackingTouch(SeekBar sb) {}
+            @Override public void onStopTrackingTouch(SeekBar sb) {
+                prefs.edit().putInt(PREF_PLAYLIST_PANEL_WIDTH_DP, 200 + sb.getProgress()).apply();
+            }
+        });
+        SeekBar sbPlaylistHeight = findViewById(R.id.sbPlaylistPanelHeight);
+        TextView tvPlaylistHeightLabel = findViewById(R.id.tvPlaylistPanelHeightLabel);
+        sbPlaylistHeight.setMax(350);
+        sbPlaylistHeight.setProgress(savedPlaylistPanelHeight - 200);
+        tvPlaylistHeightLabel.setText(getString(R.string.settings_playlist_panel_height, savedPlaylistPanelHeight));
+        sbPlaylistHeight.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override public void onProgressChanged(SeekBar sb, int p, boolean user) {
+                tvPlaylistHeightLabel.setText(getString(R.string.settings_playlist_panel_height, 200 + p));
+            }
+            @Override public void onStartTrackingTouch(SeekBar sb) {}
+            @Override public void onStopTrackingTouch(SeekBar sb) {
+                prefs.edit().putInt(PREF_PLAYLIST_PANEL_HEIGHT_DP, 200 + sb.getProgress()).apply();
+            }
+        });
+        RadioButton rbPlaylistVertical   = findViewById(R.id.rbPlaylistPanelVertical);
+        RadioButton rbPlaylistHorizontal  = findViewById(R.id.rbPlaylistPanelHorizontal);
+        rbPlaylistVertical.setChecked(PLAYLIST_PANEL_ORIENTATION_VERTICAL.equals(savedPlaylistPanelOrientation));
+        rbPlaylistHorizontal.setChecked(PLAYLIST_PANEL_ORIENTATION_HORIZONTAL.equals(savedPlaylistPanelOrientation));
+        ((RadioGroup) findViewById(R.id.rgPlaylistPanelOrientation)).setOnCheckedChangeListener((g, id) ->
+                prefs.edit().putString(PREF_PLAYLIST_PANEL_ORIENTATION,
+                        id == R.id.rbPlaylistPanelHorizontal ? PLAYLIST_PANEL_ORIENTATION_HORIZONTAL : PLAYLIST_PANEL_ORIENTATION_VERTICAL).apply());
 
         // ── 字幕大小 ───────────────────────────────────────────────────────────
         SeekBar sbSubSize = findViewById(R.id.sbSubtitleSize);

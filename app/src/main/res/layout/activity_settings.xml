@@ -84,7 +84,8 @@
                 <TextView android:id="@+id/tabPortraitSwipe" android:layout_width="0dp" android:layout_weight="1" android:layout_height="36dp" android:text="竖屏手势" android:textColor="@color/textPrimary" android:textSize="12sp" android:gravity="center" android:background="@drawable/bg_speed_badge" android:layout_marginEnd="4dp" />
                 <TextView android:id="@+id/tabLandscapeSwipe" android:layout_width="0dp" android:layout_weight="1" android:layout_height="36dp" android:text="横屏手势" android:textColor="@color/textPrimary" android:textSize="12sp" android:gravity="center" android:background="@drawable/bg_speed_badge" android:layout_marginEnd="4dp" />
                 <TextView android:id="@+id/tabPanelPortrait" android:layout_width="0dp" android:layout_weight="1" android:layout_height="36dp" android:text="面板竖屏" android:textColor="@color/textPrimary" android:textSize="12sp" android:gravity="center" android:background="@drawable/bg_speed_badge" android:layout_marginEnd="4dp" />
-                <TextView android:id="@+id/tabPanelLandscape" android:layout_width="0dp" android:layout_weight="1" android:layout_height="36dp" android:text="面板横屏" android:textColor="@color/textPrimary" android:textSize="12sp" android:gravity="center" android:background="@drawable/bg_speed_badge" />
+                <TextView android:id="@+id/tabPanelLandscape" android:layout_width="0dp" android:layout_weight="1" android:layout_height="36dp" android:text="面板横屏" android:textColor="@color/textPrimary" android:textSize="12sp" android:gravity="center" android:background="@drawable/bg_speed_badge" android:layout_marginEnd="4dp" />
+                <TextView android:id="@+id/tabPlaylistPanel" android:layout_width="0dp" android:layout_weight="1" android:layout_height="36dp" android:text="@string/settings_playlist_panel_tab" android:textColor="@color/textPrimary" android:textSize="12sp" android:gravity="center" android:background="@drawable/bg_speed_badge" />
 
             </LinearLayout>
 
@@ -126,6 +127,20 @@
                         <RadioButton android:id="@+id/rbPanelDirLandscapeRight" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="@string/panel_dir_right" android:textColor="@color/textPrimary" android:paddingStart="4dp" android:paddingTop="6dp" android:paddingBottom="6dp" />
                     </LinearLayout>
                 </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout android:id="@+id/sectionPlaylistPanel" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone">
+                <TextView android:id="@+id/tvPlaylistPanelBgAlphaLabel" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/colorAccentLight" android:textSize="13sp" android:paddingTop="4dp" android:paddingBottom="4dp" />
+                <SeekBar android:id="@+id/sbPlaylistPanelBgAlpha" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="100" android:progressTint="@color/colorAccent" android:thumbTint="@color/colorAccent" android:layout_marginBottom="6dp" />
+                <TextView android:id="@+id/tvPlaylistPanelWidthLabel" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/colorAccentLight" android:textSize="13sp" android:paddingTop="4dp" android:paddingBottom="4dp" />
+                <SeekBar android:id="@+id/sbPlaylistPanelWidth" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="250" android:progressTint="@color/colorAccent" android:thumbTint="@color/colorAccent" android:layout_marginBottom="6dp" />
+                <TextView android:id="@+id/tvPlaylistPanelHeightLabel" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/colorAccentLight" android:textSize="13sp" android:paddingTop="4dp" android:paddingBottom="4dp" />
+                <SeekBar android:id="@+id/sbPlaylistPanelHeight" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="350" android:progressTint="@color/colorAccent" android:thumbTint="@color/colorAccent" android:layout_marginBottom="6dp" />
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/settings_playlist_panel_orientation" android:textColor="@color/colorAccentLight" android:textSize="13sp" android:paddingTop="8dp" android:paddingBottom="4dp" />
+                <RadioGroup android:id="@+id/rgPlaylistPanelOrientation" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+                    <RadioButton android:id="@+id/rbPlaylistPanelVertical" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="@string/settings_playlist_panel_vertical" android:textColor="@color/textPrimary" android:paddingStart="4dp" android:paddingTop="6dp" android:paddingBottom="6dp" />
+                    <RadioButton android:id="@+id/rbPlaylistPanelHorizontal" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="@string/settings_playlist_panel_horizontal" android:textColor="@color/textPrimary" android:paddingStart="4dp" android:paddingTop="6dp" android:paddingBottom="6dp" />
+                </RadioGroup>
             </LinearLayout>
 
             <!-- ── 列表模式（竖屏手势行下方、字幕大小上方） ── -->

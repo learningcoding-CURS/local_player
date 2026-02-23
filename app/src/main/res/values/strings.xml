@@ -160,6 +160,13 @@
     <!-- Playlist panel direction -->
     <string name="settings_panel_dir_portrait">播放列表面板方向（竖屏）</string>
     <string name="settings_panel_dir_landscape">播放列表面板方向（横屏）</string>
+    <string name="settings_playlist_panel_tab">列表面板</string>
+    <string name="settings_playlist_panel_bg_alpha">背景透明度：%d%%</string>
+    <string name="settings_playlist_panel_width">宽度（左右滑出时）：%d dp</string>
+    <string name="settings_playlist_panel_height">高度（上下滑出时）：%d dp</string>
+    <string name="settings_playlist_panel_orientation">列表排列方向</string>
+    <string name="settings_playlist_panel_vertical">竖排</string>
+    <string name="settings_playlist_panel_horizontal">横排</string>
     <string name="panel_dir_top">从上方滑入</string>
     <string name="panel_dir_bottom">从下方滑入</string>
     <string name="panel_dir_left">从左侧滑入</string>

@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.ClipDrawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.LayerDrawable;
@@ -314,6 +316,7 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
                 && !isDraggingSeekBar) {
             try {
                 float windowW = getWindow().getDecorView().getWidth();
+                if (windowW <= 0) windowW = getResources().getDisplayMetrics().widthPixels;
                 gestureHandler.feedSwipeEvent(ev, windowW);
             } catch (Exception e) {
                 Log.e("PlayerActivity", "feedSwipeEvent error", e);
@@ -608,9 +611,18 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
         // ── Button order in top/center bar ────────────────────────────────
         applyButtonOrder(prefs);
 
-        // ── 播放列表面板方向（若面板已打开则实时更新，便于透明设置页预览）──
-        if (isPanelVisible && playlistPanel != null) {
-            applyPlaylistPanelLayout();
+        // ── 播放列表面板（方向、尺寸、背景、排列；若面板已打开则实时更新）──
+        if (playlistPanel != null && playlistUris != null && !playlistUris.isEmpty()) {
+            String orientation = prefs.getString(SettingsActivity.PREF_PLAYLIST_PANEL_ORIENTATION,
+                    SettingsActivity.PLAYLIST_PANEL_ORIENTATION_VERTICAL);
+            int layoutOrientation = SettingsActivity.PLAYLIST_PANEL_ORIENTATION_HORIZONTAL.equals(orientation)
+                    ? RecyclerView.HORIZONTAL : RecyclerView.VERTICAL;
+            if (rvPlaylistPanel.getLayoutManager() instanceof LinearLayoutManager) {
+                ((LinearLayoutManager) rvPlaylistPanel.getLayoutManager()).setOrientation(layoutOrientation);
+            }
+            if (isPanelVisible) {
+                applyPlaylistPanelLayout();
+            }
         }
     }
 
@@ -660,9 +672,19 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
     /** 根据当前方向设置播放列表面板的布局（位置、尺寸、关闭按钮朝向） */
     private void applyPlaylistPanelLayout() {
         if (playlistPanel == null || playlistUris == null || playlistUris.isEmpty()) return;
+        SharedPreferences prefs = getSharedPreferences(SettingsActivity.PREFS_NAME, MODE_PRIVATE);
+        int widthDp  = prefs.getInt(SettingsActivity.PREF_PLAYLIST_PANEL_WIDTH_DP,
+                SettingsActivity.DEFAULT_PLAYLIST_PANEL_WIDTH_DP);
+        int heightDp = prefs.getInt(SettingsActivity.PREF_PLAYLIST_PANEL_HEIGHT_DP,
+                SettingsActivity.DEFAULT_PLAYLIST_PANEL_HEIGHT_DP);
+        int bgAlpha  = prefs.getInt(SettingsActivity.PREF_PLAYLIST_PANEL_BG_ALPHA,
+                SettingsActivity.DEFAULT_PLAYLIST_PANEL_BG_ALPHA);
+        int alpha = Math.max(0, Math.min(100, bgAlpha));
+        int color = Color.argb((int) (alpha * 2.55f), 0x0D, 0x0D, 0x0D);
+        playlistPanel.setBackground(new ColorDrawable(color));
         String dir = getPanelDirection();
-        int sidePx  = (int) (260 * density());
-        int blockPx = (int) (300 * density());
+        int sidePx  = (int) (widthDp * density());
+        int blockPx = (int) (heightDp * density());
         FrameLayout.LayoutParams lp;
         switch (dir) {
             case SettingsActivity.PANEL_DIR_LEFT:
@@ -904,9 +926,9 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
                 == Configuration.ORIENTATION_LANDSCAPE;
 
         android.content.SharedPreferences prefs =
-                getSharedPreferences("app_settings", MODE_PRIVATE);
-        String portraitPref  = prefs.getString("portrait_swipe",  "VERTICAL");
-        String landscapePref = prefs.getString("landscape_swipe", "HORIZONTAL");
+                getSharedPreferences(SettingsActivity.PREFS_NAME, MODE_PRIVATE);
+        String portraitPref  = prefs.getString(SettingsActivity.PREF_PORTRAIT_SWIPE,  "VERTICAL");
+        String landscapePref = prefs.getString(SettingsActivity.PREF_LANDSCAPE_SWIPE, "HORIZONTAL");
 
         gestureHandler = new GestureHandler(this, new GestureHandler.GestureListener() {
 
@@ -965,6 +987,21 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
                         ? GestureHandler.SwipeDirection.VERTICAL
                         : GestureHandler.SwipeDirection.HORIZONTAL);
         playerView.setOnTouchListener(gestureHandler);
+
+        // 在 controlsOverlay 上添加触摸监听，确保控件层可见时滑动事件仍能传递到 feedSwipeEvent
+        // （控件层覆盖在 playerView 之上，playerView 的 onTouch 无法收到触摸，仅靠 Activity.dispatchTouchEvent）
+        if (controlsOverlay != null) {
+            controlsOverlay.setOnTouchListener((v, event) -> {
+                if (!isLocked && gestureHandler != null && event != null
+                        && !isSubtitlePanelVisible && !isPanelVisible
+                        && !isDraggingSeekBar) {
+                    float w = getWindow().getDecorView().getWidth();
+                    if (w <= 0) w = getResources().getDisplayMetrics().widthPixels;
+                    gestureHandler.feedSwipeEvent(event, w);
+                }
+                return false; // 不消费事件，让子控件（按钮等）正常响应
+            });
+        }
     }
 
     private void setupControls() {
@@ -1047,7 +1084,11 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
         SharedPreferences prefs = getSharedPreferences(SettingsActivity.PREFS_NAME, MODE_PRIVATE);
         boolean showPanel = prefs.getBoolean(SettingsActivity.PREF_BTN_PLAYLIST_VISIBLE, true);
         btnPlaylistPanel.setVisibility(showPanel ? View.VISIBLE : View.GONE);
-        rvPlaylistPanel.setLayoutManager(new LinearLayoutManager(this));
+        String orientation = prefs.getString(SettingsActivity.PREF_PLAYLIST_PANEL_ORIENTATION,
+                SettingsActivity.PLAYLIST_PANEL_ORIENTATION_VERTICAL);
+        int layoutOrientation = SettingsActivity.PLAYLIST_PANEL_ORIENTATION_HORIZONTAL.equals(orientation)
+                ? RecyclerView.HORIZONTAL : RecyclerView.VERTICAL;
+        rvPlaylistPanel.setLayoutManager(new LinearLayoutManager(this, layoutOrientation, false));
         panelAdapter = new PlayerPlaylistAdapter(playlistUris, playlistIndex,
                 index -> {
                     if (index != playlistIndex) {
@@ -1088,9 +1129,14 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
         if (playlistUris == null || playlistUris.isEmpty()) return;
 
         applyPlaylistPanelLayout();
+        SharedPreferences prefs = getSharedPreferences(SettingsActivity.PREFS_NAME, MODE_PRIVATE);
+        int widthDp  = prefs.getInt(SettingsActivity.PREF_PLAYLIST_PANEL_WIDTH_DP,
+                SettingsActivity.DEFAULT_PLAYLIST_PANEL_WIDTH_DP);
+        int heightDp = prefs.getInt(SettingsActivity.PREF_PLAYLIST_PANEL_HEIGHT_DP,
+                SettingsActivity.DEFAULT_PLAYLIST_PANEL_HEIGHT_DP);
         String dir = getPanelDirection();
-        int sidePx  = (int) (260 * density());
-        int blockPx = (int) (300 * density());
+        int sidePx  = (int) (widthDp * density());
+        int blockPx = (int) (heightDp * density());
 
         // Animate in from the correct edge
         switch (dir) {
