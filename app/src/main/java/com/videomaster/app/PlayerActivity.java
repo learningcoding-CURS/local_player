@@ -104,6 +104,8 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
     private ImageButton   btnPlayPause;
     private ImageButton   btnRewind;
     private ImageButton   btnForward;
+    private ImageButton   btnSkipPrev;
+    private ImageButton   btnSkipNext;
     private ImageButton   btnSubtitle;
     private ImageButton   btnSubtitleToggle;
     private ImageButton   btnRotate;
@@ -355,6 +357,8 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
         btnPlayPause        = findViewById(R.id.btnPlayPause);
         btnRewind           = findViewById(R.id.btnRewind);
         btnForward          = findViewById(R.id.btnForward);
+        btnSkipPrev         = findViewById(R.id.btnSkipPrev);
+        btnSkipNext         = findViewById(R.id.btnSkipNext);
         btnSubtitle         = findViewById(R.id.btnSubtitle);
         btnSubtitleToggle   = findViewById(R.id.btnSubtitleToggle);
         btnRotate           = findViewById(R.id.btnRotate);
@@ -471,6 +475,30 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
                 SettingsActivity.PREF_BTN_PLAYPAUSE_COLOR,
                 SettingsActivity.DEFAULT_BTN_COLOR, prefs);
 
+        // ── Skip buttons (prev/next video) ────────────────────────────────
+        applyButtonSettings(btnSkipPrev,
+                SettingsActivity.PREF_BTN_SKIP_VISIBLE,
+                SettingsActivity.PREF_BTN_SKIP_COLOR,
+                SettingsActivity.DEFAULT_BTN_COLOR, prefs);
+        applyButtonSettings(btnSkipNext,
+                SettingsActivity.PREF_BTN_SKIP_VISIBLE,
+                SettingsActivity.PREF_BTN_SKIP_COLOR,
+                SettingsActivity.DEFAULT_BTN_COLOR, prefs);
+
+        int skipBtnSizeDp = prefs.getInt(SettingsActivity.PREF_SKIP_BTN_SIZE,
+                SettingsActivity.DEFAULT_SKIP_BTN_SIZE);
+        int skipSizePx = dpToPx(skipBtnSizeDp);
+        if (btnSkipPrev != null) {
+            ViewGroup.LayoutParams sp = btnSkipPrev.getLayoutParams();
+            sp.width = skipSizePx; sp.height = skipSizePx;
+            btnSkipPrev.setLayoutParams(sp);
+        }
+        if (btnSkipNext != null) {
+            ViewGroup.LayoutParams sn = btnSkipNext.getLayoutParams();
+            sn.width = skipSizePx; sn.height = skipSizePx;
+            btnSkipNext.setLayoutParams(sn);
+        }
+
         // ── Button order in top/center bar ────────────────────────────────
         applyButtonOrder(prefs);
     }
@@ -541,9 +569,8 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
             }
         }
 
-        // Center bar: reorder rewind / play-pause / forward
+        // Center bar: reorder skip-prev / rewind / play-pause / forward / skip-next
         android.widget.LinearLayout centerBar = null;
-        // Find center LinearLayout (contains btnRewind, btnPlayPause, btnForward)
         android.widget.FrameLayout overlay = controlsOverlay;
         if (overlay != null) {
             for (int i = 0; i < overlay.getChildCount(); i++) {
@@ -554,11 +581,20 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
                 }
             }
         }
+        // Ensure saved order includes skip buttons (migration for existing users)
+        if (!centerOrder.contains("skip-prev")) {
+            centerOrder = "skip-prev," + centerOrder;
+        }
+        if (!centerOrder.contains("skip-next")) {
+            centerOrder = centerOrder + ",skip-next";
+        }
         if (centerBar != null) {
             java.util.LinkedHashMap<String, View> centerBtnMap = new java.util.LinkedHashMap<>();
+            centerBtnMap.put("skip-prev",   btnSkipPrev);
             centerBtnMap.put("rewind",      btnRewind);
             centerBtnMap.put("play-pause",  btnPlayPause);
             centerBtnMap.put("forward",     btnForward);
+            centerBtnMap.put("skip-next",   btnSkipNext);
 
             for (View v : centerBtnMap.values()) {
                 if (v != null) centerBar.removeView(v);
@@ -752,6 +788,8 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
             scheduleHideControls();
         });
 
+        btnSkipPrev.setOnClickListener(v -> { playPrevious(); scheduleHideControls(); });
+        btnSkipNext.setOnClickListener(v -> { playNext(); scheduleHideControls(); });
         btnRotate.setOnClickListener(v -> toggleOrientation());
         btnSubtitle.setOnClickListener(v -> handleSubtitleButtonClick());
         if (btnSubtitleToggle != null) {
@@ -797,6 +835,8 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
     private void setupPlaylistPanel() {
         if (playlistUris == null || playlistUris.isEmpty()) {
             btnPlaylistPanel.setVisibility(View.GONE);
+            if (btnSkipPrev != null) btnSkipPrev.setVisibility(View.GONE);
+            if (btnSkipNext != null) btnSkipNext.setVisibility(View.GONE);
             return;
         }
         // Respect user visibility setting

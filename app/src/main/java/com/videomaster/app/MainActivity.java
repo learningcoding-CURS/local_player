@@ -293,6 +293,9 @@ public class MainActivity extends AppCompatActivity {
                     break;
             }
         }
+        // Always append the stats tab at the end (not user-reorderable)
+        menu.add(Menu.NONE, R.id.nav_stats, Menu.NONE, R.string.tab_stats)
+                .setIcon(R.drawable.ic_stats);
     }
 
     private void showTab(String tabId) {

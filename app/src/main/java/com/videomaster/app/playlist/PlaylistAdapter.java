@@ -107,6 +107,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.ViewHo
         // Load thumbnail for both grid and list cells
         if (h.ivThumb != null) {
             h.ivThumb.clearColorFilter();
+            h.ivThumb.setScaleType(android.widget.ImageView.ScaleType.CENTER_INSIDE);
             h.ivThumb.setImageResource(R.drawable.ic_playlist);
             h.ivThumb.setColorFilter(
                     h.itemView.getContext().getResources()
@@ -126,26 +127,37 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.ViewHo
     // ── Thumbnail loading ──────────────────────────────────────────────────
 
     private void loadThumbnail(Context context, String listId, ViewHolder holder) {
+        // Tag the view so we can detect if the ViewHolder was recycled before the load finishes
+        if (holder.ivThumb != null) holder.ivThumb.setTag(R.id.ivPlaylistThumb, listId);
+
         thumbExecutor.execute(() -> {
             Bitmap bmp = null;
-            // Check for custom thumbnail
             SharedPreferences thumbPrefs =
                     context.getSharedPreferences(THUMB_PREFS, Context.MODE_PRIVATE);
             String customPath = thumbPrefs.getString(listId, null);
             if (customPath != null) {
                 File f = new File(customPath);
                 if (f.exists()) {
-                    bmp = BitmapFactory.decodeFile(customPath);
+                    try {
+                        BitmapFactory.Options opts = new BitmapFactory.Options();
+                        opts.inSampleSize = 1;
+                        bmp = BitmapFactory.decodeFile(f.getAbsolutePath(), opts);
+                    } catch (Exception ignored) {}
                 }
             }
-            // Fall back to default playlist icon (null bmp = use default icon set in bind)
             final Bitmap finalBmp = bmp;
             mainHandler.post(() -> {
                 if (holder.ivThumb == null) return;
+                // Only apply if the view is still bound to the same list item
+                Object tag = holder.ivThumb.getTag(R.id.ivPlaylistThumb);
+                if (!listId.equals(tag)) return;
+
                 if (finalBmp != null) {
                     holder.ivThumb.clearColorFilter();
+                    holder.ivThumb.setScaleType(android.widget.ImageView.ScaleType.CENTER_CROP);
                     holder.ivThumb.setImageBitmap(finalBmp);
                 } else {
+                    holder.ivThumb.setScaleType(android.widget.ImageView.ScaleType.CENTER_INSIDE);
                     holder.ivThumb.setImageResource(R.drawable.ic_playlist);
                     holder.ivThumb.setColorFilter(
                             context.getResources().getColor(R.color.colorAccent, null));

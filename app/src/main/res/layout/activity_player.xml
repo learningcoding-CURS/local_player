@@ -186,13 +186,24 @@
                 android:contentDescription="@string/btn_rotate" />
         </LinearLayout>
 
-        <!-- Centre playback row: rewind | play/pause | forward -->
+        <!-- Centre playback row: skip-prev | rewind | play/pause | forward | skip-next -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:orientation="horizontal"
             android:gravity="center_vertical">
+
+            <ImageButton
+                android:id="@+id/btnSkipPrev"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@drawable/ic_skip_prev"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:tint="@color/controlTint"
+                android:contentDescription="@string/btn_skip_prev"
+                android:padding="10dp"
+                android:layout_marginEnd="8dp" />
 
             <ImageButton
                 android:id="@+id/btnRewind"
@@ -225,6 +236,17 @@
                 android:tint="@color/controlTint"
                 android:contentDescription="@string/btn_forward"
                 android:padding="10dp" />
+
+            <ImageButton
+                android:id="@+id/btnSkipNext"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@drawable/ic_skip_next"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:tint="@color/controlTint"
+                android:contentDescription="@string/btn_skip_next"
+                android:padding="10dp"
+                android:layout_marginStart="8dp" />
         </LinearLayout>
 
         <!-- Bottom bar: time + seekbar -->

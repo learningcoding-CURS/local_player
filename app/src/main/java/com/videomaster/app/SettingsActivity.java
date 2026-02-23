@@ -69,6 +69,12 @@ public class SettingsActivity extends AppCompatActivity {
     public static final String PREF_BTN_SUBTLIST_VISIBLE        = "btn_subtlist_visible";
     public static final String PREF_BTN_ROTATE_VISIBLE          = "btn_rotate_visible";
 
+    // Skip buttons (prev/next video)
+    public static final String PREF_BTN_SKIP_VISIBLE         = "btn_skip_visible";
+    public static final String PREF_BTN_SKIP_COLOR           = "btn_skip_color";
+    public static final String PREF_SKIP_BTN_SIZE            = "skip_btn_size";
+    public static final int    DEFAULT_SKIP_BTN_SIZE         = 48;
+
     // Player control button colors (string: "white","accent","orange","cyan","green","yellow")
     public static final String PREF_BTN_LOCK_COLOR           = "btn_lock_color";
     public static final String PREF_BTN_PLAYMODE_COLOR       = "btn_playmode_color";
@@ -87,7 +93,7 @@ public class SettingsActivity extends AppCompatActivity {
     // Default button orders
     public static final String DEFAULT_TOP_BTN_ORDER =
             "lock,play-mode,playlist-panel,subtitle-toggle,subtitle,subtitle-list,rotate";
-    public static final String DEFAULT_CENTER_BTN_ORDER = "rewind,play-pause,forward";
+    public static final String DEFAULT_CENTER_BTN_ORDER = "skip-prev,rewind,play-pause,forward,skip-next";
 
     public static final String DEFAULT_BTN_COLOR         = "white";
     public static final String DEFAULT_PLAYLIST_BTN_COLOR = "accent";
@@ -389,17 +395,19 @@ public class SettingsActivity extends AppCompatActivity {
                 PREF_BTN_LOCK_VISIBLE, PREF_BTN_PLAYMODE_VISIBLE,
                 PREF_BTN_PLAYLIST_VISIBLE, PREF_BTN_SUBTITLE_TOGGLE_VISIBLE,
                 PREF_BTN_SUBTITLE_VISIBLE, PREF_BTN_SUBTLIST_VISIBLE,
-                PREF_BTN_ROTATE_VISIBLE, null, null };
+                PREF_BTN_ROTATE_VISIBLE, null, null, PREF_BTN_SKIP_VISIBLE };
         ctrlPrefsColor = new String[]{
                 PREF_BTN_LOCK_COLOR, PREF_BTN_PLAYMODE_COLOR,
                 PREF_BTN_PLAYLIST_COLOR, PREF_BTN_SUBTITLE_TOGGLE_COLOR,
                 PREF_BTN_SUBTITLE_COLOR, PREF_BTN_SUBTLIST_COLOR,
-                PREF_BTN_ROTATE_COLOR, PREF_BTN_SEEK_COLOR, PREF_BTN_PLAYPAUSE_COLOR };
+                PREF_BTN_ROTATE_COLOR, PREF_BTN_SEEK_COLOR, PREF_BTN_PLAYPAUSE_COLOR,
+                PREF_BTN_SKIP_COLOR };
         String[] ctrlDefColor   = {
                 DEFAULT_BTN_COLOR, DEFAULT_BTN_COLOR,
                 DEFAULT_PLAYLIST_BTN_COLOR, DEFAULT_BTN_COLOR,
                 DEFAULT_BTN_COLOR, DEFAULT_BTN_COLOR,
-                DEFAULT_BTN_COLOR, DEFAULT_BTN_COLOR, DEFAULT_BTN_COLOR };
+                DEFAULT_BTN_COLOR, DEFAULT_BTN_COLOR, DEFAULT_BTN_COLOR,
+                DEFAULT_BTN_COLOR };
         String[] ctrlLabels     = {
                 getString(R.string.settings_ctrl_lock),
                 getString(R.string.settings_ctrl_playmode),
@@ -409,7 +417,8 @@ public class SettingsActivity extends AppCompatActivity {
                 getString(R.string.settings_ctrl_subtlist),
                 getString(R.string.settings_ctrl_rotate),
                 getString(R.string.settings_ctrl_seek),
-                getString(R.string.settings_ctrl_playpause)
+                getString(R.string.settings_ctrl_playpause),
+                getString(R.string.settings_ctrl_skip)
         };
 
         int numControls = ctrlLabels.length;
@@ -478,6 +487,56 @@ public class SettingsActivity extends AppCompatActivity {
                 div.setLayoutParams(divLp);
                 controlsContainer.addView(div);
             }
+        }
+
+        // ── 切换按钮大小 ─────────────────────────────────────────────────────
+        {
+            int savedSkipBtnSize = prefs.getInt(PREF_SKIP_BTN_SIZE, DEFAULT_SKIP_BTN_SIZE);
+            LinearLayout root = findViewById(R.id.settingsRoot);
+            // Section title
+            TextView skipTitle = new TextView(this);
+            skipTitle.setText(getString(R.string.settings_ctrl_skip));
+            skipTitle.setTextColor(getResources().getColor(R.color.colorAccentLight, null));
+            skipTitle.setTextSize(13f);
+            skipTitle.setPadding(0, dp(8), 0, dp(4));
+            root.addView(skipTitle, root.indexOfChild(controlsContainer));
+
+            TextView tvSkipSizeLabel = new TextView(this);
+            tvSkipSizeLabel.setText(getString(R.string.settings_skip_btn_size, savedSkipBtnSize));
+            tvSkipSizeLabel.setTextColor(getResources().getColor(R.color.textSecondary, null));
+            tvSkipSizeLabel.setTextSize(13f);
+            tvSkipSizeLabel.setPadding(0, dp(4), 0, dp(2));
+            root.addView(tvSkipSizeLabel, root.indexOfChild(controlsContainer));
+
+            SeekBar sbSkipSize = new SeekBar(this);
+            sbSkipSize.setMax(64); // 32-96 dp
+            sbSkipSize.setProgress(Math.max(0, Math.min(64, savedSkipBtnSize - 32)));
+            sbSkipSize.setProgressTintList(android.content.res.ColorStateList.valueOf(
+                    getResources().getColor(R.color.colorAccent, null)));
+            sbSkipSize.setThumbTintList(android.content.res.ColorStateList.valueOf(
+                    getResources().getColor(R.color.colorAccent, null)));
+            LinearLayout.LayoutParams sbLp = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            sbLp.bottomMargin = dp(8);
+            sbSkipSize.setLayoutParams(sbLp);
+            sbSkipSize.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override public void onProgressChanged(SeekBar sb, int p, boolean user) {
+                    tvSkipSizeLabel.setText(getString(R.string.settings_skip_btn_size, p + 32));
+                }
+                @Override public void onStartTrackingTouch(SeekBar sb) {}
+                @Override public void onStopTrackingTouch(SeekBar sb) {
+                    prefs.edit().putInt(PREF_SKIP_BTN_SIZE, sb.getProgress() + 32).apply();
+                }
+            });
+            root.addView(sbSkipSize, root.indexOfChild(controlsContainer));
+
+            View div = new View(this);
+            div.setBackgroundColor(getResources().getColor(R.color.divider, null));
+            LinearLayout.LayoutParams divLp = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT, 1);
+            divLp.setMargins(0, dp(4), 0, dp(4));
+            div.setLayoutParams(divLp);
+            root.addView(div, root.indexOfChild(controlsContainer));
         }
 
         // ── 顶栏按钮排序 ─────────────────────────────────────────────────────
@@ -822,9 +881,11 @@ public class SettingsActivity extends AppCompatActivity {
 
     private String[] getCenterBtnLabels() {
         return new String[]{
+                getString(R.string.btn_skip_prev),
                 getString(R.string.btn_rewind),
                 getString(R.string.settings_ctrl_playpause),
-                getString(R.string.btn_forward)
+                getString(R.string.btn_forward),
+                getString(R.string.btn_skip_next)
         };
     }
 

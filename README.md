@@ -869,4 +869,100 @@ SubtitleManager.getInstance().registerParser(new MyCustomParser());
 
 ---
 
-*VideoMaster v13.0 — 纯本地，无联网，完全离线。*
+---
+
+## v14.0 变更记录
+
+### 1. 修复底部导航「统计」按钮消失
+
+**根因**：`rebuildBottomNav()` 在根据用户自定义标签顺序重建菜单时，清空了所有菜单项后只添加了三个可排序标签（内置媒体/媒体库/我的列表），遗漏了「统计」Tab。
+
+**修复**：在 `rebuildBottomNav()` 末尾始终追加 `nav_stats` 菜单项（不参与用户排序，固定末尾位置）。
+
+| 位置 | 变更 |
+|------|------|
+| `MainActivity.java` | `rebuildBottomNav()` 末尾追加 `menu.add(nav_stats)` |
+
+---
+
+### 2. 修复「我的列表」自定义封面不显示
+
+**根因**：`PlaylistAdapter.loadThumbnail()` 在后台线程加载自定义封面图后，未校验 ViewHolder 是否已被 RecyclerView 回收复用，导致异步结果可能被丢弃或贴错。同时缺少 `setScaleType(CENTER_CROP)` 使得小图无法正确铺满。
+
+**修复**：
+- 绑定时用 `setTag(R.id.ivPlaylistThumb, listId)` 标记 ImageView
+- 后台加载完成后校验 `getTag()` 是否仍匹配当前 `listId`，不匹配则跳过
+- 自定义封面使用 `CENTER_CROP`，默认图标使用 `CENTER_INSIDE`
+- 增加 `BitmapFactory.Options` 异常保护
+
+| 位置 | 变更 |
+|------|------|
+| `PlaylistAdapter.java` | `loadThumbnail()` 增加 tag 校验、ScaleType 切换、异常保护 |
+
+---
+
+### 3. 彻底修复手势切换媒体无效
+
+**根因**：`GestureDetector` 内部在用户手指按下约 500ms 后触发 `onLongPress`，将 `lpActive` 置为 `true`。旧代码在 `feedSwipeEvent()` 和 `onTouch()` 的 `ACTION_MOVE` 中用 `!lpActive` 作为前置条件，导致长按触发后所有滑动检测被完全屏蔽。用户稍慢的滑动操作（触摸到开始移动 >500ms）会被错误地识别为长按而非切换手势。
+
+**修复**：
+- 移除 `feedSwipeEvent()` 和 `onTouch()` 中 `ACTION_MOVE` 对 `!lpActive` 的守卫条件
+- 在 `detectSwipe()` 中，当滑动阈值被触发且 `lpActive == true` 时：自动取消长按状态（`lpActive = false`），设置 `lpSwiped = true` 防止多次触发，然后正常执行 `onSwipeMedia()`
+- 结果：滑动手势始终优先于长按速度增强，用户无论何时开始滑动都能可靠切换视频
+
+**手势规则（修复后）**：所有三个入口（媒体库、内置媒体、我的列表）打开播放器后，横屏/竖屏的左右/上下滑动均可**每次、每个视频**可靠切换。
+
+| 位置 | 变更 |
+|------|------|
+| `GestureHandler.java` | `feedSwipeEvent()` 移除 `!lpActive` 守卫 |
+| `GestureHandler.java` | `onTouch()` 移除 `!lpActive` 守卫 |
+| `GestureHandler.java` | `detectSwipe()` 新增长按自动取消逻辑 |
+
+---
+
+### 4. 播放界面新增切换视频按钮
+
+在播放器中央控制栏两侧新增「上一个」（⏮）和「下一个」（⏭）按钮，直接点击即可切换到播放列表中的前一个/后一个视频。
+
+- 按钮仅在存在播放列表上下文时显示（单文件播放时自动隐藏）
+- 按钮大小、颜色、显隐、排列顺序均可在设置中自定义
+
+#### 新增文件
+
+| 文件 | 说明 |
+|------|------|
+| `res/drawable/ic_skip_prev.xml` | 上一个视频矢量图标（⏮） |
+| `res/drawable/ic_skip_next.xml` | 下一个视频矢量图标（⏭） |
+
+---
+
+### 5. 切换按钮全面可配置
+
+在「设置」页面中，切换按钮（上一个/下一个）支持以下自定义：
+
+| 设置项 | 范围 | 默认值 | 说明 |
+|--------|------|--------|------|
+| 显示/隐藏 | 开/关 | 开 | 控制按钮是否可见 |
+| 按钮大小 | 32–96 dp | 48 dp | 按钮图标尺寸 |
+| 颜色 | 白/红/橙/青/绿/黄 | 白 | 按钮图标着色 |
+| 排序 | 中央栏排序 | 最左/最右 | 通过中央按钮排序调整位置 |
+
+---
+
+## v14.0 修改记录
+
+| 文件 | 修改内容 |
+|------|---------|
+| `MainActivity.java` | `rebuildBottomNav()` 末尾追加 `nav_stats` 菜单项，修复统计 Tab 消失 |
+| `PlaylistAdapter.java` | `loadThumbnail()` 增加 tag 校验防止 ViewHolder 复用错图；ScaleType 切换；异常保护 |
+| `GestureHandler.java` | 移除 `feedSwipeEvent` / `onTouch` 中 `!lpActive` 守卫；`detectSwipe()` 新增长按自动取消逻辑 |
+| `activity_player.xml` | 中央控制栏新增 `btnSkipPrev` / `btnSkipNext` |
+| `PlayerActivity.java` | 新增 `btnSkipPrev` / `btnSkipNext` 字段、点击事件、设置读取（显隐/大小/颜色）；`applyButtonOrder()` 支持 skip-prev / skip-next |
+| `SettingsActivity.java` | 新增 `PREF_BTN_SKIP_VISIBLE` / `PREF_BTN_SKIP_COLOR` / `PREF_SKIP_BTN_SIZE` 常量；控件数组扩展为 10 项；新增切换按钮大小 SeekBar；`DEFAULT_CENTER_BTN_ORDER` 更新为含 skip-prev / skip-next；`getCenterBtnLabels()` 扩展 |
+| `ic_skip_prev.xml` | 新增上一个视频矢量图标 |
+| `ic_skip_next.xml` | 新增下一个视频矢量图标 |
+| `strings.xml` | 新增 `btn_skip_prev`、`btn_skip_next`、`settings_ctrl_skip`、`settings_skip_btn_size` |
+
+---
+
+*VideoMaster v14.0 — 纯本地，无联网，完全离线。*

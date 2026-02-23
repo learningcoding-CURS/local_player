@@ -204,6 +204,9 @@ public class GestureHandler implements View.OnTouchListener {
      *
      * Uses the shared {@code swipeConsumed} flag to prevent double-firing if the swipe
      * is also detected via the view-level path.
+     *
+     * Swipe detection is NOT blocked by lpActive — if a swipe is detected during a
+     * long press, the long press is cancelled and the swipe takes priority.
      */
     public void feedSwipeEvent(MotionEvent ev, float windowWidth) {
         if (ev == null || listener == null) return;
@@ -214,12 +217,10 @@ public class GestureHandler implements View.OnTouchListener {
             if (action == MotionEvent.ACTION_DOWN) {
                 activityStartX = ev.getX();
                 activityStartY = ev.getY();
-                // Reset shared swipe guard on new touch (syncs with view-level path)
                 swipeConsumed = false;
-            } else if (action == MotionEvent.ACTION_MOVE && !swipeConsumed && !lpActive) {
+            } else if (action == MotionEvent.ACTION_MOVE && !swipeConsumed) {
                 detectSwipe(ev.getX(), ev.getY(), activityStartX, activityStartY, activityWindowWidth);
             } else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
-                // Ensure lpActive is cleared even if the view-level path missed the UP event
                 if (lpActive) {
                     lpActive = false;
                     if (!lpSwiped) listener.onLongPressEnd();
@@ -250,8 +251,9 @@ public class GestureHandler implements View.OnTouchListener {
             // Feed to GestureDetector for tap/double-tap/long-press/brightness
             detector.onTouchEvent(event);
 
-            // Direct swipe detection using stored start coords (more reliable than e1)
-            if (action == MotionEvent.ACTION_MOVE && !lpActive && !swipeConsumed) {
+            // Direct swipe detection — not blocked by lpActive; a swipe during long
+            // press cancels the long press and takes priority.
+            if (action == MotionEvent.ACTION_MOVE && !swipeConsumed) {
                 float width = viewWidth > 1 ? viewWidth : activityWindowWidth;
                 detectSwipe(event.getX(), event.getY(), touchStartX, touchStartY, width);
             }
@@ -296,21 +298,30 @@ public class GestureHandler implements View.OnTouchListener {
 
         SwipeDirection dir = isLandscape ? landscapeSwipe : portraitSwipe;
 
+        boolean triggered = false;
+        boolean toNext    = false;
+
         if (dir == SwipeDirection.HORIZONTAL) {
-            // In HORIZONTAL mode, left-side vertical scroll is brightness-only.
             if (absDY > absDX && isLeft) return;
             if (absDX > absDY && absDX > switchThresholdPx) {
-                swipeConsumed = true;
-                listener.onSwipeMedia(totalDx < 0); // left = next, right = previous
+                triggered = true;
+                toNext    = totalDx < 0;
             }
         } else {
-            // VERTICAL mode — up/down swipe works on the full screen width.
-            // (Brightness still fires via GestureDetector on small left-side movements,
-            //  but once this threshold is crossed swipeConsumed prevents further brightness.)
             if (absDY > absDX && absDY > switchThresholdPx) {
-                swipeConsumed = true;
-                listener.onSwipeMedia(totalDy > 0); // down = next, up = previous
+                triggered = true;
+                toNext    = totalDy > 0;
             }
+        }
+
+        if (triggered) {
+            swipeConsumed = true;
+            // If a long press was active, cancel it — swipe takes priority
+            if (lpActive) {
+                lpActive = false;
+                lpSwiped = true;
+            }
+            listener.onSwipeMedia(toNext);
         }
     }
 

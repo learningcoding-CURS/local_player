@@ -175,12 +175,16 @@
     <string name="settings_ctrl_rotate">旋转按钮</string>
     <string name="settings_ctrl_seek">跳转按钮（前进/后退）</string>
     <string name="settings_ctrl_playpause">播放/暂停按钮</string>
+    <string name="settings_ctrl_skip">切换按钮（上一个/下一个）</string>
+    <string name="settings_skip_btn_size">切换按钮大小：%ddp</string>
 
     <!-- Accessibility -->
     <string name="btn_play">播放</string>
     <string name="btn_pause">暂停</string>
     <string name="btn_rewind">后退</string>
     <string name="btn_forward">前进</string>
+    <string name="btn_skip_prev">上一个</string>
+    <string name="btn_skip_next">下一个</string>
     <string name="btn_rotate">旋转屏幕</string>
     <string name="btn_subtitle">字幕选项</string>
     <string name="btn_speed">速度选择</string>
