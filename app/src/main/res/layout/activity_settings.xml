@@ -256,6 +256,162 @@
                 android:thumbTint="@color/colorAccent"
                 android:layout_marginBottom="8dp" />
 
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/divider"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="4dp" />
+
+            <!-- ── 跳转按钮设置 ── -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/settings_section_seek_btn"
+                android:textColor="@color/colorAccentLight"
+                android:textSize="13sp"
+                android:paddingTop="8dp"
+                android:paddingBottom="4dp" />
+
+            <TextView
+                android:id="@+id/tvSeekIconSizeLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/settings_section_seek_btn"
+                android:textColor="@color/textSecondary"
+                android:textSize="13sp"
+                android:paddingTop="4dp"
+                android:paddingBottom="2dp" />
+
+            <SeekBar
+                android:id="@+id/sbSeekIconSize"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="64"
+                android:progressTint="@color/colorAccent"
+                android:thumbTint="@color/colorAccent"
+                android:layout_marginBottom="8dp" />
+
+            <TextView
+                android:id="@+id/tvSeekSecondsLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/settings_section_seek_btn"
+                android:textColor="@color/textSecondary"
+                android:textSize="13sp"
+                android:paddingTop="4dp"
+                android:paddingBottom="2dp" />
+
+            <SeekBar
+                android:id="@+id/sbSeekSeconds"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="59"
+                android:progressTint="@color/colorAccent"
+                android:thumbTint="@color/colorAccent"
+                android:layout_marginBottom="8dp" />
+
+            <TextView
+                android:id="@+id/tvSeekAlphaLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/settings_section_seek_btn"
+                android:textColor="@color/textSecondary"
+                android:textSize="13sp"
+                android:paddingTop="4dp"
+                android:paddingBottom="2dp" />
+
+            <SeekBar
+                android:id="@+id/sbSeekAlpha"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="90"
+                android:progressTint="@color/colorAccent"
+                android:thumbTint="@color/colorAccent"
+                android:layout_marginBottom="8dp" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/divider"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="4dp" />
+
+            <!-- ── 进度条设置 ── -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/settings_section_seekbar"
+                android:textColor="@color/colorAccentLight"
+                android:textSize="13sp"
+                android:paddingTop="8dp"
+                android:paddingBottom="4dp" />
+
+            <TextView
+                android:id="@+id/tvSeekbarHeightLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/settings_section_seekbar"
+                android:textColor="@color/textSecondary"
+                android:textSize="13sp"
+                android:paddingTop="4dp"
+                android:paddingBottom="2dp" />
+
+            <SeekBar
+                android:id="@+id/sbSeekbarHeight"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="16"
+                android:progressTint="@color/colorAccent"
+                android:thumbTint="@color/colorAccent"
+                android:layout_marginBottom="8dp" />
+
+            <TextView
+                android:id="@+id/tvSeekbarProgressAlphaLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/settings_section_seekbar"
+                android:textColor="@color/textSecondary"
+                android:textSize="13sp"
+                android:paddingTop="4dp"
+                android:paddingBottom="2dp" />
+
+            <SeekBar
+                android:id="@+id/sbSeekbarProgressAlpha"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="90"
+                android:progressTint="@color/colorAccent"
+                android:thumbTint="@color/colorAccent"
+                android:layout_marginBottom="8dp" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/divider"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="4dp" />
+
+            <!-- ── 字幕面板透明度 ── -->
+            <TextView
+                android:id="@+id/tvSubtitlePanelAlphaLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/settings_subtitle_panel_alpha"
+                android:textColor="@color/colorAccentLight"
+                android:textSize="13sp"
+                android:paddingTop="8dp"
+                android:paddingBottom="4dp" />
+
+            <SeekBar
+                android:id="@+id/sbSubtitlePanelAlpha"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="90"
+                android:progressTint="@color/colorAccent"
+                android:thumbTint="@color/colorAccent"
+                android:layout_marginBottom="8dp" />
+
             <!-- Bottom spacer -->
             <View
                 android:layout_width="match_parent"

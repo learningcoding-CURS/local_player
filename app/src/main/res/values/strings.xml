@@ -45,7 +45,7 @@
 
     <!-- Subtitle -->
     <string name="subtitle">字幕</string>
-    <string name="subtitle_import">导入字幕 (SRT / ASS / VTT)</string>
+    <string name="subtitle_import">导入字幕 (SRT / ASS / VTT / TXT / MD)</string>
     <string name="subtitle_export">导出字幕</string>
     <string name="subtitle_export_srt">导出为 SRT</string>
     <string name="subtitle_export_vtt">导出为 VTT</string>
@@ -111,11 +111,37 @@
     <string name="btn_subtitle_list">字幕列表</string>
     <string name="subtitle_show_list">展示字幕列表</string>
 
+    <!-- Subtitle import source -->
+    <string name="subtitle_from_library">从字幕库选择</string>
+    <string name="subtitle_from_file">从本地文件选择</string>
+    <string name="subtitle_btn_label">字幕</string>
+
+    <!-- Subtitle library -->
+    <string name="subtitle_library_title">字幕库</string>
+    <string name="subtitle_library_empty">暂无字幕文件\n点击右下角 + 添加字幕</string>
+    <string name="subtitle_add_to_library">添加字幕到库</string>
+    <string name="subtitle_library_imported">已添加到字幕库</string>
+    <string name="subtitle_library_import_failed">添加失败，请检查文件格式</string>
+    <string name="subtitle_library_rename">重命名</string>
+    <string name="subtitle_library_rename_failed">重命名失败</string>
+    <string name="subtitle_library_delete">删除</string>
+    <string name="subtitle_library_delete_confirm">确定要删除「%s」吗？</string>
+
+    <!-- Player settings -->
+    <string name="settings_section_seek_btn">跳转按钮</string>
+    <string name="settings_seek_icon_size">按钮大小：%ddp</string>
+    <string name="settings_seek_seconds">跳转时长：%d 秒</string>
+    <string name="settings_seek_alpha">按钮透明度：%d%%</string>
+    <string name="settings_section_seekbar">进度条</string>
+    <string name="settings_seekbar_height">进度条粗细：%ddp</string>
+    <string name="settings_seekbar_progress_alpha">已播放透明度：%d%%</string>
+    <string name="settings_subtitle_panel_alpha">字幕面板透明度：%d%%</string>
+
     <!-- Accessibility -->
     <string name="btn_play">播放</string>
     <string name="btn_pause">暂停</string>
-    <string name="btn_rewind">后退5秒</string>
-    <string name="btn_forward">前进5秒</string>
+    <string name="btn_rewind">后退</string>
+    <string name="btn_forward">前进</string>
     <string name="btn_rotate">旋转屏幕</string>
     <string name="btn_subtitle">字幕选项</string>
     <string name="btn_speed">速度选择</string>

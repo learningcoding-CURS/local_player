@@ -332,61 +332,59 @@
             android:paddingBottom="8dp" />
     </LinearLayout>
 
-    <!-- ─── Subtitle List Panel (full screen) ─── -->
+    <!-- ─── Subtitle List Panel (full screen, transparent background set in code) ─── -->
     <LinearLayout
         android:id="@+id/subtitleListPanel"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="bottom"
         android:orientation="vertical"
-        android:background="#EE0D0D0D"
+        android:background="#990D0D0D"
         android:visibility="gone">
 
-        <!-- Panel header -->
+        <!-- Drag handle indicator (pull down to close) -->
+        <View
+            android:id="@+id/subtitlePanelDragHandle"
+            android:layout_width="40dp"
+            android:layout_height="4dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="4dp"
+            android:background="#66FFFFFF" />
+
+        <!-- Panel header: [toggle timestamps] [close arrow-down] -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:orientation="horizontal"
             android:gravity="center_vertical"
             android:paddingStart="16dp"
-            android:paddingEnd="8dp"
-            android:background="#1AFFFFFF">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/subtitle_list_title"
-                android:textColor="@color/textPrimary"
-                android:textSize="14sp"
-                android:fontFamily="sans-serif-medium" />
+            android:paddingEnd="8dp">
 
             <!-- Toggle timestamps button -->
             <TextView
                 android:id="@+id/btnToggleTimestamps"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:text="@string/subtitle_list_hide_time"
                 android:textColor="@color/colorAccentLight"
-                android:textSize="12sp"
-                android:paddingStart="8dp"
-                android:paddingEnd="8dp"
+                android:textSize="13sp"
                 android:paddingTop="6dp"
                 android:paddingBottom="6dp"
                 android:clickable="true"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground" />
 
-            <!-- Close button -->
+            <!-- Close button (arrow down) -->
             <ImageButton
                 android:id="@+id/btnCloseSubtitlePanel"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:src="@drawable/ic_forward"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@drawable/ic_arrow_down"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:tint="@color/controlTint"
-                android:contentDescription="关闭字幕列表"
-                android:rotation="90" />
+                android:contentDescription="关闭字幕列表" />
         </LinearLayout>
 
         <!-- Empty hint -->

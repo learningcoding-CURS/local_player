@@ -7,6 +7,8 @@ import com.videomaster.app.interfaces.ISubtitleExporter;
 import com.videomaster.app.interfaces.ISubtitleParser;
 import com.videomaster.app.util.FileUtils;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -37,6 +39,8 @@ public class SubtitleManager {
         parsers.add(new SrtParser());
         parsers.add(new VttParser());
         parsers.add(new AssParser());
+        parsers.add(new TxtParser());
+        parsers.add(new MarkdownParser());
         // Register built-in exporters
         exporters.add(new SubtitleExporter.SrtExporter());
         exporters.add(new SubtitleExporter.VttExporter());
@@ -74,6 +78,28 @@ public class SubtitleManager {
         if (parser == null) return false;
         try (InputStream in = ctx.getContentResolver().openInputStream(uri)) {
             if (in == null) return false;
+            currentSubtitles = parser.parse(in, charset);
+            lastFoundIndex = 0;
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * Loads subtitles from a File (e.g. internal storage library).
+     *
+     * @param file    subtitle file
+     * @param charset encoding, e.g. "UTF-8"
+     * @return true on success
+     */
+    public boolean loadSubtitlesFromFile(File file, String charset) {
+        String name = file.getName();
+        String ext  = FileUtils.getExtension(name);
+        ISubtitleParser parser = findParserForExtension(ext);
+        if (parser == null) return false;
+        try (InputStream in = new FileInputStream(file)) {
             currentSubtitles = parser.parse(in, charset);
             lastFoundIndex = 0;
             return true;

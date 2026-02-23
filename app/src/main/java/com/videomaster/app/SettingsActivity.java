@@ -31,11 +31,28 @@ public class SettingsActivity extends AppCompatActivity {
     public static final String PREF_SUBTITLE_SIZE    = "subtitle_size";
     public static final String PREF_SUBTITLE_LINE_SP = "subtitle_line_spacing";
 
+    // Seek button settings
+    public static final String PREF_SEEK_ICON_SIZE         = "seek_icon_size";
+    public static final String PREF_SEEK_SECONDS           = "seek_seconds";
+    public static final String PREF_SEEK_ALPHA             = "seek_alpha";
+    // Seekbar settings
+    public static final String PREF_SEEKBAR_HEIGHT         = "seekbar_height";
+    public static final String PREF_SEEKBAR_PROGRESS_ALPHA = "seekbar_progress_alpha";
+    // Subtitle panel
+    public static final String PREF_SUBTITLE_PANEL_ALPHA   = "subtitle_panel_alpha";
+
     public static final String VIEW_MODE_GRID = "GRID";
     public static final String VIEW_MODE_LIST = "LIST";
 
     public static final float DEFAULT_SUBTITLE_SIZE    = 18f;
     public static final float DEFAULT_SUBTITLE_LINE_SP = 1.2f;
+
+    public static final int DEFAULT_SEEK_ICON_SIZE         = 64;
+    public static final int DEFAULT_SEEK_SECONDS           = 5;
+    public static final int DEFAULT_SEEK_ALPHA             = 100;
+    public static final int DEFAULT_SEEKBAR_HEIGHT         = 12;
+    public static final int DEFAULT_SEEKBAR_PROGRESS_ALPHA = 80;
+    public static final int DEFAULT_SUBTITLE_PANEL_ALPHA   = 60;
 
     static final String DEFAULT_TAB_ORDER = "builtin,library,playlist";
 
@@ -58,6 +75,12 @@ public class SettingsActivity extends AppCompatActivity {
         String savedViewMode  = prefs.getString(PREF_VIEW_MODE, VIEW_MODE_GRID);
         float  savedSubSize   = prefs.getFloat(PREF_SUBTITLE_SIZE, DEFAULT_SUBTITLE_SIZE);
         float  savedLineSp    = prefs.getFloat(PREF_SUBTITLE_LINE_SP, DEFAULT_SUBTITLE_LINE_SP);
+        int    savedSeekIconSize   = prefs.getInt(PREF_SEEK_ICON_SIZE,         DEFAULT_SEEK_ICON_SIZE);
+        int    savedSeekSeconds    = prefs.getInt(PREF_SEEK_SECONDS,           DEFAULT_SEEK_SECONDS);
+        int    savedSeekAlpha      = prefs.getInt(PREF_SEEK_ALPHA,             DEFAULT_SEEK_ALPHA);
+        int    savedSeekbarHeight  = prefs.getInt(PREF_SEEKBAR_HEIGHT,         DEFAULT_SEEKBAR_HEIGHT);
+        int    savedProgAlpha      = prefs.getInt(PREF_SEEKBAR_PROGRESS_ALPHA, DEFAULT_SEEKBAR_PROGRESS_ALPHA);
+        int    savedPanelAlpha     = prefs.getInt(PREF_SUBTITLE_PANEL_ALPHA,   DEFAULT_SUBTITLE_PANEL_ALPHA);
 
         tabOrder = savedOrderStr.split(",");
 
@@ -132,6 +155,96 @@ public class SettingsActivity extends AppCompatActivity {
             @Override public void onStopTrackingTouch(SeekBar sb) {}
         });
 
+        // ── 跳转按钮大小 ──────────────────────────────────────────────────────
+        SeekBar sbSeekIconSize = findViewById(R.id.sbSeekIconSize);
+        TextView tvSeekIconSizeLabel = findViewById(R.id.tvSeekIconSizeLabel);
+        // range 0-64 → actual 32-96 dp
+        sbSeekIconSize.setMax(64);
+        sbSeekIconSize.setProgress(Math.max(0, Math.min(64, savedSeekIconSize - 32)));
+        tvSeekIconSizeLabel.setText(getString(R.string.settings_seek_icon_size, savedSeekIconSize));
+        sbSeekIconSize.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override public void onProgressChanged(SeekBar sb, int p, boolean user) {
+                tvSeekIconSizeLabel.setText(getString(R.string.settings_seek_icon_size, p + 32));
+            }
+            @Override public void onStartTrackingTouch(SeekBar sb) {}
+            @Override public void onStopTrackingTouch(SeekBar sb) {}
+        });
+
+        // ── 跳转时长 ───────────────────────────────────────────────────────
+        SeekBar sbSeekSeconds = findViewById(R.id.sbSeekSeconds);
+        TextView tvSeekSecondsLabel = findViewById(R.id.tvSeekSecondsLabel);
+        // range 0-59 → actual 1-60 s
+        sbSeekSeconds.setMax(59);
+        sbSeekSeconds.setProgress(Math.max(0, Math.min(59, savedSeekSeconds - 1)));
+        tvSeekSecondsLabel.setText(getString(R.string.settings_seek_seconds, savedSeekSeconds));
+        sbSeekSeconds.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override public void onProgressChanged(SeekBar sb, int p, boolean user) {
+                tvSeekSecondsLabel.setText(getString(R.string.settings_seek_seconds, p + 1));
+            }
+            @Override public void onStartTrackingTouch(SeekBar sb) {}
+            @Override public void onStopTrackingTouch(SeekBar sb) {}
+        });
+
+        // ── 跳转按钮透明度 ────────────────────────────────────────────────
+        SeekBar sbSeekAlpha = findViewById(R.id.sbSeekAlpha);
+        TextView tvSeekAlphaLabel = findViewById(R.id.tvSeekAlphaLabel);
+        // range 0-90 → actual 10-100%
+        sbSeekAlpha.setMax(90);
+        sbSeekAlpha.setProgress(Math.max(0, Math.min(90, savedSeekAlpha - 10)));
+        tvSeekAlphaLabel.setText(getString(R.string.settings_seek_alpha, savedSeekAlpha));
+        sbSeekAlpha.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override public void onProgressChanged(SeekBar sb, int p, boolean user) {
+                tvSeekAlphaLabel.setText(getString(R.string.settings_seek_alpha, p + 10));
+            }
+            @Override public void onStartTrackingTouch(SeekBar sb) {}
+            @Override public void onStopTrackingTouch(SeekBar sb) {}
+        });
+
+        // ── 进度条粗细 ────────────────────────────────────────────────────
+        SeekBar sbSeekbarHeight = findViewById(R.id.sbSeekbarHeight);
+        TextView tvSeekbarHeightLabel = findViewById(R.id.tvSeekbarHeightLabel);
+        // range 0-16 → actual 4-20 dp
+        sbSeekbarHeight.setMax(16);
+        sbSeekbarHeight.setProgress(Math.max(0, Math.min(16, savedSeekbarHeight - 4)));
+        tvSeekbarHeightLabel.setText(getString(R.string.settings_seekbar_height, savedSeekbarHeight));
+        sbSeekbarHeight.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override public void onProgressChanged(SeekBar sb, int p, boolean user) {
+                tvSeekbarHeightLabel.setText(getString(R.string.settings_seekbar_height, p + 4));
+            }
+            @Override public void onStartTrackingTouch(SeekBar sb) {}
+            @Override public void onStopTrackingTouch(SeekBar sb) {}
+        });
+
+        // ── 进度条已播放透明度 ─────────────────────────────────────────────
+        SeekBar sbProgAlpha = findViewById(R.id.sbSeekbarProgressAlpha);
+        TextView tvProgAlphaLabel = findViewById(R.id.tvSeekbarProgressAlphaLabel);
+        // range 0-90 → actual 10-100%
+        sbProgAlpha.setMax(90);
+        sbProgAlpha.setProgress(Math.max(0, Math.min(90, savedProgAlpha - 10)));
+        tvProgAlphaLabel.setText(getString(R.string.settings_seekbar_progress_alpha, savedProgAlpha));
+        sbProgAlpha.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override public void onProgressChanged(SeekBar sb, int p, boolean user) {
+                tvProgAlphaLabel.setText(getString(R.string.settings_seekbar_progress_alpha, p + 10));
+            }
+            @Override public void onStartTrackingTouch(SeekBar sb) {}
+            @Override public void onStopTrackingTouch(SeekBar sb) {}
+        });
+
+        // ── 字幕面板背景透明度 ─────────────────────────────────────────────
+        SeekBar sbPanelAlpha = findViewById(R.id.sbSubtitlePanelAlpha);
+        TextView tvPanelAlphaLabel = findViewById(R.id.tvSubtitlePanelAlphaLabel);
+        // range 0-90 → actual 0-90%
+        sbPanelAlpha.setMax(90);
+        sbPanelAlpha.setProgress(Math.max(0, Math.min(90, savedPanelAlpha)));
+        tvPanelAlphaLabel.setText(getString(R.string.settings_subtitle_panel_alpha, savedPanelAlpha));
+        sbPanelAlpha.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override public void onProgressChanged(SeekBar sb, int p, boolean user) {
+                tvPanelAlphaLabel.setText(getString(R.string.settings_subtitle_panel_alpha, p));
+            }
+            @Override public void onStartTrackingTouch(SeekBar sb) {}
+            @Override public void onStopTrackingTouch(SeekBar sb) {}
+        });
+
         // ── Save button ───────────────────────────────────────────────────────
         Button btnSave = findViewById(R.id.btnSaveSettings);
         btnSave.setOnClickListener(v -> {
@@ -165,6 +278,14 @@ public class SettingsActivity extends AppCompatActivity {
             float newSubSize = sbSubSize.getProgress() + 10f;
             float newLineSp  = 1.0f + sbLineSp.getProgress() * 0.1f;
 
+            // Player controls
+            int newSeekIconSize  = sbSeekIconSize.getProgress() + 32;
+            int newSeekSeconds   = sbSeekSeconds.getProgress() + 1;
+            int newSeekAlpha     = sbSeekAlpha.getProgress() + 10;
+            int newSeekbarHeight = sbSeekbarHeight.getProgress() + 4;
+            int newProgAlpha     = sbProgAlpha.getProgress() + 10;
+            int newPanelAlpha    = sbPanelAlpha.getProgress();
+
             prefs.edit()
                     .putString(PREF_DEFAULT_TAB, newDefault)
                     .putString(PREF_TAB_ORDER, orderSb.toString())
@@ -173,6 +294,12 @@ public class SettingsActivity extends AppCompatActivity {
                     .putString(PREF_LANDSCAPE_SWIPE, newLandscape)
                     .putFloat(PREF_SUBTITLE_SIZE, newSubSize)
                     .putFloat(PREF_SUBTITLE_LINE_SP, newLineSp)
+                    .putInt(PREF_SEEK_ICON_SIZE, newSeekIconSize)
+                    .putInt(PREF_SEEK_SECONDS, newSeekSeconds)
+                    .putInt(PREF_SEEK_ALPHA, newSeekAlpha)
+                    .putInt(PREF_SEEKBAR_HEIGHT, newSeekbarHeight)
+                    .putInt(PREF_SEEKBAR_PROGRESS_ALPHA, newProgAlpha)
+                    .putInt(PREF_SUBTITLE_PANEL_ALPHA, newPanelAlpha)
                     .apply();
 
             Toast.makeText(this, R.string.settings_applied, Toast.LENGTH_SHORT).show();

@@ -2,13 +2,20 @@ package com.videomaster.app;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.graphics.drawable.ClipDrawable;
+import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.LayerDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController;
 import android.view.WindowManager;
@@ -27,6 +34,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.videomaster.app.SettingsActivity;
+import com.videomaster.app.subtitle.SubtitleLibraryManager;
 import com.videomaster.app.interfaces.IPlayerEventListener;
 import com.videomaster.app.player.GestureHandler;
 import com.videomaster.app.player.PlayMode;
@@ -125,6 +133,12 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
     private SubtitleListAdapter subtitleListAdapter;
     private boolean       isSubtitlePanelVisible = false;
 
+    // Subtitle library
+    private SubtitleLibraryManager subtitleLibraryManager;
+
+    // Seek button settings (loaded from prefs)
+    private int seekMs = 5000;
+
     // ── Handlers / runnables ───────────────────────────────────────────────
 
     private final Handler  uiHandler              = new Handler(Looper.getMainLooper());
@@ -169,7 +183,21 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
                 }
             });
 
+    private final androidx.activity.result.ActivityResultLauncher<Intent> subtitleLibraryLauncher =
+            registerForActivityResult(
+                    new androidx.activity.result.contract.ActivityResultContracts
+                            .StartActivityForResult(), result -> {
+                if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                    String path = result.getData().getStringExtra(
+                            SubtitleLibraryActivity.EXTRA_SELECTED_PATH);
+                    if (path != null) importSubtitleFromFile(new java.io.File(path));
+                }
+            });
+
     private String pendingExportFormat = "SRT";
+
+    // Double-click detection for subtitle button
+    private long lastSubtitleClickMs = 0;
 
     // ── Lifecycle ──────────────────────────────────────────────────────────
 
@@ -178,7 +206,8 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_player);
 
-        mediaListManager = MediaListManager.getInstance(this);
+        mediaListManager        = MediaListManager.getInstance(this);
+        subtitleLibraryManager  = SubtitleLibraryManager.getInstance(this);
 
         initViews();
         initPlayer();
@@ -225,6 +254,17 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
         super.onConfigurationChanged(newConfig);
         boolean landscape = newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE;
         if (gestureHandler != null) gestureHandler.setLandscape(landscape);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (isSubtitlePanelVisible) {
+            closeSubtitleListPanel();
+        } else if (isPanelVisible) {
+            closePlaylistPanel();
+        } else {
+            super.onBackPressed();
+        }
     }
 
     @Override
@@ -289,7 +329,88 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
         tvSubtitleListEmpty = findViewById(R.id.tvSubtitleListEmpty);
         btnToggleTimestamps = findViewById(R.id.btnToggleTimestamps);
 
+        applyPlayerSettings();
         enterImmersiveMode();
+    }
+
+    /** Reads all player-related settings from SharedPreferences and applies them to the UI. */
+    private void applyPlayerSettings() {
+        SharedPreferences prefs = getSharedPreferences(SettingsActivity.PREFS_NAME, MODE_PRIVATE);
+
+        // ── Seek buttons ──────────────────────────────────────────────────
+        int seekIconSizeDp = prefs.getInt(SettingsActivity.PREF_SEEK_ICON_SIZE,
+                SettingsActivity.DEFAULT_SEEK_ICON_SIZE);
+        seekMs = prefs.getInt(SettingsActivity.PREF_SEEK_SECONDS,
+                SettingsActivity.DEFAULT_SEEK_SECONDS) * 1000;
+        int seekAlphaPct = prefs.getInt(SettingsActivity.PREF_SEEK_ALPHA,
+                SettingsActivity.DEFAULT_SEEK_ALPHA);
+
+        int sizePx   = dpToPx(seekIconSizeDp);
+        int alphaVal = Math.round(seekAlphaPct * 2.55f);
+
+        ViewGroup.LayoutParams rp = btnRewind.getLayoutParams();
+        rp.width = sizePx; rp.height = sizePx;
+        btnRewind.setLayoutParams(rp);
+
+        ViewGroup.LayoutParams fp = btnForward.getLayoutParams();
+        fp.width = sizePx; fp.height = sizePx;
+        btnForward.setLayoutParams(fp);
+
+        btnRewind.setImageAlpha(alphaVal);
+        btnForward.setImageAlpha(alphaVal);
+
+        // ── SeekBar appearance ────────────────────────────────────────────
+        int trackHeightDp = prefs.getInt(SettingsActivity.PREF_SEEKBAR_HEIGHT,
+                SettingsActivity.DEFAULT_SEEKBAR_HEIGHT);
+        int progressAlpha = prefs.getInt(SettingsActivity.PREF_SEEKBAR_PROGRESS_ALPHA,
+                SettingsActivity.DEFAULT_SEEKBAR_PROGRESS_ALPHA);
+        applySeekbarStyle(trackHeightDp, progressAlpha);
+
+        // ── Subtitle panel background ─────────────────────────────────────
+        int panelAlpha = prefs.getInt(SettingsActivity.PREF_SUBTITLE_PANEL_ALPHA,
+                SettingsActivity.DEFAULT_SUBTITLE_PANEL_ALPHA);
+        applySubtitlePanelAlpha(panelAlpha);
+    }
+
+    private void applySeekbarStyle(int trackHeightDp, int progressAlphaPct) {
+        int trackPx   = dpToPx(trackHeightDp);
+        int cornerPx  = trackPx / 2;
+        int alphaVal  = Math.round(progressAlphaPct * 2.55f);
+        int progressColor = (alphaVal << 24) | 0xE94560;
+
+        GradientDrawable bgShape = new GradientDrawable();
+        bgShape.setShape(GradientDrawable.RECTANGLE);
+        bgShape.setCornerRadius(cornerPx);
+        bgShape.setColor(0x22FFFFFF);
+
+        GradientDrawable progressShape = new GradientDrawable();
+        progressShape.setShape(GradientDrawable.RECTANGLE);
+        progressShape.setCornerRadius(cornerPx);
+        progressShape.setColor(progressColor);
+
+        ClipDrawable clipProgress = new ClipDrawable(progressShape, Gravity.START,
+                ClipDrawable.HORIZONTAL);
+
+        LayerDrawable layer = new LayerDrawable(new android.graphics.drawable.Drawable[]{
+                bgShape, clipProgress });
+        layer.setId(0, android.R.id.background);
+        layer.setId(1, android.R.id.progress);
+        layer.setLayerGravity(0, Gravity.CENTER_VERTICAL);
+        layer.setLayerGravity(1, Gravity.CENTER_VERTICAL);
+        layer.setLayerHeight(0, trackPx);
+        layer.setLayerHeight(1, trackPx);
+
+        seekBar.setProgressDrawable(layer);
+        seekBar.setSplitTrack(false);
+    }
+
+    private void applySubtitlePanelAlpha(int alphaPct) {
+        int a = Math.round(alphaPct * 2.55f);
+        subtitleListPanel.setBackgroundColor((a << 24) | 0x0D0D0D);
+    }
+
+    private int dpToPx(int dp) {
+        return Math.round(dp * getResources().getDisplayMetrics().density);
     }
 
     private void initPlayer() {
@@ -383,17 +504,17 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
         });
 
         btnRewind.setOnClickListener(v -> {
-            playerManager.seekRelative(-5000);
+            playerManager.seekRelative(-seekMs);
             scheduleHideControls();
         });
 
         btnForward.setOnClickListener(v -> {
-            playerManager.seekRelative(5000);
+            playerManager.seekRelative(seekMs);
             scheduleHideControls();
         });
 
         btnRotate.setOnClickListener(v -> toggleOrientation());
-        btnSubtitle.setOnClickListener(v -> showSubtitleMenu());
+        btnSubtitle.setOnClickListener(v -> handleSubtitleButtonClick());
         tvSpeed.setOnClickListener(v -> showSpeedMenu());
         btnLock.setOnClickListener(v -> lockScreen());
         btnUnlock.setOnClickListener(v -> unlockScreen());
@@ -506,16 +627,20 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
                 entry -> {
                     playerManager.seekTo(entry.getStartTimeMs());
                     subtitleManager.onSeek();
-                    // Do NOT close panel; just scroll to the clicked entry
                     scheduleHideControls();
                 });
 
         rvSubtitleList.setLayoutManager(new LinearLayoutManager(this));
         rvSubtitleList.setAdapter(subtitleListAdapter);
 
-        boolean isEmpty = subs.isEmpty();
-        tvSubtitleListEmpty.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
-        rvSubtitleList.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
+        tvSubtitleListEmpty.setVisibility(subs.isEmpty() ? View.VISIBLE : View.GONE);
+        rvSubtitleList.setVisibility(subs.isEmpty() ? View.GONE : View.VISIBLE);
+
+        // Apply panel background alpha from settings
+        SharedPreferences prefs = getSharedPreferences(SettingsActivity.PREFS_NAME, MODE_PRIVATE);
+        int panelAlpha = prefs.getInt(SettingsActivity.PREF_SUBTITLE_PANEL_ALPHA,
+                SettingsActivity.DEFAULT_SUBTITLE_PANEL_ALPHA);
+        applySubtitlePanelAlpha(panelAlpha);
 
         subtitleListPanel.setVisibility(View.VISIBLE);
         subtitleListPanel.post(() -> {
@@ -525,8 +650,37 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
         isSubtitlePanelVisible = true;
         uiHandler.removeCallbacks(hideControlsRunnable);
 
+        // Pull-down gesture to close
+        setupSubtitlePanelSwipeDown();
+
         // Scroll to active subtitle
         scrollToActiveSubtitle(playerManager.getPosition());
+    }
+
+    private float subtitlePanelDragStartY = 0f;
+
+    private void setupSubtitlePanelSwipeDown() {
+        View dragHandle = subtitleListPanel.findViewById(R.id.subtitlePanelDragHandle);
+        View header = subtitleListPanel.getChildAt(1); // header LinearLayout
+        View[] targets = { dragHandle, header };
+        for (View target : targets) {
+            if (target == null) continue;
+            target.setOnTouchListener((v, event) -> {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        subtitlePanelDragStartY = event.getRawY();
+                        return true;
+                    case MotionEvent.ACTION_MOVE:
+                        float dy = event.getRawY() - subtitlePanelDragStartY;
+                        if (dy > dpToPx(80)) {
+                            closeSubtitleListPanel();
+                            return true;
+                        }
+                        break;
+                }
+                return false;
+            });
+        }
     }
 
     private void closeSubtitleListPanel() {
@@ -988,30 +1142,47 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
                 .show();
     }
 
-    // ── Subtitle menu ──────────────────────────────────────────────────────
+    // ── Subtitle button handling (single click = pick source, double click = clear) ──
 
-    private void showSubtitleMenu() {
+    private void handleSubtitleButtonClick() {
+        long now = System.currentTimeMillis();
+        if (now - lastSubtitleClickMs < 400) {
+            // Double click — clear/hide subtitle
+            lastSubtitleClickMs = 0;
+            uiHandler.removeCallbacks(subtitleSingleClickRunnable);
+            clearSubtitle();
+        } else {
+            lastSubtitleClickMs = now;
+            uiHandler.removeCallbacks(subtitleSingleClickRunnable);
+            uiHandler.postDelayed(subtitleSingleClickRunnable, 400);
+        }
+    }
+
+    private final Runnable subtitleSingleClickRunnable = this::showSubtitleImportMenu;
+
+    private void clearSubtitle() {
+        subtitleManager.clearSubtitles();
+        subtitleView.setSubtitle(null);
+        refreshSubtitleListButton();
+        Toast.makeText(this, R.string.subtitle_cleared, Toast.LENGTH_SHORT).show();
+    }
+
+    private void showSubtitleImportMenu() {
         String[] options = {
-                getString(R.string.subtitle_import),
-                getString(R.string.subtitle_export),
-                getString(R.string.subtitle_clear)
+                getString(R.string.subtitle_from_library),
+                getString(R.string.subtitle_from_file)
         };
         new AlertDialog.Builder(this, R.style.DarkDialog)
-                .setTitle(R.string.subtitle)
                 .setItems(options, (dialog, which) -> {
-                    switch (which) {
-                        case 0: pickSubtitleFile();       break;
-                        case 1: showExportFormatDialog(); break;
-                        case 2:
-                            subtitleManager.clearSubtitles();
-                            subtitleView.setSubtitle(null);
-                            refreshSubtitleListButton();
-                            Toast.makeText(this, R.string.subtitle_cleared,
-                                    Toast.LENGTH_SHORT).show();
-                            break;
-                    }
+                    if (which == 0) openSubtitleLibrary();
+                    else            pickSubtitleFile();
                 })
                 .show();
+    }
+
+    private void openSubtitleLibrary() {
+        Intent intent = new Intent(this, SubtitleLibraryActivity.class);
+        subtitleLibraryLauncher.launch(intent);
     }
 
     private void showExportFormatDialog() {
@@ -1030,13 +1201,35 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         intent.setType("*/*");
-        intent.putExtra(Intent.EXTRA_MIME_TYPES,
-                new String[]{"application/x-subrip", "text/vtt", "text/x-ssa", "text/plain"});
+        intent.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{
+                "application/x-subrip",   // .srt
+                "text/vtt",               // .vtt
+                "text/x-ssa",             // .ass / .ssa
+                "text/plain",             // .txt
+                "text/markdown",          // .md (standard MIME)
+                "text/x-markdown",        // .md (alternate MIME)
+                "application/octet-stream" // fallback for files without recognized MIME
+        });
         importLauncher.launch(intent);
     }
 
     private void importSubtitle(Uri uri) {
         boolean ok = subtitleManager.loadSubtitles(this, uri, "UTF-8");
+        if (ok) {
+            // Also save to subtitle library for reuse
+            String fileName = com.videomaster.app.util.FileUtils.getFileName(this, uri);
+            subtitleLibraryManager.importFromUri(this, uri, fileName);
+        }
+        Toast.makeText(this,
+                ok ? getString(R.string.subtitle_loaded,
+                        subtitleManager.getCurrentSubtitles().size())
+                   : getString(R.string.subtitle_load_failed),
+                Toast.LENGTH_SHORT).show();
+        refreshSubtitleListButton();
+    }
+
+    private void importSubtitleFromFile(java.io.File file) {
+        boolean ok = subtitleManager.loadSubtitlesFromFile(file, "UTF-8");
         Toast.makeText(this,
                 ok ? getString(R.string.subtitle_loaded,
                         subtitleManager.getCurrentSubtitles().size())

@@ -138,10 +138,14 @@ public class GestureHandler implements View.OnTouchListener {
             @Override
             public boolean onScroll(MotionEvent e1, MotionEvent e2,
                                     float distanceX, float distanceY) {
-                if (lpActive) {
-                    lpSwiped = true;
-                } else {
-                    handleNormalScroll(e1, e2, distanceX, distanceY);
+                try {
+                    if (lpActive) {
+                        lpSwiped = true;
+                    } else {
+                        handleNormalScroll(e1, e2, distanceX, distanceY);
+                    }
+                } catch (Exception ignored) {
+                    // Guard against any unexpected NPE on certain devices/Android versions
                 }
                 return true;
             }
@@ -179,23 +183,28 @@ public class GestureHandler implements View.OnTouchListener {
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
-        viewWidth = v.getWidth() > 0 ? v.getWidth() : 1f;
+        if (event == null) return false;
+        try {
+            viewWidth = v != null && v.getWidth() > 0 ? v.getWidth() : 1f;
 
-        int action = event.getActionMasked();
+            int action = event.getActionMasked();
 
-        if (action == MotionEvent.ACTION_DOWN) {
-            swipeConsumed = false;
-        }
-
-        detector.onTouchEvent(event);
-
-        if (lpActive && (action == MotionEvent.ACTION_UP
-                || action == MotionEvent.ACTION_CANCEL)) {
-            lpActive = false;
-            if (!lpSwiped) {
-                listener.onLongPressEnd();
+            if (action == MotionEvent.ACTION_DOWN) {
+                swipeConsumed = false;
             }
-            lpSwiped = false;
+
+            detector.onTouchEvent(event);
+
+            if (lpActive && (action == MotionEvent.ACTION_UP
+                    || action == MotionEvent.ACTION_CANCEL)) {
+                lpActive = false;
+                if (!lpSwiped) {
+                    listener.onLongPressEnd();
+                }
+                lpSwiped = false;
+            }
+        } catch (Exception ignored) {
+            // Safety net for unusual touch events on some devices
         }
         return true;
     }
@@ -211,7 +220,7 @@ public class GestureHandler implements View.OnTouchListener {
      */
     private void handleNormalScroll(MotionEvent e1, MotionEvent e2,
                                     float distanceX, float distanceY) {
-        if (e1 == null || e2 == null) return;
+        if (e1 == null || e2 == null || listener == null) return;
 
         float absDX    = Math.abs(distanceX);
         float absDY    = Math.abs(distanceY);

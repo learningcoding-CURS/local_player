@@ -31,13 +31,13 @@ import java.util.List;
  */
 public class PlayerManager {
 
-    private static final long POSITION_UPDATE_INTERVAL_MS = 200;
+    private static final long POSITION_UPDATE_INTERVAL_MS = 150;
 
     // Buffer configuration for smooth playback
-    private static final int MIN_BUFFER_MS                = 20_000;
-    private static final int MAX_BUFFER_MS                = 60_000;
-    private static final int BUFFER_FOR_PLAYBACK_MS       = 1_000;
-    private static final int BUFFER_AFTER_REBUFFER_MS     = 2_000;
+    private static final int MIN_BUFFER_MS                = 25_000;
+    private static final int MAX_BUFFER_MS                = 90_000;
+    private static final int BUFFER_FOR_PLAYBACK_MS       = 800;
+    private static final int BUFFER_AFTER_REBUFFER_MS     = 1_500;
 
     private final ExoPlayer                  player;
     private final Handler                    handler;
@@ -89,12 +89,15 @@ public class PlayerManager {
         trackSelector.setParameters(
                 trackSelector.buildUponParameters()
                         .setForceHighestSupportedBitrate(false)
+                        .setExceedRendererCapabilitiesIfNecessary(true)
                         .build());
 
         player = new ExoPlayer.Builder(context)
                 .setLoadControl(loadControl)
                 .setTrackSelector(trackSelector)
                 .setHandleAudioBecomingNoisy(true)
+                .setSeekBackIncrementMs(5_000)
+                .setSeekForwardIncrementMs(5_000)
                 .build();
         player.addListener(new Player.Listener() {
             @Override
