@@ -26,6 +26,9 @@ public final class PermissionUtils {
             if (!hasPermission(activity, Manifest.permission.READ_MEDIA_VIDEO)) {
                 missing.add(Manifest.permission.READ_MEDIA_VIDEO);
             }
+            if (!hasPermission(activity, Manifest.permission.READ_MEDIA_AUDIO)) {
+                missing.add(Manifest.permission.READ_MEDIA_AUDIO);
+            }
         } else {
             if (!hasPermission(activity, Manifest.permission.READ_EXTERNAL_STORAGE)) {
                 missing.add(Manifest.permission.READ_EXTERNAL_STORAGE);

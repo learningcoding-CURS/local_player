@@ -4,6 +4,7 @@ package com.videomaster.app.databinding;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
@@ -14,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewbinding.ViewBinding;
 import androidx.viewbinding.ViewBindings;
 import com.google.android.material.appbar.AppBarLayout;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.videomaster.app.R;
 import java.lang.NullPointerException;
@@ -28,30 +30,57 @@ public final class ActivityMainBinding implements ViewBinding {
   public final AppBarLayout appBarLayout;
 
   @NonNull
+  public final BottomNavigationView bottomNav;
+
+  @NonNull
+  public final FrameLayout contentFrame;
+
+  @NonNull
   public final FloatingActionButton fabOpen;
 
   @NonNull
   public final ProgressBar loadingView;
 
   @NonNull
+  public final RecyclerView recyclerBuiltin;
+
+  @NonNull
   public final RecyclerView recyclerView;
+
+  @NonNull
+  public final FrameLayout tabBuiltin;
+
+  @NonNull
+  public final FrameLayout tabLibrary;
 
   @NonNull
   public final Toolbar toolbar;
 
   @NonNull
+  public final TextView tvBuiltinEmpty;
+
+  @NonNull
   public final TextView tvEmpty;
 
   private ActivityMainBinding(@NonNull CoordinatorLayout rootView,
-      @NonNull AppBarLayout appBarLayout, @NonNull FloatingActionButton fabOpen,
-      @NonNull ProgressBar loadingView, @NonNull RecyclerView recyclerView,
-      @NonNull Toolbar toolbar, @NonNull TextView tvEmpty) {
+      @NonNull AppBarLayout appBarLayout, @NonNull BottomNavigationView bottomNav,
+      @NonNull FrameLayout contentFrame, @NonNull FloatingActionButton fabOpen,
+      @NonNull ProgressBar loadingView, @NonNull RecyclerView recyclerBuiltin,
+      @NonNull RecyclerView recyclerView, @NonNull FrameLayout tabBuiltin,
+      @NonNull FrameLayout tabLibrary, @NonNull Toolbar toolbar, @NonNull TextView tvBuiltinEmpty,
+      @NonNull TextView tvEmpty) {
     this.rootView = rootView;
     this.appBarLayout = appBarLayout;
+    this.bottomNav = bottomNav;
+    this.contentFrame = contentFrame;
     this.fabOpen = fabOpen;
     this.loadingView = loadingView;
+    this.recyclerBuiltin = recyclerBuiltin;
     this.recyclerView = recyclerView;
+    this.tabBuiltin = tabBuiltin;
+    this.tabLibrary = tabLibrary;
     this.toolbar = toolbar;
+    this.tvBuiltinEmpty = tvBuiltinEmpty;
     this.tvEmpty = tvEmpty;
   }
 
@@ -88,6 +117,18 @@ public final class ActivityMainBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.bottomNav;
+      BottomNavigationView bottomNav = ViewBindings.findChildViewById(rootView, id);
+      if (bottomNav == null) {
+        break missingId;
+      }
+
+      id = R.id.contentFrame;
+      FrameLayout contentFrame = ViewBindings.findChildViewById(rootView, id);
+      if (contentFrame == null) {
+        break missingId;
+      }
+
       id = R.id.fabOpen;
       FloatingActionButton fabOpen = ViewBindings.findChildViewById(rootView, id);
       if (fabOpen == null) {
@@ -100,9 +141,27 @@ public final class ActivityMainBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.recyclerBuiltin;
+      RecyclerView recyclerBuiltin = ViewBindings.findChildViewById(rootView, id);
+      if (recyclerBuiltin == null) {
+        break missingId;
+      }
+
       id = R.id.recyclerView;
       RecyclerView recyclerView = ViewBindings.findChildViewById(rootView, id);
       if (recyclerView == null) {
+        break missingId;
+      }
+
+      id = R.id.tabBuiltin;
+      FrameLayout tabBuiltin = ViewBindings.findChildViewById(rootView, id);
+      if (tabBuiltin == null) {
+        break missingId;
+      }
+
+      id = R.id.tabLibrary;
+      FrameLayout tabLibrary = ViewBindings.findChildViewById(rootView, id);
+      if (tabLibrary == null) {
         break missingId;
       }
 
@@ -112,14 +171,21 @@ public final class ActivityMainBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.tvBuiltinEmpty;
+      TextView tvBuiltinEmpty = ViewBindings.findChildViewById(rootView, id);
+      if (tvBuiltinEmpty == null) {
+        break missingId;
+      }
+
       id = R.id.tvEmpty;
       TextView tvEmpty = ViewBindings.findChildViewById(rootView, id);
       if (tvEmpty == null) {
         break missingId;
       }
 
-      return new ActivityMainBinding((CoordinatorLayout) rootView, appBarLayout, fabOpen,
-          loadingView, recyclerView, toolbar, tvEmpty);
+      return new ActivityMainBinding((CoordinatorLayout) rootView, appBarLayout, bottomNav,
+          contentFrame, fabOpen, loadingView, recyclerBuiltin, recyclerView, tabBuiltin, tabLibrary,
+          toolbar, tvBuiltinEmpty, tvEmpty);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

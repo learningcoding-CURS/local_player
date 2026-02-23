@@ -49,6 +49,89 @@
         android:indeterminateTint="@color/colorAccent"
         android:visibility="gone" />
 
+    <!-- ─── Brightness indicator (left center) ─── -->
+    <LinearLayout
+        android:id="@+id/brightnessIndicator"
+        android:layout_width="48dp"
+        android:layout_height="200dp"
+        android:layout_gravity="center_vertical|start"
+        android:layout_marginStart="24dp"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:background="#88000000"
+        android:padding="8dp"
+        android:visibility="gone">
+
+        <ImageView
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:src="@drawable/ic_brightness"
+            android:tint="@color/textPrimary" />
+
+        <!-- Vertical progress bar for brightness level -->
+        <ProgressBar
+            android:id="@+id/brightnessBar"
+            style="@android:style/Widget.ProgressBar.Horizontal"
+            android:layout_width="8dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="4dp"
+            android:progressTint="@color/colorAccentLight"
+            android:progressBackgroundTint="#44FFFFFF"
+            android:max="100"
+            android:rotation="270" />
+
+        <TextView
+            android:id="@+id/tvBrightnessValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="50%"
+            android:textColor="@color/textPrimary"
+            android:textSize="10sp" />
+    </LinearLayout>
+
+    <!-- ─── Volume indicator (right center) ─── -->
+    <LinearLayout
+        android:id="@+id/volumeIndicator"
+        android:layout_width="48dp"
+        android:layout_height="200dp"
+        android:layout_gravity="center_vertical|end"
+        android:layout_marginEnd="24dp"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:background="#88000000"
+        android:padding="8dp"
+        android:visibility="gone">
+
+        <ImageView
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:src="@drawable/ic_speed"
+            android:tint="@color/textPrimary" />
+
+        <ProgressBar
+            android:id="@+id/volumeBar"
+            style="@android:style/Widget.ProgressBar.Horizontal"
+            android:layout_width="8dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="4dp"
+            android:progressTint="@color/colorAccentLight"
+            android:progressBackgroundTint="#44FFFFFF"
+            android:max="100"
+            android:rotation="270" />
+
+        <TextView
+            android:id="@+id/tvVolumeValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="50%"
+            android:textColor="@color/textPrimary"
+            android:textSize="10sp" />
+    </LinearLayout>
+
     <!-- ─────────────────── CONTROLS OVERLAY ─────────────────── -->
     <FrameLayout
         android:id="@+id/controlsOverlay"
@@ -57,7 +140,7 @@
         android:background="@color/overlayBackground"
         android:visibility="visible">
 
-        <!-- Top bar: speed badge + subtitle + rotate buttons -->
+        <!-- Top bar: lock | speed badge | subtitle | rotate buttons -->
         <LinearLayout
             android:id="@+id/topBar"
             android:layout_width="match_parent"
@@ -65,7 +148,34 @@
             android:layout_gravity="top"
             android:orientation="horizontal"
             android:padding="12dp"
-            android:gravity="end">
+            android:gravity="center_vertical">
+
+            <!-- Lock button (left side) -->
+            <ImageButton
+                android:id="@+id/btnLock"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/ic_lock_open"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:tint="@color/controlTint"
+                android:contentDescription="@string/btn_lock"
+                android:layout_marginEnd="4dp" />
+
+            <!-- Add to playlist button -->
+            <ImageButton
+                android:id="@+id/btnAddToPlaylist"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/ic_playlist"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:tint="@color/controlTint"
+                android:contentDescription="@string/btn_add_to_playlist"
+                android:layout_marginEnd="4dp" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
 
             <!-- Current speed badge -->
             <TextView
@@ -203,6 +313,27 @@
                 android:progressBackgroundTint="@color/seekbarBackground" />
         </LinearLayout>
 
+    </FrameLayout>
+
+    <!-- ─── Lock Overlay (shown when screen is locked) ─── -->
+    <FrameLayout
+        android:id="@+id/lockOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone">
+
+        <!-- Unlock button — always visible when locked -->
+        <ImageButton
+            android:id="@+id/btnUnlock"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="top|start"
+            android:layout_margin="16dp"
+            android:src="@drawable/ic_lock"
+            android:background="#88000000"
+            android:tint="@color/colorAccentLight"
+            android:contentDescription="@string/btn_unlock"
+            android:padding="10dp" />
     </FrameLayout>
 
 </FrameLayout>

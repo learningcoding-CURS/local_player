@@ -33,185 +33,229 @@
 22-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:11:22-73
 23        android:minSdkVersion="33" />
 23-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:12:9-35
-24
-25    <!-- Keep screen on during playback -->
-26    <uses-permission android:name="android.permission.WAKE_LOCK" />
-26-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:15:5-68
-26-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:15:22-65
-27    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-27-->[androidx.media3:media3-exoplayer:1.3.0] C:\Users\JG\.gradle\caches\transforms-3\a1bc3d3a2337c5672bbe53acbdb1a47d\transformed\jetified-media3-exoplayer-1.3.0\AndroidManifest.xml:22:5-79
-27-->[androidx.media3:media3-exoplayer:1.3.0] C:\Users\JG\.gradle\caches\transforms-3\a1bc3d3a2337c5672bbe53acbdb1a47d\transformed\jetified-media3-exoplayer-1.3.0\AndroidManifest.xml:22:22-76
-28
-29    <permission
-29-->[androidx.core:core:1.9.0] C:\Users\JG\.gradle\caches\transforms-3\761d68ccdd62ecb8703967694e2fec50\transformed\core-1.9.0\AndroidManifest.xml:22:5-24:47
-30        android:name="com.videomaster.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
-30-->[androidx.core:core:1.9.0] C:\Users\JG\.gradle\caches\transforms-3\761d68ccdd62ecb8703967694e2fec50\transformed\core-1.9.0\AndroidManifest.xml:23:9-81
-31        android:protectionLevel="signature" />
-31-->[androidx.core:core:1.9.0] C:\Users\JG\.gradle\caches\transforms-3\761d68ccdd62ecb8703967694e2fec50\transformed\core-1.9.0\AndroidManifest.xml:24:9-44
-32
-33    <uses-permission android:name="com.videomaster.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
-33-->[androidx.core:core:1.9.0] C:\Users\JG\.gradle\caches\transforms-3\761d68ccdd62ecb8703967694e2fec50\transformed\core-1.9.0\AndroidManifest.xml:26:5-97
-33-->[androidx.core:core:1.9.0] C:\Users\JG\.gradle\caches\transforms-3\761d68ccdd62ecb8703967694e2fec50\transformed\core-1.9.0\AndroidManifest.xml:26:22-94
-34
-35    <application
-35-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:17:5-65:19
-36        android:allowBackup="false"
-36-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:18:9-36
-37        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
-37-->[androidx.core:core:1.9.0] C:\Users\JG\.gradle\caches\transforms-3\761d68ccdd62ecb8703967694e2fec50\transformed\core-1.9.0\AndroidManifest.xml:28:18-86
-38        android:debuggable="true"
-39        android:extractNativeLibs="false"
-40        android:icon="@mipmap/ic_launcher"
-40-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:19:9-43
-41        android:label="@string/app_name"
-41-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:20:9-41
-42        android:networkSecurityConfig="@xml/network_security_config"
-42-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:25:9-69
-43        android:roundIcon="@mipmap/ic_launcher_round"
-43-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:21:9-54
-44        android:supportsRtl="true"
-44-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:22:9-35
-45        android:theme="@style/Theme.VideoMaster"
-45-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:23:9-49
-46        android:usesCleartextTraffic="false" >
-46-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:24:9-45
-47
-48        <!-- Main activity: video library -->
-49        <activity
-49-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:28:9-43:20
-50            android:name="com.videomaster.app.MainActivity"
-50-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:29:13-41
-51            android:exported="true"
-51-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:30:13-36
-52            android:screenOrientation="portrait"
-52-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:31:13-49
-53            android:windowSoftInputMode="adjustResize" >
-53-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:32:13-55
-54            <intent-filter>
-54-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:33:13-36:29
-55                <action android:name="android.intent.action.MAIN" />
-55-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:34:17-69
-55-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:34:25-66
-56
-57                <category android:name="android.intent.category.LAUNCHER" />
-57-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:35:17-77
-57-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:35:27-74
-58            </intent-filter>
-59            <!-- Allow opening video files from other apps -->
-60            <intent-filter>
-60-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:38:13-42:29
-61                <action android:name="android.intent.action.VIEW" />
-61-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:39:17-69
-61-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:39:25-66
-62
-63                <category android:name="android.intent.category.DEFAULT" />
-63-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:40:17-76
-63-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:40:27-73
-64
-65                <data android:mimeType="video/*" />
-65-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:41:17-52
-65-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:41:23-49
-66            </intent-filter>
-67        </activity>
-68
-69        <!-- Player activity -->
-70        <activity
-70-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:46:9-52:46
-71            android:name="com.videomaster.app.PlayerActivity"
-71-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:47:13-43
-72            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboardHidden"
-72-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:49:13-106
-73            android:exported="false"
-73-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:48:13-37
-74            android:launchMode="singleTop"
-74-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:52:13-43
-75            android:screenOrientation="sensor"
-75-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:50:13-47
-76            android:windowSoftInputMode="adjustNothing" />
-76-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:51:13-56
-77
-78        <!-- FileProvider for subtitle export -->
-79        <provider
-80            android:name="androidx.core.content.FileProvider"
-80-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:56:13-62
-81            android:authorities="com.videomaster.app.fileprovider"
-81-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:57:13-64
-82            android:exported="false"
-82-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:58:13-37
-83            android:grantUriPermissions="true" >
-83-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:59:13-47
-84            <meta-data
-84-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:60:13-62:54
-85                android:name="android.support.FILE_PROVIDER_PATHS"
-85-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:61:17-67
-86                android:resource="@xml/file_paths" />
-86-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:62:17-51
-87        </provider>
-88        <provider
-88-->[androidx.emoji2:emoji2:1.2.0] C:\Users\JG\.gradle\caches\transforms-3\cd0e31776a03b70e2d22563fb2144838\transformed\jetified-emoji2-1.2.0\AndroidManifest.xml:24:9-32:20
-89            android:name="androidx.startup.InitializationProvider"
-89-->[androidx.emoji2:emoji2:1.2.0] C:\Users\JG\.gradle\caches\transforms-3\cd0e31776a03b70e2d22563fb2144838\transformed\jetified-emoji2-1.2.0\AndroidManifest.xml:25:13-67
-90            android:authorities="com.videomaster.app.androidx-startup"
-90-->[androidx.emoji2:emoji2:1.2.0] C:\Users\JG\.gradle\caches\transforms-3\cd0e31776a03b70e2d22563fb2144838\transformed\jetified-emoji2-1.2.0\AndroidManifest.xml:26:13-68
-91            android:exported="false" >
-91-->[androidx.emoji2:emoji2:1.2.0] C:\Users\JG\.gradle\caches\transforms-3\cd0e31776a03b70e2d22563fb2144838\transformed\jetified-emoji2-1.2.0\AndroidManifest.xml:27:13-37
-92            <meta-data
-92-->[androidx.emoji2:emoji2:1.2.0] C:\Users\JG\.gradle\caches\transforms-3\cd0e31776a03b70e2d22563fb2144838\transformed\jetified-emoji2-1.2.0\AndroidManifest.xml:29:13-31:52
-93                android:name="androidx.emoji2.text.EmojiCompatInitializer"
-93-->[androidx.emoji2:emoji2:1.2.0] C:\Users\JG\.gradle\caches\transforms-3\cd0e31776a03b70e2d22563fb2144838\transformed\jetified-emoji2-1.2.0\AndroidManifest.xml:30:17-75
-94                android:value="androidx.startup" />
-94-->[androidx.emoji2:emoji2:1.2.0] C:\Users\JG\.gradle\caches\transforms-3\cd0e31776a03b70e2d22563fb2144838\transformed\jetified-emoji2-1.2.0\AndroidManifest.xml:31:17-49
-95            <meta-data
-95-->[androidx.lifecycle:lifecycle-process:2.7.0] C:\Users\JG\.gradle\caches\transforms-3\68f59f0bf725c68febd88c73ab24c7a7\transformed\jetified-lifecycle-process-2.7.0\AndroidManifest.xml:29:13-31:52
-96                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
-96-->[androidx.lifecycle:lifecycle-process:2.7.0] C:\Users\JG\.gradle\caches\transforms-3\68f59f0bf725c68febd88c73ab24c7a7\transformed\jetified-lifecycle-process-2.7.0\AndroidManifest.xml:30:17-78
-97                android:value="androidx.startup" />
-97-->[androidx.lifecycle:lifecycle-process:2.7.0] C:\Users\JG\.gradle\caches\transforms-3\68f59f0bf725c68febd88c73ab24c7a7\transformed\jetified-lifecycle-process-2.7.0\AndroidManifest.xml:31:17-49
-98            <meta-data
-98-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\JG\.gradle\caches\transforms-3\e4974d1565457fa4eab9bb90b299f5b8\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:29:13-31:52
-99                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
-99-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\JG\.gradle\caches\transforms-3\e4974d1565457fa4eab9bb90b299f5b8\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:30:17-85
-100                android:value="androidx.startup" />
-100-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\JG\.gradle\caches\transforms-3\e4974d1565457fa4eab9bb90b299f5b8\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:31:17-49
-101        </provider>
-102
-103        <receiver
-103-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\JG\.gradle\caches\transforms-3\e4974d1565457fa4eab9bb90b299f5b8\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:34:9-52:20
-104            android:name="androidx.profileinstaller.ProfileInstallReceiver"
-104-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\JG\.gradle\caches\transforms-3\e4974d1565457fa4eab9bb90b299f5b8\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:35:13-76
-105            android:directBootAware="false"
-105-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\JG\.gradle\caches\transforms-3\e4974d1565457fa4eab9bb90b299f5b8\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:36:13-44
-106            android:enabled="true"
-106-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\JG\.gradle\caches\transforms-3\e4974d1565457fa4eab9bb90b299f5b8\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:37:13-35
-107            android:exported="true"
-107-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\JG\.gradle\caches\transforms-3\e4974d1565457fa4eab9bb90b299f5b8\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:38:13-36
-108            android:permission="android.permission.DUMP" >
-108-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\JG\.gradle\caches\transforms-3\e4974d1565457fa4eab9bb90b299f5b8\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:39:13-57
-109            <intent-filter>
-109-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\JG\.gradle\caches\transforms-3\e4974d1565457fa4eab9bb90b299f5b8\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:40:13-42:29
-110                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
-110-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\JG\.gradle\caches\transforms-3\e4974d1565457fa4eab9bb90b299f5b8\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:41:17-91
-110-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\JG\.gradle\caches\transforms-3\e4974d1565457fa4eab9bb90b299f5b8\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:41:25-88
-111            </intent-filter>
-112            <intent-filter>
-112-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\JG\.gradle\caches\transforms-3\e4974d1565457fa4eab9bb90b299f5b8\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:43:13-45:29
-113                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
-113-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\JG\.gradle\caches\transforms-3\e4974d1565457fa4eab9bb90b299f5b8\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:44:17-85
-113-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\JG\.gradle\caches\transforms-3\e4974d1565457fa4eab9bb90b299f5b8\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:44:25-82
-114            </intent-filter>
-115            <intent-filter>
-115-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\JG\.gradle\caches\transforms-3\e4974d1565457fa4eab9bb90b299f5b8\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:46:13-48:29
-116                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
-116-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\JG\.gradle\caches\transforms-3\e4974d1565457fa4eab9bb90b299f5b8\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:47:17-88
-116-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\JG\.gradle\caches\transforms-3\e4974d1565457fa4eab9bb90b299f5b8\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:47:25-85
-117            </intent-filter>
-118            <intent-filter>
-118-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\JG\.gradle\caches\transforms-3\e4974d1565457fa4eab9bb90b299f5b8\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:49:13-51:29
-119                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
-119-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\JG\.gradle\caches\transforms-3\e4974d1565457fa4eab9bb90b299f5b8\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:50:17-95
-119-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\JG\.gradle\caches\transforms-3\e4974d1565457fa4eab9bb90b299f5b8\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:50:25-92
-120            </intent-filter>
-121        </receiver>
-122    </application>
-123
-124</manifest>
+24    <uses-permission
+24-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:13:5-14:38
+25        android:name="android.permission.READ_MEDIA_AUDIO"
+25-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:13:22-72
+26        android:minSdkVersion="33" />
+26-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:14:9-35
+27
+28    <!-- Keep screen on during playback -->
+29    <uses-permission android:name="android.permission.WAKE_LOCK" />
+29-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:17:5-68
+29-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:17:22-65
+30    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+30-->[androidx.media3:media3-exoplayer:1.3.0] C:\Users\JG\.gradle\caches\transforms-3\a1bc3d3a2337c5672bbe53acbdb1a47d\transformed\jetified-media3-exoplayer-1.3.0\AndroidManifest.xml:22:5-79
+30-->[androidx.media3:media3-exoplayer:1.3.0] C:\Users\JG\.gradle\caches\transforms-3\a1bc3d3a2337c5672bbe53acbdb1a47d\transformed\jetified-media3-exoplayer-1.3.0\AndroidManifest.xml:22:22-76
+31
+32    <permission
+32-->[androidx.core:core:1.9.0] C:\Users\JG\.gradle\caches\transforms-3\761d68ccdd62ecb8703967694e2fec50\transformed\core-1.9.0\AndroidManifest.xml:22:5-24:47
+33        android:name="com.videomaster.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+33-->[androidx.core:core:1.9.0] C:\Users\JG\.gradle\caches\transforms-3\761d68ccdd62ecb8703967694e2fec50\transformed\core-1.9.0\AndroidManifest.xml:23:9-81
+34        android:protectionLevel="signature" />
+34-->[androidx.core:core:1.9.0] C:\Users\JG\.gradle\caches\transforms-3\761d68ccdd62ecb8703967694e2fec50\transformed\core-1.9.0\AndroidManifest.xml:24:9-44
+35
+36    <uses-permission android:name="com.videomaster.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+36-->[androidx.core:core:1.9.0] C:\Users\JG\.gradle\caches\transforms-3\761d68ccdd62ecb8703967694e2fec50\transformed\core-1.9.0\AndroidManifest.xml:26:5-97
+36-->[androidx.core:core:1.9.0] C:\Users\JG\.gradle\caches\transforms-3\761d68ccdd62ecb8703967694e2fec50\transformed\core-1.9.0\AndroidManifest.xml:26:22-94
+37
+38    <application
+38-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:19:5-86:19
+39        android:allowBackup="false"
+39-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:20:9-36
+40        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+40-->[androidx.core:core:1.9.0] C:\Users\JG\.gradle\caches\transforms-3\761d68ccdd62ecb8703967694e2fec50\transformed\core-1.9.0\AndroidManifest.xml:28:18-86
+41        android:debuggable="true"
+42        android:extractNativeLibs="false"
+43        android:icon="@mipmap/ic_launcher"
+43-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:21:9-43
+44        android:label="@string/app_name"
+44-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:22:9-41
+45        android:networkSecurityConfig="@xml/network_security_config"
+45-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:27:9-69
+46        android:roundIcon="@mipmap/ic_launcher_round"
+46-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:23:9-54
+47        android:supportsRtl="true"
+47-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:24:9-35
+48        android:theme="@style/Theme.VideoMaster"
+48-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:25:9-49
+49        android:usesCleartextTraffic="false" >
+49-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:26:9-45
+50
+51        <!-- Main activity: media library with bottom navigation -->
+52        <activity
+52-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:30:9-50:20
+53            android:name="com.videomaster.app.MainActivity"
+53-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:31:13-41
+54            android:exported="true"
+54-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:32:13-36
+55            android:screenOrientation="portrait"
+55-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:33:13-49
+56            android:windowSoftInputMode="adjustResize" >
+56-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:34:13-55
+57            <intent-filter>
+57-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:35:13-38:29
+58                <action android:name="android.intent.action.MAIN" />
+58-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:36:17-69
+58-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:36:25-66
+59
+60                <category android:name="android.intent.category.LAUNCHER" />
+60-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:37:17-77
+60-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:37:27-74
+61            </intent-filter>
+62            <!-- Allow opening video/audio from other apps -->
+63            <intent-filter>
+63-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:40:13-44:29
+64                <action android:name="android.intent.action.VIEW" />
+64-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:41:17-69
+64-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:41:25-66
+65
+66                <category android:name="android.intent.category.DEFAULT" />
+66-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:42:17-76
+66-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:42:27-73
+67
+68                <data android:mimeType="video/*" />
+68-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:43:17-52
+68-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:43:23-49
+69            </intent-filter>
+70            <intent-filter>
+70-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:45:13-49:29
+71                <action android:name="android.intent.action.VIEW" />
+71-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:41:17-69
+71-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:41:25-66
+72
+73                <category android:name="android.intent.category.DEFAULT" />
+73-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:42:17-76
+73-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:42:27-73
+74
+75                <data android:mimeType="audio/*" />
+75-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:43:17-52
+75-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:43:23-49
+76            </intent-filter>
+77        </activity>
+78
+79        <!-- Player activity -->
+80        <activity
+80-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:53:9-59:46
+81            android:name="com.videomaster.app.PlayerActivity"
+81-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:54:13-43
+82            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboardHidden"
+82-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:56:13-106
+83            android:exported="false"
+83-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:55:13-37
+84            android:launchMode="singleTop"
+84-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:59:13-43
+85            android:screenOrientation="sensor"
+85-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:57:13-47
+86            android:windowSoftInputMode="adjustNothing" />
+86-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:58:13-56
+87
+88        <!-- Playlist management -->
+89        <activity
+89-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:62:9-66:58
+90            android:name="com.videomaster.app.playlist.PlaylistActivity"
+90-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:63:13-54
+91            android:exported="false"
+91-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:64:13-37
+92            android:screenOrientation="portrait"
+92-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:65:13-49
+93            android:windowSoftInputMode="adjustResize" />
+93-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:66:13-55
+94
+95        <!-- Playlist detail (items within a playlist) -->
+96        <activity
+96-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:69:9-73:58
+97            android:name="com.videomaster.app.playlist.PlaylistDetailActivity"
+97-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:70:13-60
+98            android:exported="false"
+98-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:71:13-37
+99            android:screenOrientation="portrait"
+99-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:72:13-49
+100            android:windowSoftInputMode="adjustResize" />
+100-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:73:13-55
+101
+102        <!-- FileProvider for subtitle export -->
+103        <provider
+104            android:name="androidx.core.content.FileProvider"
+104-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:77:13-62
+105            android:authorities="com.videomaster.app.fileprovider"
+105-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:78:13-64
+106            android:exported="false"
+106-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:79:13-37
+107            android:grantUriPermissions="true" >
+107-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:80:13-47
+108            <meta-data
+108-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:81:13-83:54
+109                android:name="android.support.FILE_PROVIDER_PATHS"
+109-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:82:17-67
+110                android:resource="@xml/file_paths" />
+110-->E:\local_lib\coding\video\app\src\main\AndroidManifest.xml:83:17-51
+111        </provider>
+112        <provider
+112-->[androidx.emoji2:emoji2:1.2.0] C:\Users\JG\.gradle\caches\transforms-3\cd0e31776a03b70e2d22563fb2144838\transformed\jetified-emoji2-1.2.0\AndroidManifest.xml:24:9-32:20
+113            android:name="androidx.startup.InitializationProvider"
+113-->[androidx.emoji2:emoji2:1.2.0] C:\Users\JG\.gradle\caches\transforms-3\cd0e31776a03b70e2d22563fb2144838\transformed\jetified-emoji2-1.2.0\AndroidManifest.xml:25:13-67
+114            android:authorities="com.videomaster.app.androidx-startup"
+114-->[androidx.emoji2:emoji2:1.2.0] C:\Users\JG\.gradle\caches\transforms-3\cd0e31776a03b70e2d22563fb2144838\transformed\jetified-emoji2-1.2.0\AndroidManifest.xml:26:13-68
+115            android:exported="false" >
+115-->[androidx.emoji2:emoji2:1.2.0] C:\Users\JG\.gradle\caches\transforms-3\cd0e31776a03b70e2d22563fb2144838\transformed\jetified-emoji2-1.2.0\AndroidManifest.xml:27:13-37
+116            <meta-data
+116-->[androidx.emoji2:emoji2:1.2.0] C:\Users\JG\.gradle\caches\transforms-3\cd0e31776a03b70e2d22563fb2144838\transformed\jetified-emoji2-1.2.0\AndroidManifest.xml:29:13-31:52
+117                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+117-->[androidx.emoji2:emoji2:1.2.0] C:\Users\JG\.gradle\caches\transforms-3\cd0e31776a03b70e2d22563fb2144838\transformed\jetified-emoji2-1.2.0\AndroidManifest.xml:30:17-75
+118                android:value="androidx.startup" />
+118-->[androidx.emoji2:emoji2:1.2.0] C:\Users\JG\.gradle\caches\transforms-3\cd0e31776a03b70e2d22563fb2144838\transformed\jetified-emoji2-1.2.0\AndroidManifest.xml:31:17-49
+119            <meta-data
+119-->[androidx.lifecycle:lifecycle-process:2.7.0] C:\Users\JG\.gradle\caches\transforms-3\68f59f0bf725c68febd88c73ab24c7a7\transformed\jetified-lifecycle-process-2.7.0\AndroidManifest.xml:29:13-31:52
+120                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+120-->[androidx.lifecycle:lifecycle-process:2.7.0] C:\Users\JG\.gradle\caches\transforms-3\68f59f0bf725c68febd88c73ab24c7a7\transformed\jetified-lifecycle-process-2.7.0\AndroidManifest.xml:30:17-78
+121                android:value="androidx.startup" />
+121-->[androidx.lifecycle:lifecycle-process:2.7.0] C:\Users\JG\.gradle\caches\transforms-3\68f59f0bf725c68febd88c73ab24c7a7\transformed\jetified-lifecycle-process-2.7.0\AndroidManifest.xml:31:17-49
+122            <meta-data
+122-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\JG\.gradle\caches\transforms-3\e4974d1565457fa4eab9bb90b299f5b8\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:29:13-31:52
+123                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
+123-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\JG\.gradle\caches\transforms-3\e4974d1565457fa4eab9bb90b299f5b8\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:30:17-85
+124                android:value="androidx.startup" />
+124-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\JG\.gradle\caches\transforms-3\e4974d1565457fa4eab9bb90b299f5b8\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:31:17-49
+125        </provider>
+126
+127        <receiver
+127-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\JG\.gradle\caches\transforms-3\e4974d1565457fa4eab9bb90b299f5b8\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:34:9-52:20
+128            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+128-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\JG\.gradle\caches\transforms-3\e4974d1565457fa4eab9bb90b299f5b8\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:35:13-76
+129            android:directBootAware="false"
+129-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\JG\.gradle\caches\transforms-3\e4974d1565457fa4eab9bb90b299f5b8\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:36:13-44
+130            android:enabled="true"
+130-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\JG\.gradle\caches\transforms-3\e4974d1565457fa4eab9bb90b299f5b8\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:37:13-35
+131            android:exported="true"
+131-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\JG\.gradle\caches\transforms-3\e4974d1565457fa4eab9bb90b299f5b8\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:38:13-36
+132            android:permission="android.permission.DUMP" >
+132-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\JG\.gradle\caches\transforms-3\e4974d1565457fa4eab9bb90b299f5b8\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:39:13-57
+133            <intent-filter>
+133-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\JG\.gradle\caches\transforms-3\e4974d1565457fa4eab9bb90b299f5b8\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:40:13-42:29
+134                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
+134-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\JG\.gradle\caches\transforms-3\e4974d1565457fa4eab9bb90b299f5b8\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:41:17-91
+134-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\JG\.gradle\caches\transforms-3\e4974d1565457fa4eab9bb90b299f5b8\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:41:25-88
+135            </intent-filter>
+136            <intent-filter>
+136-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\JG\.gradle\caches\transforms-3\e4974d1565457fa4eab9bb90b299f5b8\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:43:13-45:29
+137                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
+137-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\JG\.gradle\caches\transforms-3\e4974d1565457fa4eab9bb90b299f5b8\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:44:17-85
+137-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\JG\.gradle\caches\transforms-3\e4974d1565457fa4eab9bb90b299f5b8\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:44:25-82
+138            </intent-filter>
+139            <intent-filter>
+139-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\JG\.gradle\caches\transforms-3\e4974d1565457fa4eab9bb90b299f5b8\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:46:13-48:29
+140                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
+140-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\JG\.gradle\caches\transforms-3\e4974d1565457fa4eab9bb90b299f5b8\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:47:17-88
+140-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\JG\.gradle\caches\transforms-3\e4974d1565457fa4eab9bb90b299f5b8\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:47:25-85
+141            </intent-filter>
+142            <intent-filter>
+142-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\JG\.gradle\caches\transforms-3\e4974d1565457fa4eab9bb90b299f5b8\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:49:13-51:29
+143                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
+143-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\JG\.gradle\caches\transforms-3\e4974d1565457fa4eab9bb90b299f5b8\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:50:17-95
+143-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\JG\.gradle\caches\transforms-3\e4974d1565457fa4eab9bb90b299f5b8\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:50:25-92
+144            </intent-filter>
+145        </receiver>
+146    </application>
+147
+148</manifest>

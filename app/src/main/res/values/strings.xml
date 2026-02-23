@@ -2,19 +2,34 @@
 <resources>
     <string name="app_name">VideoMaster</string>
 
-    <!-- Main screen -->
-    <string name="library_title">视频库</string>
-    <string name="no_videos">暂无视频\n点击右下角按钮导入</string>
-    <string name="open_video">打开视频</string>
-    <string name="permission_denied">需要存储权限才能读取视频</string>
+    <!-- Main screen tabs -->
+    <string name="library_title">媒体库</string>
+    <string name="tab_library">媒体库</string>
+    <string name="tab_playlist">我的列表</string>
+    <string name="tab_builtin">内置媒体</string>
+    <string name="no_videos">暂无视频/音频\n点击右下角按钮导入</string>
+    <string name="open_video">打开媒体</string>
+    <string name="permission_denied">需要存储权限才能读取媒体文件</string>
+    <string name="builtin_empty">暂无内置媒体\n请在 assets/builtin_media/ 目录放置文件并更新 index.json</string>
 
     <!-- Player -->
-    <string name="error_no_video">无法找到视频文件</string>
+    <string name="error_no_video">无法找到媒体文件</string>
     <string name="error_playback">播放出错</string>
     <string name="speed">播放速度</string>
     <string name="confirm">确认</string>
     <string name="cancel">取消</string>
     <string name="long_press_speed">2.5× 快进中</string>
+
+    <!-- Lock screen -->
+    <string name="btn_lock">锁定屏幕</string>
+    <string name="btn_unlock">解锁屏幕</string>
+    <string name="screen_locked">屏幕已锁定，点击锁图标解锁</string>
+    <string name="screen_unlocked">屏幕已解锁</string>
+
+    <!-- Playlist navigation -->
+    <string name="playlist_end">已是最后一个</string>
+    <string name="playlist_start">已是第一个</string>
+    <string name="playlist_now_playing">正在播放 %1$d / %2$d</string>
 
     <!-- Subtitle -->
     <string name="subtitle">字幕</string>
@@ -28,6 +43,26 @@
     <string name="subtitle_none_to_export">当前没有可导出的字幕</string>
     <string name="subtitle_exported">字幕导出成功</string>
     <string name="subtitle_export_failed">字幕导出失败</string>
+
+    <!-- Playlist management -->
+    <string name="playlist_title">我的播放列表</string>
+    <string name="playlist_empty">暂无列表\n点击右下角 + 创建第一个列表</string>
+    <string name="playlist_detail_empty">列表为空\n点击右下角 + 添加媒体文件</string>
+    <string name="playlist_create">新建列表</string>
+    <string name="playlist_rename">重命名</string>
+    <string name="playlist_delete">删除列表</string>
+    <string name="playlist_delete_confirm">确定要删除列表「%s」吗？</string>
+    <string name="playlist_name_hint">列表名称</string>
+    <string name="playlist_category_hint">分类（可选，如：电影、音乐）</string>
+    <string name="playlist_name_empty">名称不能为空</string>
+    <string name="playlist_item_count">%d 个文件</string>
+    <string name="playlist_add_to">添加到列表</string>
+    <string name="playlist_added">已添加到「%s」</string>
+    <string name="playlist_none_create_first">还没有列表，是否立即创建？</string>
+    <string name="playlist_add_media">添加媒体文件</string>
+    <string name="playlist_play_from_here">从此处开始播放</string>
+    <string name="playlist_remove_item">从列表中移除</string>
+    <string name="btn_add_to_playlist">添加到播放列表</string>
 
     <!-- Accessibility -->
     <string name="btn_play">播放</string>

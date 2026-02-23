@@ -21,6 +21,9 @@
     <uses-permission
         android:name="android.permission.READ_MEDIA_IMAGES"
         android:minSdkVersion="33" />
+    <uses-permission
+        android:name="android.permission.READ_MEDIA_AUDIO"
+        android:minSdkVersion="33" />
 
     <!-- Keep screen on during playback -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
@@ -45,7 +48,7 @@
         android:theme="@style/Theme.VideoMaster"
         android:usesCleartextTraffic="false" >
 
-        <!-- Main activity: video library -->
+        <!-- Main activity: media library with bottom navigation -->
         <activity
             android:name="com.videomaster.app.MainActivity"
             android:exported="true"
@@ -56,13 +59,20 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <!-- Allow opening video files from other apps -->
+            <!-- Allow opening video/audio from other apps -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.DEFAULT" />
 
                 <data android:mimeType="video/*" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:mimeType="audio/*" />
             </intent-filter>
         </activity>
 
@@ -74,6 +84,20 @@
             android:launchMode="singleTop"
             android:screenOrientation="sensor"
             android:windowSoftInputMode="adjustNothing" />
+
+        <!-- Playlist management -->
+        <activity
+            android:name="com.videomaster.app.playlist.PlaylistActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize" />
+
+        <!-- Playlist detail (items within a playlist) -->
+        <activity
+            android:name="com.videomaster.app.playlist.PlaylistDetailActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize" />
 
         <!-- FileProvider for subtitle export -->
         <provider
