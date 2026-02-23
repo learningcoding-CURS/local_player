@@ -46,8 +46,7 @@ public class SubtitleLibraryActivity extends AppCompatActivity {
                     new androidx.activity.result.contract.ActivityResultContracts
                             .StartActivityForResult(), result -> {
                 if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
-                    Uri uri = result.getData().getData();
-                    if (uri != null) addToLibrary(uri);
+                    processPickerResult(result.getData());
                 }
             });
 
@@ -113,16 +112,34 @@ public class SubtitleLibraryActivity extends AppCompatActivity {
                 "text/x-markdown",
                 "application/octet-stream"
         });
+        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
         pickerLauncher.launch(intent);
     }
 
-    private void addToLibrary(Uri uri) {
-        String name = getFileNameFromUri(uri);
-        File saved = libraryManager.importFromUri(this, uri, name);
-        if (saved != null) {
-            Toast.makeText(this, R.string.subtitle_library_imported, Toast.LENGTH_SHORT).show();
+    private void processPickerResult(Intent data) {
+        java.util.List<Uri> uris = new java.util.ArrayList<>();
+        android.content.ClipData clip = data.getClipData();
+        if (clip != null && clip.getItemCount() > 0) {
+            for (int i = 0; i < clip.getItemCount(); i++) {
+                Uri u = clip.getItemAt(i).getUri();
+                if (u != null) uris.add(u);
+            }
+        } else if (data.getData() != null) {
+            uris.add(data.getData());
+        }
+        int success = 0;
+        for (Uri uri : uris) {
+            String name = getFileNameFromUri(uri);
+            File saved = libraryManager.importFromUri(this, uri, name);
+            if (saved != null) success++;
+        }
+        if (success > 0) {
+            String msg = success == 1
+                    ? getString(R.string.subtitle_library_imported)
+                    : getString(R.string.subtitle_library_imported_count, success);
+            Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
             refreshList();
-        } else {
+        } else if (!uris.isEmpty()) {
             Toast.makeText(this, R.string.subtitle_library_import_failed, Toast.LENGTH_SHORT).show();
         }
     }

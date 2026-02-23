@@ -80,7 +80,7 @@
         android:background="@color/overlayBackground"
         android:visibility="visible">
 
-        <!-- Top bar: lock | add-playlist | play-mode | playlist-panel | space | speed | subtitle | rotate -->
+        <!-- Top bar: lock | play-mode | space | speed | playlist-panel | subtitle | subtitle-list | rotate -->
         <LinearLayout
             android:id="@+id/topBar"
             android:layout_width="match_parent"
@@ -101,17 +101,6 @@
                 android:contentDescription="@string/btn_lock"
                 android:layout_marginEnd="4dp" />
 
-            <!-- Add to playlist button -->
-            <ImageButton
-                android:id="@+id/btnAddToPlaylist"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:src="@drawable/ic_playlist"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:tint="@color/controlTint"
-                android:contentDescription="@string/btn_add_to_playlist"
-                android:layout_marginEnd="4dp" />
-
             <!-- Play mode toggle button -->
             <ImageButton
                 android:id="@+id/btnPlayMode"
@@ -121,17 +110,6 @@
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:tint="@color/controlTint"
                 android:contentDescription="@string/btn_play_mode"
-                android:layout_marginEnd="4dp" />
-
-            <!-- In-player playlist panel toggle -->
-            <ImageButton
-                android:id="@+id/btnPlaylistPanel"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:src="@drawable/ic_playlist_panel"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:tint="@color/controlTint"
-                android:contentDescription="@string/btn_playlist_panel"
                 android:layout_marginEnd="4dp" />
 
             <View
@@ -146,11 +124,22 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="1×"
-                android:layout_marginEnd="8dp"
+                android:layout_marginEnd="4dp"
                 android:clickable="true"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground"
                 android:contentDescription="@string/btn_speed" />
+
+            <!-- In-player playlist panel toggle — accent color, next to speed -->
+            <ImageButton
+                android:id="@+id/btnPlaylistPanel"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/ic_playlist_panel"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:tint="@color/colorAccent"
+                android:contentDescription="@string/btn_playlist_panel"
+                android:layout_marginEnd="4dp" />
 
             <!-- Subtitle import/export menu -->
             <ImageButton

@@ -3,11 +3,13 @@ package com.videomaster.app;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.SeekBar;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -41,6 +43,27 @@ public class SettingsActivity extends AppCompatActivity {
     // Subtitle panel
     public static final String PREF_SUBTITLE_PANEL_ALPHA   = "subtitle_panel_alpha";
 
+    // Player control button visibility (boolean)
+    public static final String PREF_BTN_LOCK_VISIBLE     = "btn_lock_visible";
+    public static final String PREF_BTN_PLAYMODE_VISIBLE = "btn_playmode_visible";
+    public static final String PREF_BTN_PLAYLIST_VISIBLE = "btn_playlist_visible";
+    public static final String PREF_BTN_SUBTITLE_VISIBLE = "btn_subtitle_visible";
+    public static final String PREF_BTN_SUBTLIST_VISIBLE = "btn_subtlist_visible";
+    public static final String PREF_BTN_ROTATE_VISIBLE   = "btn_rotate_visible";
+
+    // Player control button colors (string: "white","accent","orange","cyan","green","yellow")
+    public static final String PREF_BTN_LOCK_COLOR      = "btn_lock_color";
+    public static final String PREF_BTN_PLAYMODE_COLOR  = "btn_playmode_color";
+    public static final String PREF_BTN_PLAYLIST_COLOR  = "btn_playlist_color";
+    public static final String PREF_BTN_SUBTITLE_COLOR  = "btn_subtitle_color";
+    public static final String PREF_BTN_SUBTLIST_COLOR  = "btn_subtlist_color";
+    public static final String PREF_BTN_ROTATE_COLOR    = "btn_rotate_color";
+    public static final String PREF_BTN_SEEK_COLOR      = "btn_seek_color";
+    public static final String PREF_BTN_PLAYPAUSE_COLOR = "btn_playpause_color";
+
+    public static final String DEFAULT_BTN_COLOR         = "white";
+    public static final String DEFAULT_PLAYLIST_BTN_COLOR = "accent";
+
     public static final String VIEW_MODE_GRID = "GRID";
     public static final String VIEW_MODE_LIST = "LIST";
 
@@ -55,6 +78,10 @@ public class SettingsActivity extends AppCompatActivity {
     public static final int DEFAULT_SUBTITLE_PANEL_ALPHA   = 60;
 
     static final String DEFAULT_TAB_ORDER = "builtin,library,playlist";
+
+    // Available button color options
+    private static final String[] COLOR_VALUES = {"white","accent","orange","cyan","green","yellow"};
+    private static final int[]    COLOR_INT    = {0xB3FFFFFF,0xFFE94560,0xFFFF9800,0xFF00BCD4,0xFF4CAF50,0xFFFFEB3B};
 
     private String[] tabOrder;
 
@@ -245,6 +272,89 @@ public class SettingsActivity extends AppCompatActivity {
             @Override public void onStopTrackingTouch(SeekBar sb) {}
         });
 
+        // ── 播放控件 visibility + color ───────────────────────────────────────
+        LinearLayout controlsContainer = findViewById(R.id.playerControlsContainer);
+        String[] ctrlPrefsVis   = { PREF_BTN_LOCK_VISIBLE, PREF_BTN_PLAYMODE_VISIBLE,
+                PREF_BTN_PLAYLIST_VISIBLE, PREF_BTN_SUBTITLE_VISIBLE,
+                PREF_BTN_SUBTLIST_VISIBLE, PREF_BTN_ROTATE_VISIBLE,
+                null, null };
+        String[] ctrlPrefsColor = { PREF_BTN_LOCK_COLOR, PREF_BTN_PLAYMODE_COLOR,
+                PREF_BTN_PLAYLIST_COLOR, PREF_BTN_SUBTITLE_COLOR,
+                PREF_BTN_SUBTLIST_COLOR, PREF_BTN_ROTATE_COLOR,
+                PREF_BTN_SEEK_COLOR, PREF_BTN_PLAYPAUSE_COLOR };
+        String[] ctrlDefColor   = { DEFAULT_BTN_COLOR, DEFAULT_BTN_COLOR,
+                DEFAULT_PLAYLIST_BTN_COLOR, DEFAULT_BTN_COLOR,
+                DEFAULT_BTN_COLOR, DEFAULT_BTN_COLOR,
+                DEFAULT_BTN_COLOR, DEFAULT_BTN_COLOR };
+        String[] ctrlLabels     = {
+                getString(R.string.settings_ctrl_lock),
+                getString(R.string.settings_ctrl_playmode),
+                getString(R.string.settings_ctrl_playlist),
+                getString(R.string.settings_ctrl_subtitle),
+                getString(R.string.settings_ctrl_subtlist),
+                getString(R.string.settings_ctrl_rotate),
+                getString(R.string.settings_ctrl_seek),
+                getString(R.string.settings_ctrl_playpause)
+        };
+        Switch[] ctrlSwitches = new Switch[ctrlPrefsVis.length];
+        RadioGroup[] ctrlColorGroups = new RadioGroup[ctrlPrefsColor.length];
+
+        int dp4 = dp(4);
+        for (int i = 0; i < ctrlLabels.length; i++) {
+            // Row container
+            LinearLayout row = new LinearLayout(this);
+            row.setOrientation(LinearLayout.VERTICAL);
+            row.setPadding(0, dp4, 0, dp4);
+
+            // Top line: label + optional switch
+            LinearLayout topLine = new LinearLayout(this);
+            topLine.setOrientation(LinearLayout.HORIZONTAL);
+            topLine.setGravity(android.view.Gravity.CENTER_VERTICAL);
+
+            TextView tvLabel = new TextView(this);
+            tvLabel.setText(ctrlLabels[i]);
+            tvLabel.setTextColor(getResources().getColor(R.color.textPrimary, null));
+            tvLabel.setTextSize(14f);
+            LinearLayout.LayoutParams lp =
+                    new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
+            tvLabel.setLayoutParams(lp);
+            topLine.addView(tvLabel);
+
+            if (ctrlPrefsVis[i] != null) {
+                Switch sw = new Switch(this);
+                sw.setChecked(prefs.getBoolean(ctrlPrefsVis[i], true));
+                ctrlSwitches[i] = sw;
+                topLine.addView(sw);
+            }
+            row.addView(topLine);
+
+            // Color picker row
+            RadioGroup rgColor = new RadioGroup(this);
+            rgColor.setOrientation(RadioGroup.HORIZONTAL);
+            String[] colorLabels = { "白", "红", "橙", "青", "绿", "黄" };
+            String savedColor = prefs.getString(ctrlPrefsColor[i], ctrlDefColor[i]);
+            for (int c = 0; c < COLOR_VALUES.length; c++) {
+                RadioButton rbColor = makeColorRadioButton(colorLabels[c], COLOR_INT[c]);
+                rbColor.setChecked(COLOR_VALUES[c].equals(savedColor));
+                rgColor.addView(rbColor);
+            }
+            ctrlColorGroups[i] = rgColor;
+            row.addView(rgColor);
+
+            controlsContainer.addView(row);
+
+            // Divider between controls (not after last)
+            if (i < ctrlLabels.length - 1) {
+                View div = new View(this);
+                div.setBackgroundColor(getResources().getColor(R.color.divider, null));
+                LinearLayout.LayoutParams divLp = new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT, 1);
+                divLp.setMargins(0, dp4, 0, dp4);
+                div.setLayoutParams(divLp);
+                controlsContainer.addView(div);
+            }
+        }
+
         // ── Save button ───────────────────────────────────────────────────────
         Button btnSave = findViewById(R.id.btnSaveSettings);
         btnSave.setOnClickListener(v -> {
@@ -286,7 +396,7 @@ public class SettingsActivity extends AppCompatActivity {
             int newProgAlpha     = sbProgAlpha.getProgress() + 10;
             int newPanelAlpha    = sbPanelAlpha.getProgress();
 
-            prefs.edit()
+            SharedPreferences.Editor editor = prefs.edit()
                     .putString(PREF_DEFAULT_TAB, newDefault)
                     .putString(PREF_TAB_ORDER, orderSb.toString())
                     .putString(PREF_VIEW_MODE, newViewMode)
@@ -299,8 +409,22 @@ public class SettingsActivity extends AppCompatActivity {
                     .putInt(PREF_SEEK_ALPHA, newSeekAlpha)
                     .putInt(PREF_SEEKBAR_HEIGHT, newSeekbarHeight)
                     .putInt(PREF_SEEKBAR_PROGRESS_ALPHA, newProgAlpha)
-                    .putInt(PREF_SUBTITLE_PANEL_ALPHA, newPanelAlpha)
-                    .apply();
+                    .putInt(PREF_SUBTITLE_PANEL_ALPHA, newPanelAlpha);
+
+            // Save button visibility and color settings
+            for (int i = 0; i < ctrlPrefsVis.length; i++) {
+                if (ctrlPrefsVis[i] != null && ctrlSwitches[i] != null) {
+                    editor.putBoolean(ctrlPrefsVis[i], ctrlSwitches[i].isChecked());
+                }
+                if (ctrlColorGroups[i] != null) {
+                    int checkedId = ctrlColorGroups[i].getCheckedRadioButtonId();
+                    RadioButton rb = ctrlColorGroups[i].findViewById(checkedId);
+                    if (rb != null && rb.getTag() instanceof String) {
+                        editor.putString(ctrlPrefsColor[i], (String) rb.getTag());
+                    }
+                }
+            }
+            editor.apply();
 
             Toast.makeText(this, R.string.settings_applied, Toast.LENGTH_SHORT).show();
             setResult(RESULT_OK);
@@ -372,6 +496,24 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     // ── Helpers ──────────────────────────────────────────────────────────────
+
+    private RadioButton makeColorRadioButton(String label, int colorInt) {
+        RadioButton rb = new RadioButton(this);
+        rb.setId(android.view.View.generateViewId());
+        rb.setText(label);
+        rb.setTextColor(colorInt);
+        rb.setButtonTintList(android.content.res.ColorStateList.valueOf(colorInt));
+        int dp4 = dp(4);
+        rb.setPadding(dp4, dp4, dp4, dp4);
+        // Store color value as tag for retrieval during save
+        for (int i = 0; i < COLOR_INT.length; i++) {
+            if (COLOR_INT[i] == colorInt) {
+                rb.setTag(COLOR_VALUES[i]);
+                break;
+            }
+        }
+        return rb;
+    }
 
     private RadioButton makeRadioButton(String label) {
         RadioButton rb = new RadioButton(this);

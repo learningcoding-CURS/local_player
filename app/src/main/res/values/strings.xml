@@ -121,6 +121,7 @@
     <string name="subtitle_library_empty">暂无字幕文件\n点击右下角 + 添加字幕</string>
     <string name="subtitle_add_to_library">添加字幕到库</string>
     <string name="subtitle_library_imported">已添加到字幕库</string>
+    <string name="subtitle_library_imported_count">已添加 %d 个字幕文件</string>
     <string name="subtitle_library_import_failed">添加失败，请检查文件格式</string>
     <string name="subtitle_library_rename">重命名</string>
     <string name="subtitle_library_rename_failed">重命名失败</string>
@@ -136,6 +137,23 @@
     <string name="settings_seekbar_height">进度条粗细：%ddp</string>
     <string name="settings_seekbar_progress_alpha">已播放透明度：%d%%</string>
     <string name="settings_subtitle_panel_alpha">字幕面板透明度：%d%%</string>
+
+    <!-- Custom thumbnail -->
+    <string name="custom_thumb_set">设置自定义缩略图</string>
+    <string name="custom_thumb_clear">清除自定义缩略图</string>
+    <string name="custom_thumb_saved">缩略图已更新</string>
+    <string name="custom_thumb_failed">缩略图设置失败</string>
+
+    <!-- Player controls settings -->
+    <string name="settings_section_player_controls">播放控件（显隐 · 颜色）</string>
+    <string name="settings_ctrl_lock">锁屏按钮</string>
+    <string name="settings_ctrl_playmode">播放模式</string>
+    <string name="settings_ctrl_playlist">播放列表面板</string>
+    <string name="settings_ctrl_subtitle">字幕按钮</string>
+    <string name="settings_ctrl_subtlist">字幕列表</string>
+    <string name="settings_ctrl_rotate">旋转按钮</string>
+    <string name="settings_ctrl_seek">跳转按钮（前进/后退）</string>
+    <string name="settings_ctrl_playpause">播放/暂停按钮</string>
 
     <!-- Accessibility -->
     <string name="btn_play">播放</string>

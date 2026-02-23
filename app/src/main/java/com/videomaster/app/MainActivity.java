@@ -116,6 +116,19 @@ public class MainActivity extends AppCompatActivity {
                 applyViewMode();
             });
 
+    // URI string of the playlist item whose thumbnail is being set
+    private String pendingCustomThumbUri = null;
+
+    private final ActivityResultLauncher<Intent> thumbnailPickerLauncher =
+            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+                if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null
+                        && pendingCustomThumbUri != null) {
+                    Uri imageUri = result.getData().getData();
+                    if (imageUri != null) saveCustomThumbnail(pendingCustomThumbUri, imageUri);
+                    pendingCustomThumbUri = null;
+                }
+            });
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -137,7 +150,7 @@ public class MainActivity extends AppCompatActivity {
         loadingView  = findViewById(R.id.loadingView);
         fabOpen      = findViewById(R.id.fabOpen);
         fabOpen.setOnClickListener(v -> pickVideoFile());
-        adapter = new VideoAdapter(videoList, item -> openPlayer(item.getUri()));
+        adapter = new VideoAdapter(videoList, item -> openPlayerWithList(item, videoList));
         recyclerView.setAdapter(adapter);
 
         // Built-in tab
@@ -507,17 +520,24 @@ public class MainActivity extends AppCompatActivity {
         }
 
         playlistItemAdapter = new VideoAdapter(currentListItems, item -> {
-            int idx = currentListItems.indexOf(item);
-            if (idx < 0) return;
+            // Build a snapshot of the current list to avoid index drift issues
             ArrayList<String> uriStrs = new ArrayList<>();
             for (VideoItem vi : currentListItems) uriStrs.add(vi.getUri().toString());
+            int idx = uriStrs.indexOf(item.getUri().toString());
+            if (idx < 0) return;
             Intent intent = new Intent(this, PlayerActivity.class);
             intent.putExtra(PlayerActivity.EXTRA_VIDEO_URI, uriStrs.get(idx));
             intent.putStringArrayListExtra(PlayerActivity.EXTRA_PLAYLIST_URIS, uriStrs);
             intent.putExtra(PlayerActivity.EXTRA_PLAYLIST_INDEX, idx);
             intent.putExtra(PlayerActivity.EXTRA_PLAYLIST_ID, list.getId());
-            startActivity(intent);
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            try {
+                startActivity(intent);
+            } catch (Exception e) {
+                Toast.makeText(this, R.string.error_no_video, Toast.LENGTH_SHORT).show();
+            }
         });
+        playlistItemAdapter.setOnItemLongClickListener(this::showPlaylistItemOptions);
         playlistItemAdapter.setViewMode(isGrid ? VideoAdapter.ViewMode.GRID : VideoAdapter.ViewMode.LIST);
         recyclerPlaylistItems.setLayoutManager(new GridLayoutManager(this, spanCount));
         recyclerPlaylistItems.setAdapter(playlistItemAdapter);
@@ -663,6 +683,70 @@ public class MainActivity extends AppCompatActivity {
         intent.putStringArrayListExtra(PlayerActivity.EXTRA_PLAYLIST_URIS, uris);
         intent.putExtra(PlayerActivity.EXTRA_PLAYLIST_INDEX, Math.max(0, idx));
         startActivity(intent);
+    }
+
+    // ── Custom thumbnail ───────────────────────────────────────────────────
+
+    private void pickCustomThumbnail(String mediaUriStr) {
+        pendingCustomThumbUri = mediaUriStr;
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("image/*");
+        thumbnailPickerLauncher.launch(intent);
+    }
+
+    private void saveCustomThumbnail(String mediaUriStr, Uri imageUri) {
+        try {
+            java.io.File thumbDir = new java.io.File(getFilesDir(), "thumbs");
+            if (!thumbDir.exists()) thumbDir.mkdirs();
+            // Use a hash of the URI as filename to avoid path collisions
+            String hash = String.valueOf(Math.abs(mediaUriStr.hashCode()));
+            java.io.File destFile = new java.io.File(thumbDir, hash + ".jpg");
+
+            // Copy the selected image to internal storage
+            try (java.io.InputStream in = getContentResolver().openInputStream(imageUri);
+                 java.io.FileOutputStream out = new java.io.FileOutputStream(destFile)) {
+                if (in == null) return;
+                android.graphics.Bitmap bmp = android.graphics.BitmapFactory.decodeStream(in);
+                if (bmp != null) {
+                    bmp.compress(android.graphics.Bitmap.CompressFormat.JPEG, 90, out);
+                }
+            }
+
+            // Persist the mapping
+            getSharedPreferences("custom_thumbnails", MODE_PRIVATE)
+                    .edit().putString(mediaUriStr, destFile.getAbsolutePath()).apply();
+
+            // Refresh the adapter so the new thumbnail shows
+            if (currentOpenList != null) refreshPlaylistDetail(currentOpenList);
+            Toast.makeText(this, R.string.custom_thumb_saved, Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            Toast.makeText(this, R.string.custom_thumb_failed, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void showPlaylistItemOptions(VideoItem item) {
+        String uriStr = item.getUri().toString();
+        String[] opts = {
+                getString(R.string.custom_thumb_set),
+                getString(R.string.custom_thumb_clear),
+                getString(R.string.playlist_remove_item)
+        };
+        new AlertDialog.Builder(this, R.style.DarkDialog)
+                .setTitle(item.getTitle())
+                .setItems(opts, (d, which) -> {
+                    if (which == 0) {
+                        pickCustomThumbnail(uriStr);
+                    } else if (which == 1) {
+                        getSharedPreferences("custom_thumbnails", MODE_PRIVATE)
+                                .edit().remove(uriStr).apply();
+                        if (currentOpenList != null) refreshPlaylistDetail(currentOpenList);
+                    } else if (which == 2 && currentOpenList != null) {
+                        mediaListManager.removeItemFromList(currentOpenList.getId(), uriStr);
+                        refreshPlaylistDetail(currentOpenList);
+                    }
+                })
+                .show();
     }
 
     private int dp(int dpVal) {

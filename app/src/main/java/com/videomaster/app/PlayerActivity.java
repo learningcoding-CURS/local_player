@@ -107,7 +107,6 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
     private ImageButton   btnRotate;
     private ImageButton   btnLock;
     private ImageButton   btnUnlock;
-    private ImageButton   btnAddToPlaylist;
     private ImageButton   btnPlayMode;
     private ImageButton   btnPlaylistPanel;
     private ImageButton   btnClosePanel;
@@ -309,7 +308,6 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
         btnRotate           = findViewById(R.id.btnRotate);
         btnLock             = findViewById(R.id.btnLock);
         btnUnlock           = findViewById(R.id.btnUnlock);
-        btnAddToPlaylist    = findViewById(R.id.btnAddToPlaylist);
         btnPlayMode         = findViewById(R.id.btnPlayMode);
         btnPlaylistPanel    = findViewById(R.id.btnPlaylistPanel);
         btnClosePanel       = findViewById(R.id.btnClosePanel);
@@ -370,6 +368,80 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
         int panelAlpha = prefs.getInt(SettingsActivity.PREF_SUBTITLE_PANEL_ALPHA,
                 SettingsActivity.DEFAULT_SUBTITLE_PANEL_ALPHA);
         applySubtitlePanelAlpha(panelAlpha);
+
+        // ── Player control buttons visibility & color ─────────────────────
+        applyButtonSettings(btnLock,
+                SettingsActivity.PREF_BTN_LOCK_VISIBLE,
+                SettingsActivity.PREF_BTN_LOCK_COLOR,
+                SettingsActivity.DEFAULT_BTN_COLOR, prefs);
+        applyButtonSettings(btnPlayMode,
+                SettingsActivity.PREF_BTN_PLAYMODE_VISIBLE,
+                SettingsActivity.PREF_BTN_PLAYMODE_COLOR,
+                SettingsActivity.DEFAULT_BTN_COLOR, prefs);
+        applyButtonSettings(btnPlaylistPanel,
+                SettingsActivity.PREF_BTN_PLAYLIST_VISIBLE,
+                SettingsActivity.PREF_BTN_PLAYLIST_COLOR,
+                SettingsActivity.DEFAULT_PLAYLIST_BTN_COLOR, prefs);
+        applyButtonSettings(btnSubtitle,
+                SettingsActivity.PREF_BTN_SUBTITLE_VISIBLE,
+                SettingsActivity.PREF_BTN_SUBTITLE_COLOR,
+                SettingsActivity.DEFAULT_BTN_COLOR, prefs);
+        applyButtonSettings(btnSubtitleList,
+                SettingsActivity.PREF_BTN_SUBTLIST_VISIBLE,
+                SettingsActivity.PREF_BTN_SUBTLIST_COLOR,
+                SettingsActivity.DEFAULT_BTN_COLOR, prefs);
+        applyButtonSettings(btnRotate,
+                SettingsActivity.PREF_BTN_ROTATE_VISIBLE,
+                SettingsActivity.PREF_BTN_ROTATE_COLOR,
+                SettingsActivity.DEFAULT_BTN_COLOR, prefs);
+        applyButtonColor(btnRewind,
+                SettingsActivity.PREF_BTN_SEEK_COLOR,
+                SettingsActivity.DEFAULT_BTN_COLOR, prefs);
+        applyButtonColor(btnForward,
+                SettingsActivity.PREF_BTN_SEEK_COLOR,
+                SettingsActivity.DEFAULT_BTN_COLOR, prefs);
+        applyButtonColor(btnPlayPause,
+                SettingsActivity.PREF_BTN_PLAYPAUSE_COLOR,
+                SettingsActivity.DEFAULT_BTN_COLOR, prefs);
+    }
+
+    /**
+     * Applies visibility and tint color to an ImageButton from SharedPreferences.
+     * If the button is the playlistPanel button, visibility may be overridden later
+     * by setupPlaylistPanel() based on whether a playlist is available.
+     */
+    private void applyButtonSettings(ImageButton btn, String visiblePrefKey,
+                                     String colorPrefKey, String defaultColor,
+                                     SharedPreferences prefs) {
+        if (btn == null) return;
+        boolean visible = prefs.getBoolean(visiblePrefKey, true);
+        // For playlist panel, only hide if setting says hide AND we haven't set it based on playlist
+        if (visiblePrefKey.equals(SettingsActivity.PREF_BTN_PLAYLIST_VISIBLE)) {
+            if (!visible) btn.setVisibility(View.GONE);
+            // If visible, setupPlaylistPanel() will control final visibility
+        } else {
+            btn.setVisibility(visible ? View.VISIBLE : View.GONE);
+        }
+        applyButtonColor(btn, colorPrefKey, defaultColor, prefs);
+    }
+
+    private void applyButtonColor(ImageButton btn, String colorPrefKey,
+                                  String defaultColor, SharedPreferences prefs) {
+        if (btn == null) return;
+        String color = prefs.getString(colorPrefKey, defaultColor);
+        btn.setImageTintList(android.content.res.ColorStateList.valueOf(resolveButtonColor(color)));
+    }
+
+    private int resolveButtonColor(String color) {
+        if (color == null) return 0xB3FFFFFF;
+        switch (color) {
+            case "accent":  return 0xFFE94560;
+            case "orange":  return 0xFFFF9800;
+            case "cyan":    return 0xFF00BCD4;
+            case "green":   return 0xFF4CAF50;
+            case "yellow":  return 0xFFFFEB3B;
+            default:        return 0xB3FFFFFF; // white 70%
+        }
     }
 
     private void applySeekbarStyle(int trackHeightDp, int progressAlphaPct) {
@@ -518,7 +590,6 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
         tvSpeed.setOnClickListener(v -> showSpeedMenu());
         btnLock.setOnClickListener(v -> lockScreen());
         btnUnlock.setOnClickListener(v -> unlockScreen());
-        btnAddToPlaylist.setOnClickListener(v -> showAddToPlaylistMenu());
 
         btnPlayMode.setOnClickListener(v -> cyclePlayMode());
         btnPlaylistPanel.setOnClickListener(v -> togglePlaylistPanel());
@@ -558,7 +629,10 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
             btnPlaylistPanel.setVisibility(View.GONE);
             return;
         }
-        btnPlaylistPanel.setVisibility(View.VISIBLE);
+        // Respect user visibility setting
+        SharedPreferences prefs = getSharedPreferences(SettingsActivity.PREFS_NAME, MODE_PRIVATE);
+        boolean showPanel = prefs.getBoolean(SettingsActivity.PREF_BTN_PLAYLIST_VISIBLE, true);
+        btnPlaylistPanel.setVisibility(showPanel ? View.VISIBLE : View.GONE);
         rvPlaylistPanel.setLayoutManager(new LinearLayoutManager(this));
         panelAdapter = new PlayerPlaylistAdapter(playlistUris, playlistIndex,
                 index -> {
@@ -918,68 +992,6 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
         brightnessIndicator.setVisibility(View.VISIBLE);
         uiHandler.removeCallbacks(hideBrightnessRunnable);
         uiHandler.postDelayed(hideBrightnessRunnable, INDICATOR_HIDE_DELAY);
-    }
-
-    // ── Add to playlist ────────────────────────────────────────────────────
-
-    private void showAddToPlaylistMenu() {
-        java.util.List<com.videomaster.app.model.MediaList> lists = mediaListManager.getLists();
-        if (lists.isEmpty()) {
-            new AlertDialog.Builder(this, R.style.DarkDialog)
-                    .setTitle(R.string.playlist_add_to)
-                    .setMessage(R.string.playlist_none_create_first)
-                    .setPositiveButton(R.string.playlist_create,
-                            (d, w) -> showCreatePlaylistAndAdd())
-                    .setNegativeButton(R.string.cancel, null)
-                    .show();
-            return;
-        }
-
-        String[] names = new String[lists.size()];
-        for (int i = 0; i < lists.size(); i++) names[i] = lists.get(i).getName();
-
-        new AlertDialog.Builder(this, R.style.DarkDialog)
-                .setTitle(R.string.playlist_add_to)
-                .setItems(names, (d, which) -> {
-                    String uriStr = getCurrentUri();
-                    if (uriStr != null) {
-                        mediaListManager.addItemToList(lists.get(which).getId(), uriStr);
-                        Toast.makeText(this,
-                                getString(R.string.playlist_added, lists.get(which).getName()),
-                                Toast.LENGTH_SHORT).show();
-                    }
-                })
-                .setNeutralButton(R.string.playlist_create,
-                        (d, w) -> showCreatePlaylistAndAdd())
-                .show();
-    }
-
-    private void showCreatePlaylistAndAdd() {
-        android.widget.EditText input = new android.widget.EditText(this);
-        input.setHint(R.string.playlist_name_hint);
-        input.setTextColor(getResources().getColor(R.color.textPrimary, null));
-        int pad = (int) (16 * getResources().getDisplayMetrics().density);
-        input.setPadding(pad, pad / 2, pad, pad / 2);
-
-        new AlertDialog.Builder(this, R.style.DarkDialog)
-                .setTitle(R.string.playlist_create)
-                .setView(input)
-                .setPositiveButton(R.string.confirm, (d, w) -> {
-                    String name = input.getText().toString().trim();
-                    if (!name.isEmpty()) {
-                        com.videomaster.app.model.MediaList list =
-                                mediaListManager.createList(name, "");
-                        String uriStr = getCurrentUri();
-                        if (uriStr != null) {
-                            mediaListManager.addItemToList(list.getId(), uriStr);
-                            Toast.makeText(this,
-                                    getString(R.string.playlist_added, name),
-                                    Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                })
-                .setNegativeButton(R.string.cancel, null)
-                .show();
     }
 
     // ── Controls visibility ────────────────────────────────────────────────

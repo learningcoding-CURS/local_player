@@ -34,11 +34,16 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
         void onItemClick(VideoItem item);
     }
 
+    public interface OnItemLongClickListener {
+        void onItemLongClick(VideoItem item);
+    }
+
     private static final int TYPE_GRID = 0;
     private static final int TYPE_LIST = 1;
 
     private final List<VideoItem>     items;
     private final OnItemClickListener listener;
+    private OnItemLongClickListener   longClickListener;
     private ViewMode viewMode = ViewMode.GRID;
 
     // Thumbnail cache (URI string → Bitmap)
@@ -49,6 +54,10 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
     public VideoAdapter(List<VideoItem> items, OnItemClickListener listener) {
         this.items    = items;
         this.listener = listener;
+    }
+
+    public void setOnItemLongClickListener(OnItemLongClickListener l) {
+        this.longClickListener = l;
     }
 
     public void setViewMode(ViewMode mode) {
@@ -80,6 +89,12 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
         holder.tvDuration.setText(TimeUtils.formatDuration(item.getDurationMs()));
         holder.tvSize.setText(FileUtils.formatSize(item.getFileSizeBytes()));
         holder.itemView.setOnClickListener(v -> listener.onItemClick(item));
+        if (longClickListener != null) {
+            final OnItemLongClickListener lcl = longClickListener;
+            holder.itemView.setOnLongClickListener(v -> { lcl.onItemLongClick(item); return true; });
+        } else {
+            holder.itemView.setOnLongClickListener(null);
+        }
 
         // Load thumbnail
         loadThumbnail(holder, item);
@@ -122,8 +137,18 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
         try {
             Uri uri = item.getUri();
             String mime = item.getMimeType();
+
+            // Check for custom thumbnail override first
+            android.content.SharedPreferences thumbPrefs =
+                    context.getSharedPreferences("custom_thumbnails", Context.MODE_PRIVATE);
+            String customPath = thumbPrefs.getString(uri.toString(), null);
+            if (customPath != null) {
+                Bitmap custom = android.graphics.BitmapFactory.decodeFile(customPath);
+                if (custom != null) return custom;
+            }
+
             if (mime != null && mime.startsWith("audio/")) {
-                // Audio: try to extract embedded album art
+                // Audio: try to extract embedded album art via MediaMetadataRetriever
                 android.media.MediaMetadataRetriever mmr = new android.media.MediaMetadataRetriever();
                 try {
                     mmr.setDataSource(context, uri);
@@ -135,13 +160,38 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
                     mmr.release();
                 }
             } else {
-                // Video: use ContentResolver.loadThumbnail (API 29+)
-                return context.getContentResolver().loadThumbnail(uri, new Size(200, 200), null);
+                // Video: try ContentResolver first (fast, works for MediaStore URIs)
+                try {
+                    return context.getContentResolver().loadThumbnail(uri, new Size(200, 200), null);
+                } catch (Exception ignored) {
+                    // Falls through to MediaMetadataRetriever fallback
+                }
+                // Fallback: MediaMetadataRetriever (works for SAF document content:// URIs)
+                android.media.MediaMetadataRetriever mmr = new android.media.MediaMetadataRetriever();
+                try {
+                    mmr.setDataSource(context, uri);
+                    Bitmap frame = mmr.getFrameAtTime(
+                            0, android.media.MediaMetadataRetriever.OPTION_CLOSEST_SYNC);
+                    if (frame != null) {
+                        int w = frame.getWidth();
+                        int h = frame.getHeight();
+                        int targetW = 200;
+                        int targetH = (w > 0) ? (int)(200f * h / w) : 200;
+                        return Bitmap.createScaledBitmap(frame, targetW, Math.max(1, targetH), true);
+                    }
+                } finally {
+                    mmr.release();
+                }
             }
         } catch (Exception e) {
             // Thumbnail not available — use fallback icon
         }
         return null;
+    }
+
+    /** Allow external code to inject a custom thumbnail path for a URI. */
+    public void setCustomThumbnail(String uriString, String filePath) {
+        thumbCache.remove(uriString); // Invalidate cache so next bind reloads
     }
 
     private void showThumbnail(@NonNull VideoViewHolder holder, Bitmap bmp) {

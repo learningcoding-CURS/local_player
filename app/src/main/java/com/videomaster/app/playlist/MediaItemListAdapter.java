@@ -69,9 +69,17 @@ public class MediaItemListAdapter extends RecyclerView.Adapter<MediaItemListAdap
             h.tvProgress.setVisibility(View.GONE);
         }
 
-        h.itemView.setOnClickListener(v -> listener.onItemClick(position, uriStr));
+        h.itemView.setOnClickListener(v -> {
+            int pos = h.getAdapterPosition();
+            if (pos != androidx.recyclerview.widget.RecyclerView.NO_ID && pos < uriStrings.size()) {
+                listener.onItemClick(pos, uriStrings.get(pos));
+            }
+        });
         h.itemView.setOnLongClickListener(v -> {
-            listener.onItemLongClick(position, uriStr);
+            int pos = h.getAdapterPosition();
+            if (pos != androidx.recyclerview.widget.RecyclerView.NO_ID && pos < uriStrings.size()) {
+                listener.onItemLongClick(pos, uriStrings.get(pos));
+            }
             return true;
         });
     }
