@@ -209,6 +209,9 @@
     <string name="settings_playpause_btn_size">按钮大小：%ddp</string>
     <string name="settings_playpause_btn_alpha">按钮透明度：%d%%</string>
     <string name="settings_playpause_btn_offset">按钮上下偏移：%ddp</string>
+    <string name="settings_longpress_hint_visible">长按 2.5× 提示显示</string>
+    <string name="settings_longpress_hint_color">长按提示颜色</string>
+    <string name="settings_longpress_hint_alpha">长按提示透明度：%d%%</string>
 
     <!-- Accessibility -->
     <string name="btn_play">播放</string>

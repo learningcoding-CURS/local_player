@@ -92,6 +92,12 @@ public class SettingsActivity extends AppCompatActivity {
     public static final String PREF_BTN_ROTATE_VISIBLE          = "btn_rotate_visible";
     public static final String PREF_BTN_SPEED_VISIBLE          = "btn_speed_visible";
 
+    // Long-press 2.5× hint (center "2.5× 快进中" indicator)
+    public static final String PREF_LONGPRESS_HINT_VISIBLE     = "longpress_hint_visible";
+    public static final String PREF_LONGPRESS_HINT_COLOR       = "longpress_hint_color";
+    public static final String PREF_LONGPRESS_HINT_ALPHA       = "longpress_hint_alpha";
+    public static final int    DEFAULT_LONGPRESS_HINT_ALPHA    = 100;
+
     // Skip buttons (prev/next video)
     public static final String PREF_BTN_SKIP_VISIBLE         = "btn_skip_visible";
     public static final String PREF_BTN_SKIP_COLOR           = "btn_skip_color";
@@ -541,17 +547,20 @@ public class SettingsActivity extends AppCompatActivity {
             View sectionSkip      = findViewById(R.id.sectionSkip);
             View sectionPlayPause = findViewById(R.id.sectionPlayPause);
             View sectionProgress  = findViewById(R.id.sectionProgress);
+            View sectionLongPress = findViewById(R.id.sectionLongPress);
 
             TextView tabSeek      = findViewById(R.id.tabSeek);
             TextView tabSkip      = findViewById(R.id.tabSkip);
             TextView tabPlayPause = findViewById(R.id.tabPlayPause);
             TextView tabProgress  = findViewById(R.id.tabProgress);
+            TextView tabLongPress = findViewById(R.id.tabLongPress);
 
             View.OnClickListener tabToggle = v -> {
                 View section;
                 if (v == tabSeek)           section = sectionSeek;
                 else if (v == tabSkip)      section = sectionSkip;
                 else if (v == tabPlayPause) section = sectionPlayPause;
+                else if (v == tabLongPress) section = sectionLongPress;
                 else                        section = sectionProgress;
 
                 boolean wasVisible = section.getVisibility() == View.VISIBLE;
@@ -565,6 +574,46 @@ public class SettingsActivity extends AppCompatActivity {
             tabSkip.setOnClickListener(tabToggle);
             tabPlayPause.setOnClickListener(tabToggle);
             tabProgress.setOnClickListener(tabToggle);
+            tabLongPress.setOnClickListener(tabToggle);
+        }
+
+        // ── 长按 2.5× 提示（显隐、颜色、透明度）──────────────────────────────────
+        {
+            boolean savedLongPressVisible = prefs.getBoolean(PREF_LONGPRESS_HINT_VISIBLE, true);
+            String  savedLongPressColor  = prefs.getString(PREF_LONGPRESS_HINT_COLOR, DEFAULT_BTN_COLOR);
+            int     savedLongPressAlpha  = prefs.getInt(PREF_LONGPRESS_HINT_ALPHA, DEFAULT_LONGPRESS_HINT_ALPHA);
+            savedLongPressAlpha = Math.max(10, Math.min(100, savedLongPressAlpha));
+
+            Switch swLongPressVisible = findViewById(R.id.swLongPressHintVisible);
+            View   swatchLongPress    = findViewById(R.id.swatchLongPressHintColor);
+            SeekBar sbLongPressAlpha = findViewById(R.id.sbLongPressHintAlpha);
+            TextView tvLongPressAlphaLabel = findViewById(R.id.tvLongPressHintAlphaLabel);
+
+            if (swLongPressVisible != null) {
+                swLongPressVisible.setChecked(savedLongPressVisible);
+                swLongPressVisible.setOnCheckedChangeListener((b, checked) ->
+                        prefs.edit().putBoolean(PREF_LONGPRESS_HINT_VISIBLE, checked).apply());
+            }
+            if (swatchLongPress != null) {
+                updateSwatchColor(swatchLongPress, savedLongPressColor);
+                swatchLongPress.setClickable(true);
+                swatchLongPress.setFocusable(true);
+                swatchLongPress.setOnClickListener(v -> showLongPressHintColorPicker(swatchLongPress));
+            }
+            if (sbLongPressAlpha != null && tvLongPressAlphaLabel != null) {
+                sbLongPressAlpha.setMax(90);  // 10–100%
+                sbLongPressAlpha.setProgress(savedLongPressAlpha - 10);
+                tvLongPressAlphaLabel.setText(getString(R.string.settings_longpress_hint_alpha, savedLongPressAlpha));
+                sbLongPressAlpha.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                    @Override public void onProgressChanged(SeekBar sb, int p, boolean user) {
+                        tvLongPressAlphaLabel.setText(getString(R.string.settings_longpress_hint_alpha, p + 10));
+                    }
+                    @Override public void onStartTrackingTouch(SeekBar sb) {}
+                    @Override public void onStopTrackingTouch(SeekBar sb) {
+                        prefs.edit().putInt(PREF_LONGPRESS_HINT_ALPHA, sb.getProgress() + 10).apply();
+                    }
+                });
+            }
         }
 
         // ── 跳转按钮大小 ──────────────────────────────────────────────────────
@@ -1130,6 +1179,45 @@ public class SettingsActivity extends AppCompatActivity {
             if (COLOR_VALUES[i].equals(color)) return COLOR_INT[i];
         }
         return COLOR_INT[0];
+    }
+
+    private void showLongPressHintColorPicker(View swatchView) {
+        String savedColor = prefs.getString(PREF_LONGPRESS_HINT_COLOR, DEFAULT_BTN_COLOR);
+        LinearLayout colorRow = new LinearLayout(this);
+        colorRow.setOrientation(LinearLayout.HORIZONTAL);
+        colorRow.setGravity(android.view.Gravity.CENTER);
+        int dp8 = dp(8);
+        colorRow.setPadding(dp8, dp8, dp8, dp8);
+        int circleSize = dp(40);
+        for (int c = 0; c < COLOR_VALUES.length; c++) {
+            View circle = new View(this);
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(circleSize, circleSize);
+            lp.setMargins(dp(6), dp(6), dp(6), dp(6));
+            circle.setLayoutParams(lp);
+            GradientDrawable gd = new GradientDrawable();
+            gd.setShape(GradientDrawable.OVAL);
+            gd.setColor(COLOR_INT[c]);
+            if (COLOR_VALUES[c].equals(savedColor)) gd.setStroke(dp(3), 0xFFFFFFFF);
+            circle.setBackground(gd);
+            circle.setClickable(true);
+            circle.setFocusable(true);
+            colorRow.addView(circle);
+        }
+        AlertDialog dialog = new AlertDialog.Builder(this, R.style.DarkDialog)
+                .setTitle("选择颜色")
+                .setView(colorRow)
+                .setNegativeButton(R.string.cancel, null)
+                .create();
+        final AlertDialog[] holder = {dialog};
+        for (int c = 0; c < colorRow.getChildCount(); c++) {
+            final int ci = c;
+            colorRow.getChildAt(c).setOnClickListener(v -> {
+                prefs.edit().putString(PREF_LONGPRESS_HINT_COLOR, COLOR_VALUES[ci]).apply();
+                updateSwatchColor(swatchView, COLOR_VALUES[ci]);
+                holder[0].dismiss();
+            });
+        }
+        dialog.show();
     }
 
     // ── Tab order drag rows ──────────────────────────────────────────────────

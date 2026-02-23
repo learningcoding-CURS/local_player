@@ -275,6 +275,18 @@
                     android:textColor="@color/textPrimary"
                     android:textSize="12sp"
                     android:gravity="center"
+                    android:background="@drawable/bg_speed_badge"
+                    android:layout_marginEnd="4dp" />
+
+                <TextView
+                    android:id="@+id/tabLongPress"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="36dp"
+                    android:text="长按"
+                    android:textColor="@color/textPrimary"
+                    android:textSize="12sp"
+                    android:gravity="center"
                     android:background="@drawable/bg_speed_badge" />
 
             </LinearLayout>
@@ -349,6 +361,26 @@
 
                 <TextView android:id="@+id/tvSeekbarProgressAlphaLabel" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/textSecondary" android:textSize="13sp" android:paddingTop="4dp" android:paddingBottom="2dp" />
                 <SeekBar android:id="@+id/sbSeekbarProgressAlpha" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="90" android:progressTint="@color/colorAccent" android:thumbTint="@color/colorAccent" android:layout_marginBottom="6dp" />
+            </LinearLayout>
+
+            <!-- ── 长按 2.5× 提示（可折叠） ── -->
+            <LinearLayout
+                android:id="@+id/sectionLongPress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:paddingTop="4dp" android:paddingBottom="4dp">
+                    <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="@string/settings_longpress_hint_visible" android:textColor="@color/textPrimary" android:textSize="14sp" />
+                    <Switch android:id="@+id/swLongPressHintVisible" android:layout_width="wrap_content" android:layout_height="wrap_content" android:thumbTint="@color/colorAccent" android:trackTint="@color/colorAccentLight" />
+                </LinearLayout>
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:paddingTop="4dp" android:paddingBottom="4dp">
+                    <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="@string/settings_longpress_hint_color" android:textColor="@color/textPrimary" android:textSize="14sp" />
+                    <View android:id="@+id/swatchLongPressHintColor" android:layout_width="24dp" android:layout_height="24dp" android:background="@drawable/bg_speed_badge" android:clickable="true" android:focusable="true" />
+                </LinearLayout>
+                <TextView android:id="@+id/tvLongPressHintAlphaLabel" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="长按提示透明度：100%" android:textColor="@color/textSecondary" android:textSize="13sp" android:paddingTop="4dp" android:paddingBottom="2dp" />
+                <SeekBar android:id="@+id/sbLongPressHintAlpha" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="90" android:progressTint="@color/colorAccent" android:thumbTint="@color/colorAccent" android:layout_marginBottom="6dp" />
             </LinearLayout>
 
             <View

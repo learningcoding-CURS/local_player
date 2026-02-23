@@ -549,6 +549,7 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
                 SettingsActivity.PREF_BTN_SPEED_VISIBLE,
                 SettingsActivity.PREF_BTN_SPEED_COLOR,
                 SettingsActivity.DEFAULT_BTN_COLOR, prefs);
+        applyLongPressHintSettings(tvLongPressHint, prefs);
         applyButtonSettings(btnRewind,
                 SettingsActivity.PREF_BTN_SEEK_VISIBLE,
                 SettingsActivity.PREF_BTN_SEEK_COLOR,
@@ -870,6 +871,18 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
         tv.setTextColor(resolveButtonColor(color));
     }
 
+    /** Applies color and alpha to the long-press 2.5× hint. Visibility is checked when showing. */
+    private void applyLongPressHintSettings(TextView tv, SharedPreferences prefs) {
+        if (tv == null) return;
+        String color = prefs.getString(SettingsActivity.PREF_LONGPRESS_HINT_COLOR,
+                SettingsActivity.DEFAULT_BTN_COLOR);
+        int alphaPct = prefs.getInt(SettingsActivity.PREF_LONGPRESS_HINT_ALPHA,
+                SettingsActivity.DEFAULT_LONGPRESS_HINT_ALPHA);
+        alphaPct = Math.max(10, Math.min(100, alphaPct));
+        tv.setTextColor(resolveButtonColor(color));
+        tv.setAlpha(alphaPct / 100f);
+    }
+
     private int resolveButtonColor(String color) {
         if (color == null) return 0xB3FFFFFF;
         switch (color) {
@@ -967,7 +980,11 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
             @Override public void onLongPressStart() {
                 if (!isLocked) {
                     playerManager.activateLongPressSpeed();
-                    tvLongPressHint.setVisibility(View.VISIBLE);
+                    if (tvLongPressHint != null) {
+                        boolean showHint = getSharedPreferences(SettingsActivity.PREFS_NAME, MODE_PRIVATE)
+                                .getBoolean(SettingsActivity.PREF_LONGPRESS_HINT_VISIBLE, true);
+                        tvLongPressHint.setVisibility(showHint ? View.VISIBLE : View.GONE);
+                    }
                     uiHandler.removeCallbacks(hideControlsRunnable);
                 }
             }
