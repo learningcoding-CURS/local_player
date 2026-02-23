@@ -5,21 +5,48 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:gravity="center_vertical"
-    android:paddingStart="12dp"
     android:paddingEnd="12dp"
-    android:paddingTop="10dp"
-    android:paddingBottom="10dp"
+    android:paddingTop="6dp"
+    android:paddingBottom="6dp"
     android:background="@drawable/selector_panel_item">
 
-    <!-- Index number -->
-    <TextView
-        android:id="@+id/tvPanelItemIndex"
-        android:layout_width="24dp"
-        android:layout_height="wrap_content"
-        android:textColor="#88FFFFFF"
-        android:textSize="11sp"
-        android:gravity="center"
-        android:fontFamily="monospace" />
+    <!-- Thumbnail with fallback icon overlay -->
+    <FrameLayout
+        android:layout_width="72dp"
+        android:layout_height="52dp"
+        android:background="#1AFFFFFF">
+
+        <ImageView
+            android:id="@+id/imgPanelThumb"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:visibility="gone" />
+
+        <!-- Fallback: music/film icon shown while loading or when no thumb available -->
+        <ImageView
+            android:id="@+id/imgPanelThumbFallback"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_playlist"
+            android:tint="#44FFFFFF" />
+
+        <!-- Index badge (bottom-right corner of thumbnail) -->
+        <TextView
+            android:id="@+id/tvPanelItemIndex"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="2dp"
+            android:textColor="#CCFFFFFF"
+            android:textSize="10sp"
+            android:background="#66000000"
+            android:paddingStart="3dp"
+            android:paddingEnd="3dp"
+            android:fontFamily="monospace" />
+
+    </FrameLayout>
 
     <!-- File name -->
     <TextView
@@ -29,8 +56,9 @@
         android:layout_weight="1"
         android:layout_marginStart="8dp"
         android:textColor="@color/textPrimary"
-        android:textSize="13sp"
+        android:textSize="12sp"
         android:maxLines="2"
-        android:ellipsize="end" />
+        android:ellipsize="end"
+        android:lineSpacingMultiplier="1.2" />
 
 </LinearLayout>

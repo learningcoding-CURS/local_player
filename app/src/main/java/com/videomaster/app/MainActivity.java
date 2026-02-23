@@ -328,11 +328,15 @@ public class MainActivity extends AppCompatActivity {
         if (playlistItemAdapter != null) {
             playlistItemAdapter.setViewMode(isGrid ? VideoAdapter.ViewMode.GRID : VideoAdapter.ViewMode.LIST);
         }
-        if (recyclerPlaylistItems.getLayoutManager() == null || isGrid) {
-            recyclerPlaylistItems.setLayoutManager(new GridLayoutManager(this, spanCount));
-        } else {
-            recyclerPlaylistItems.setLayoutManager(new GridLayoutManager(this, spanCount));
+        recyclerPlaylistItems.setLayoutManager(new GridLayoutManager(this, spanCount));
+
+        // Apply the same mode to the "我的列表" playlist card grid
+        if (playlistAdapter != null) {
+            playlistAdapter.setViewMode(
+                    isGrid ? PlaylistAdapter.ViewMode.GRID : PlaylistAdapter.ViewMode.LIST);
         }
+        recyclerPlaylists.setLayoutManager(
+                isGrid ? new GridLayoutManager(this, 2) : new LinearLayoutManager(this));
 
         invalidateOptionsMenu();
     }
@@ -475,8 +479,11 @@ public class MainActivity extends AppCompatActivity {
                 showPlaylistListOptions(list);
             }
         });
-        // Always use square grid layout for the playlist list
-        playlistAdapter.setViewMode(PlaylistAdapter.ViewMode.GRID);
+        // Use the same view-mode preference as the rest of the app
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        boolean isGrid = SettingsActivity.VIEW_MODE_GRID.equals(
+                prefs.getString(PREF_VIEW_MODE, SettingsActivity.VIEW_MODE_GRID));
+        playlistAdapter.setViewMode(isGrid ? PlaylistAdapter.ViewMode.GRID : PlaylistAdapter.ViewMode.LIST);
     }
 
     private void refreshPlaylistList() {
@@ -484,7 +491,7 @@ public class MainActivity extends AppCompatActivity {
         allLists.addAll(mediaListManager.getLists());
         if (playlistAdapter == null) {
             setupPlaylistAdapter();
-            recyclerPlaylists.setLayoutManager(new GridLayoutManager(this, 2));
+            applyViewMode();
             recyclerPlaylists.setAdapter(playlistAdapter);
         } else {
             playlistAdapter.notifyDataSetChanged();
@@ -599,28 +606,40 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void savePlaylistThumbnail(String listId, Uri imageUri) {
-        try {
-            java.io.File thumbDir = new java.io.File(getFilesDir(), "playlist_thumbs");
-            if (!thumbDir.exists()) thumbDir.mkdirs();
-            String hash = String.valueOf(Math.abs(listId.hashCode()));
-            java.io.File destFile = new java.io.File(thumbDir, hash + ".jpg");
+        java.io.File thumbDir = new java.io.File(getFilesDir(), "playlist_thumbs");
+        if (!thumbDir.exists()) thumbDir.mkdirs();
+        String hash = String.valueOf(Math.abs(listId.hashCode()));
+        java.io.File destFile = new java.io.File(thumbDir, hash + ".jpg");
 
-            try (java.io.InputStream in = getContentResolver().openInputStream(imageUri);
-                 java.io.FileOutputStream out = new java.io.FileOutputStream(destFile)) {
-                if (in == null) return;
-                android.graphics.Bitmap bmp = android.graphics.BitmapFactory.decodeStream(in);
-                if (bmp != null) {
+        // Run I/O on background thread to avoid blocking the UI
+        executor.execute(() -> {
+            try {
+                try (java.io.InputStream in = getContentResolver().openInputStream(imageUri);
+                     java.io.FileOutputStream out = new java.io.FileOutputStream(destFile)) {
+                    if (in == null) {
+                        mainHandler.post(() -> Toast.makeText(this,
+                                R.string.playlist_thumb_failed, Toast.LENGTH_SHORT).show());
+                        return;
+                    }
+                    android.graphics.Bitmap bmp = android.graphics.BitmapFactory.decodeStream(in);
+                    if (bmp == null) {
+                        mainHandler.post(() -> Toast.makeText(this,
+                                R.string.playlist_thumb_failed, Toast.LENGTH_SHORT).show());
+                        return;
+                    }
                     bmp.compress(android.graphics.Bitmap.CompressFormat.JPEG, 90, out);
                 }
+                getSharedPreferences(PLAYLIST_THUMB_PREFS, MODE_PRIVATE)
+                        .edit().putString(listId, destFile.getAbsolutePath()).apply();
+                mainHandler.post(() -> {
+                    refreshPlaylistList();
+                    Toast.makeText(this, R.string.playlist_thumb_saved, Toast.LENGTH_SHORT).show();
+                });
+            } catch (Exception e) {
+                mainHandler.post(() -> Toast.makeText(this,
+                        R.string.playlist_thumb_failed, Toast.LENGTH_SHORT).show());
             }
-            getSharedPreferences(PLAYLIST_THUMB_PREFS, MODE_PRIVATE)
-                    .edit().putString(listId, destFile.getAbsolutePath()).apply();
-
-            refreshPlaylistList();
-            Toast.makeText(this, R.string.playlist_thumb_saved, Toast.LENGTH_SHORT).show();
-        } catch (Exception e) {
-            Toast.makeText(this, R.string.playlist_thumb_failed, Toast.LENGTH_SHORT).show();
-        }
+        });
     }
 
     private void showCreatePlaylistDialog(MediaList existing) {

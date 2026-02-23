@@ -106,6 +106,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.ViewHo
 
         // Load thumbnail for grid cells
         if (h.isGrid && h.ivThumb != null) {
+            h.ivThumb.clearColorFilter();
             h.ivThumb.setImageResource(R.drawable.ic_playlist);
             loadThumbnail(h.itemView.getContext(), list.getId(), h);
         }
@@ -139,6 +140,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.ViewHo
             mainHandler.post(() -> {
                 if (holder.ivThumb == null) return;
                 if (finalBmp != null) {
+                    holder.ivThumb.clearColorFilter();
                     holder.ivThumb.setImageBitmap(finalBmp);
                 } else {
                     holder.ivThumb.setImageResource(R.drawable.ic_playlist);

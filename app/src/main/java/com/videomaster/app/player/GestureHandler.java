@@ -78,7 +78,7 @@ public class GestureHandler implements View.OnTouchListener {
 
     private static final long  DOUBLE_TAP_TIMEOUT_MS  = 300;
     /** Minimum finger travel (px equivalent of dp) to register a media-switch swipe. */
-    private static final float SWITCH_THRESHOLD_DP    = 72f;
+    private static final float SWITCH_THRESHOLD_DP    = 50f;
     /** Brightness sensitivity: fraction of [0,1] per pixel scrolled. */
     private static final float BRIGHTNESS_SENSITIVITY = 0.005f;
 
@@ -218,6 +218,13 @@ public class GestureHandler implements View.OnTouchListener {
                 swipeConsumed = false;
             } else if (action == MotionEvent.ACTION_MOVE && !swipeConsumed && !lpActive) {
                 detectSwipe(ev.getX(), ev.getY(), activityStartX, activityStartY, activityWindowWidth);
+            } else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+                // Ensure lpActive is cleared even if the view-level path missed the UP event
+                if (lpActive) {
+                    lpActive = false;
+                    if (!lpSwiped) listener.onLongPressEnd();
+                    lpSwiped = false;
+                }
             }
         } catch (Exception ignored) {}
     }
@@ -284,13 +291,13 @@ public class GestureHandler implements View.OnTouchListener {
         SwipeDirection dir = isLandscape ? landscapeSwipe : portraitSwipe;
 
         if (dir == SwipeDirection.HORIZONTAL) {
-            if (absDX > absDY * 1.2f && absDX > switchThresholdPx) {
+            if (absDX > absDY && absDX > switchThresholdPx) {
                 swipeConsumed = true;
                 listener.onSwipeMedia(totalDx < 0); // left = next, right = previous
             }
         } else {
             // VERTICAL — right side only (left is reserved for brightness)
-            if (!isLeft && absDY > absDX * 1.2f && absDY > switchThresholdPx) {
+            if (!isLeft && absDY > absDX && absDY > switchThresholdPx) {
                 swipeConsumed = true;
                 listener.onSwipeMedia(totalDy > 0); // down = next, up = previous
             }

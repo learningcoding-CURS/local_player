@@ -263,10 +263,15 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
      * Feed ALL touch events to the gesture handler at the Activity level.
      * This guarantees swipe-to-switch-media works even when the controls overlay
      * is sitting on top of playerView and may intercept touch events first.
+     *
+     * Gesture feed is skipped when either overlay panel is visible so that
+     * scrolling through the subtitle list or playlist panel does not accidentally
+     * trigger a media switch.
      */
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
-        if (!isLocked && gestureHandler != null && ev != null) {
+        if (!isLocked && gestureHandler != null && ev != null
+                && !isSubtitlePanelVisible && !isPanelVisible) {
             float windowW = getWindow().getDecorView().getWidth();
             gestureHandler.feedSwipeEvent(ev, windowW);
         }
@@ -780,19 +785,98 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
         }
     }
 
+    /** Read the user-configured panel slide direction for the current orientation. */
+    private String getPanelDirection() {
+        boolean isLandscape = getResources().getConfiguration().orientation
+                == android.content.res.Configuration.ORIENTATION_LANDSCAPE;
+        SharedPreferences prefs = getSharedPreferences(SettingsActivity.PREFS_NAME, MODE_PRIVATE);
+        String key = isLandscape
+                ? SettingsActivity.PREF_PANEL_DIR_LANDSCAPE
+                : SettingsActivity.PREF_PANEL_DIR_PORTRAIT;
+        return prefs.getString(key, SettingsActivity.PANEL_DIR_RIGHT);
+    }
+
+    /** Pixels per dp, cached lazily. */
+    private float density() {
+        return getResources().getDisplayMetrics().density;
+    }
+
     private void openPlaylistPanel() {
         if (playlistUris == null || playlistUris.isEmpty()) return;
+
+        String dir = getPanelDirection();
+        int sidePx   = (int) (260 * density()); // width for LEFT/RIGHT panels
+        int blockPx  = (int) (300 * density()); // height for TOP/BOTTOM panels
+
+        // Set LayoutParams to position the panel on the correct edge
+        FrameLayout.LayoutParams lp;
+        switch (dir) {
+            case SettingsActivity.PANEL_DIR_LEFT:
+                lp = new FrameLayout.LayoutParams(sidePx, ViewGroup.LayoutParams.MATCH_PARENT,
+                        Gravity.START);
+                break;
+            case SettingsActivity.PANEL_DIR_TOP:
+                lp = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, blockPx,
+                        Gravity.TOP);
+                break;
+            case SettingsActivity.PANEL_DIR_BOTTOM:
+                lp = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, blockPx,
+                        Gravity.BOTTOM);
+                break;
+            default: // RIGHT
+                lp = new FrameLayout.LayoutParams(sidePx, ViewGroup.LayoutParams.MATCH_PARENT,
+                        Gravity.END);
+                break;
+        }
+        playlistPanel.setLayoutParams(lp);
+
+        // Rotate close button arrow to point in the close direction
+        switch (dir) {
+            case SettingsActivity.PANEL_DIR_LEFT:   btnClosePanel.setRotation(180); break;
+            case SettingsActivity.PANEL_DIR_TOP:    btnClosePanel.setRotation(270); break;
+            case SettingsActivity.PANEL_DIR_BOTTOM: btnClosePanel.setRotation(90);  break;
+            default:                                 btnClosePanel.setRotation(0);   break;
+        }
+
+        // Reset any leftover translation from previous open/close
+        playlistPanel.setTranslationX(0);
+        playlistPanel.setTranslationY(0);
+
+        // Animate in from the correct edge using fixed pixel values (avoids getWidth()=0 when GONE)
+        switch (dir) {
+            case SettingsActivity.PANEL_DIR_LEFT:
+                playlistPanel.setTranslationX(-sidePx);
+                break;
+            case SettingsActivity.PANEL_DIR_TOP:
+                playlistPanel.setTranslationY(-blockPx);
+                break;
+            case SettingsActivity.PANEL_DIR_BOTTOM:
+                playlistPanel.setTranslationY(blockPx);
+                break;
+            default: // RIGHT
+                playlistPanel.setTranslationX(sidePx);
+                break;
+        }
         playlistPanel.setVisibility(View.VISIBLE);
-        playlistPanel.setTranslationX(playlistPanel.getWidth());
-        playlistPanel.animate().translationX(0).setDuration(250).start();
+        playlistPanel.animate().translationX(0).translationY(0).setDuration(250).start();
+
         isPanelVisible = true;
         uiHandler.removeCallbacks(hideControlsRunnable);
     }
 
     private void closePlaylistPanel() {
         if (!isPanelVisible) return;
+        String dir = getPanelDirection();
+        float targetX = 0, targetY = 0;
+        switch (dir) {
+            case SettingsActivity.PANEL_DIR_LEFT:   targetX = -playlistPanel.getWidth();  break;
+            case SettingsActivity.PANEL_DIR_TOP:    targetY = -playlistPanel.getHeight(); break;
+            case SettingsActivity.PANEL_DIR_BOTTOM: targetY = playlistPanel.getHeight();  break;
+            default:                                 targetX = playlistPanel.getWidth();   break;
+        }
         playlistPanel.animate()
-                .translationX(playlistPanel.getWidth())
+                .translationX(targetX)
+                .translationY(targetY)
                 .setDuration(200)
                 .withEndAction(() -> {
                     playlistPanel.setVisibility(View.GONE);
@@ -1205,6 +1289,9 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
         runOnUiThread(() -> {
             SubtitleEntry entry = subtitleManager.getSubtitleAt(positionMs);
             subtitleView.setSubtitle(entry != null ? entry.getPlainText() : null);
+            // Enforce user's subtitle visibility choice — SubtitleView.setSubtitle() may call
+            // setVisibility(VISIBLE) internally; re-hide if the user has turned subtitles off.
+            if (!isSubtitleTextVisible) subtitleView.setVisibility(View.GONE);
 
             if (!isDraggingSeekBar) {
                 tvCurrentTime.setText(TimeUtils.formatDuration(positionMs));

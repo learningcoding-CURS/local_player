@@ -128,6 +128,14 @@
     <string name="subtitle_library_delete">删除</string>
     <string name="subtitle_library_delete_confirm">确定要删除「%s」吗？</string>
 
+    <!-- Playlist panel direction -->
+    <string name="settings_panel_dir_portrait">播放列表面板方向（竖屏）</string>
+    <string name="settings_panel_dir_landscape">播放列表面板方向（横屏）</string>
+    <string name="panel_dir_top">从上方滑入</string>
+    <string name="panel_dir_bottom">从下方滑入</string>
+    <string name="panel_dir_left">从左侧滑入</string>
+    <string name="panel_dir_right">从右侧滑入</string>
+
     <!-- Player settings -->
     <string name="settings_section_seek_btn">跳转按钮</string>
     <string name="settings_seek_icon_size">按钮大小：%ddp</string>

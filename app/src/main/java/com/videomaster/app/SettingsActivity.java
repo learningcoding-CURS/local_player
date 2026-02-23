@@ -46,6 +46,15 @@ public class SettingsActivity extends AppCompatActivity {
     // Subtitle panel
     public static final String PREF_SUBTITLE_PANEL_ALPHA   = "subtitle_panel_alpha";
 
+    // Playlist panel slide-in direction
+    public static final String PREF_PANEL_DIR_PORTRAIT  = "panel_dir_portrait";
+    public static final String PREF_PANEL_DIR_LANDSCAPE = "panel_dir_landscape";
+    // Possible values: "TOP" | "BOTTOM" | "LEFT" | "RIGHT"
+    public static final String PANEL_DIR_TOP    = "TOP";
+    public static final String PANEL_DIR_BOTTOM = "BOTTOM";
+    public static final String PANEL_DIR_LEFT   = "LEFT";
+    public static final String PANEL_DIR_RIGHT  = "RIGHT";
+
     // Player control button visibility (boolean)
     public static final String PREF_BTN_LOCK_VISIBLE            = "btn_lock_visible";
     public static final String PREF_BTN_PLAYMODE_VISIBLE        = "btn_playmode_visible";
@@ -119,6 +128,8 @@ public class SettingsActivity extends AppCompatActivity {
         String savedDefault   = prefs.getString(PREF_DEFAULT_TAB, "builtin");
         String savedPortrait  = prefs.getString(PREF_PORTRAIT_SWIPE, "VERTICAL");
         String savedLandscape = prefs.getString(PREF_LANDSCAPE_SWIPE, "HORIZONTAL");
+        String savedPanelDirPortrait  = prefs.getString(PREF_PANEL_DIR_PORTRAIT,  PANEL_DIR_RIGHT);
+        String savedPanelDirLandscape = prefs.getString(PREF_PANEL_DIR_LANDSCAPE, PANEL_DIR_RIGHT);
         String savedViewMode  = prefs.getString(PREF_VIEW_MODE, VIEW_MODE_GRID);
         float  savedSubSize   = prefs.getFloat(PREF_SUBTITLE_SIZE, DEFAULT_SUBTITLE_SIZE);
         float  savedLineSp    = prefs.getFloat(PREF_SUBTITLE_LINE_SP, DEFAULT_SUBTITLE_LINE_SP);
@@ -168,6 +179,26 @@ public class SettingsActivity extends AppCompatActivity {
         RadioButton rbLandV = findViewById(R.id.rbLandscapeVertical);
         rbLandH.setChecked("HORIZONTAL".equals(savedLandscape));
         rbLandV.setChecked("VERTICAL".equals(savedLandscape));
+
+        // ── 播放列表面板方向（竖屏） ────────────────────────────────────────────
+        RadioButton rbPanelPortraitTop    = findViewById(R.id.rbPanelDirPortraitTop);
+        RadioButton rbPanelPortraitBottom = findViewById(R.id.rbPanelDirPortraitBottom);
+        RadioButton rbPanelPortraitLeft   = findViewById(R.id.rbPanelDirPortraitLeft);
+        RadioButton rbPanelPortraitRight  = findViewById(R.id.rbPanelDirPortraitRight);
+        rbPanelPortraitTop.setChecked(PANEL_DIR_TOP.equals(savedPanelDirPortrait));
+        rbPanelPortraitBottom.setChecked(PANEL_DIR_BOTTOM.equals(savedPanelDirPortrait));
+        rbPanelPortraitLeft.setChecked(PANEL_DIR_LEFT.equals(savedPanelDirPortrait));
+        rbPanelPortraitRight.setChecked(PANEL_DIR_RIGHT.equals(savedPanelDirPortrait));
+
+        // ── 播放列表面板方向（横屏） ────────────────────────────────────────────
+        RadioButton rbPanelLandTop    = findViewById(R.id.rbPanelDirLandscapeTop);
+        RadioButton rbPanelLandBottom = findViewById(R.id.rbPanelDirLandscapeBottom);
+        RadioButton rbPanelLandLeft   = findViewById(R.id.rbPanelDirLandscapeLeft);
+        RadioButton rbPanelLandRight  = findViewById(R.id.rbPanelDirLandscapeRight);
+        rbPanelLandTop.setChecked(PANEL_DIR_TOP.equals(savedPanelDirLandscape));
+        rbPanelLandBottom.setChecked(PANEL_DIR_BOTTOM.equals(savedPanelDirLandscape));
+        rbPanelLandLeft.setChecked(PANEL_DIR_LEFT.equals(savedPanelDirLandscape));
+        rbPanelLandRight.setChecked(PANEL_DIR_RIGHT.equals(savedPanelDirLandscape));
 
         // ── 字幕大小 ───────────────────────────────────────────────────────────
         SeekBar sbSubSize = findViewById(R.id.sbSubtitleSize);
@@ -410,6 +441,20 @@ public class SettingsActivity extends AppCompatActivity {
             // Landscape swipe
             String newLandscape = rbLandV.isChecked() ? "VERTICAL" : "HORIZONTAL";
 
+            // Panel direction (portrait)
+            String newPanelDirPortrait;
+            if (rbPanelPortraitTop.isChecked())         newPanelDirPortrait = PANEL_DIR_TOP;
+            else if (rbPanelPortraitBottom.isChecked()) newPanelDirPortrait = PANEL_DIR_BOTTOM;
+            else if (rbPanelPortraitLeft.isChecked())   newPanelDirPortrait = PANEL_DIR_LEFT;
+            else                                         newPanelDirPortrait = PANEL_DIR_RIGHT;
+
+            // Panel direction (landscape)
+            String newPanelDirLandscape;
+            if (rbPanelLandTop.isChecked())         newPanelDirLandscape = PANEL_DIR_TOP;
+            else if (rbPanelLandBottom.isChecked()) newPanelDirLandscape = PANEL_DIR_BOTTOM;
+            else if (rbPanelLandLeft.isChecked())   newPanelDirLandscape = PANEL_DIR_LEFT;
+            else                                     newPanelDirLandscape = PANEL_DIR_RIGHT;
+
             // Tab order
             StringBuilder orderSb = new StringBuilder();
             for (int i = 0; i < tabOrder.length; i++) {
@@ -447,6 +492,8 @@ public class SettingsActivity extends AppCompatActivity {
                     .putString(PREF_VIEW_MODE, newViewMode)
                     .putString(PREF_PORTRAIT_SWIPE, newPortrait)
                     .putString(PREF_LANDSCAPE_SWIPE, newLandscape)
+                    .putString(PREF_PANEL_DIR_PORTRAIT, newPanelDirPortrait)
+                    .putString(PREF_PANEL_DIR_LANDSCAPE, newPanelDirLandscape)
                     .putFloat(PREF_SUBTITLE_SIZE, newSubSize)
                     .putFloat(PREF_SUBTITLE_LINE_SP, newLineSp)
                     .putInt(PREF_SEEK_ICON_SIZE, newSeekIconSize)
