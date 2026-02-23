@@ -183,7 +183,18 @@
                 android:src="@drawable/ic_rotate"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:tint="@color/controlTint"
-                android:contentDescription="@string/btn_rotate" />
+                android:contentDescription="@string/btn_rotate"
+                android:layout_marginEnd="4dp" />
+
+            <!-- Settings -->
+            <ImageButton
+                android:id="@+id/btnPlayerSettings"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/ic_settings"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:tint="@color/controlTint"
+                android:contentDescription="@string/settings_title" />
         </LinearLayout>
 
         <!-- Centre controls: two rows stacked vertically -->
@@ -196,6 +207,7 @@
 
             <!-- Row 1: rewind | play/pause | forward -->
             <LinearLayout
+                android:id="@+id/seekRow"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
@@ -209,6 +221,7 @@
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:tint="@color/controlTint"
                     android:contentDescription="@string/btn_rewind"
+                    android:scaleType="fitCenter"
                     android:padding="10dp" />
 
                 <ImageButton
@@ -231,6 +244,7 @@
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:tint="@color/controlTint"
                     android:contentDescription="@string/btn_forward"
+                    android:scaleType="fitCenter"
                     android:padding="10dp" />
             </LinearLayout>
 
@@ -251,6 +265,7 @@
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:tint="@color/controlTint"
                     android:contentDescription="@string/btn_skip_prev"
+                    android:scaleType="fitCenter"
                     android:padding="10dp"
                     android:layout_marginEnd="24dp" />
 
@@ -262,6 +277,7 @@
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:tint="@color/controlTint"
                     android:contentDescription="@string/btn_skip_next"
+                    android:scaleType="fitCenter"
                     android:padding="10dp"
                     android:layout_marginStart="24dp" />
             </LinearLayout>

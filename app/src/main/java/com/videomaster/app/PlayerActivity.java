@@ -113,6 +113,7 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
     private ImageButton   btnUnlock;
     private ImageButton   btnPlayMode;
     private ImageButton   btnPlaylistPanel;
+    private ImageButton   btnPlayerSettings;
     private ImageButton   btnClosePanel;
     private TextView      tvSpeed;
     private TextView      tvLongPressHint;
@@ -205,6 +206,13 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
                             SubtitleLibraryActivity.EXTRA_SELECTED_PATH);
                     if (path != null) importSubtitleFromFile(new java.io.File(path));
                 }
+            });
+
+    private final androidx.activity.result.ActivityResultLauncher<Intent> settingsLauncher =
+            registerForActivityResult(
+                    new androidx.activity.result.contract.ActivityResultContracts
+                            .StartActivityForResult(), result -> {
+                applyPlayerSettings();
             });
 
     private String pendingExportFormat = "SRT";
@@ -362,6 +370,7 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
         btnSubtitle         = findViewById(R.id.btnSubtitle);
         btnSubtitleToggle   = findViewById(R.id.btnSubtitleToggle);
         btnRotate           = findViewById(R.id.btnRotate);
+        btnPlayerSettings   = findViewById(R.id.btnPlayerSettings);
         btnLock             = findViewById(R.id.btnLock);
         btnUnlock           = findViewById(R.id.btnUnlock);
         btnPlayMode         = findViewById(R.id.btnPlayMode);
@@ -412,6 +421,14 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
 
         btnRewind.setImageAlpha(alphaVal);
         btnForward.setImageAlpha(alphaVal);
+
+        // ── Seek button vertical offset (positive = move up) ──
+        int seekOffsetDp = prefs.getInt(SettingsActivity.PREF_SEEK_OFFSET_Y,
+                SettingsActivity.DEFAULT_SEEK_OFFSET_Y);
+        View seekRow = findViewById(R.id.seekRow);
+        if (seekRow != null) {
+            seekRow.setTranslationY(-dpToPx(seekOffsetDp));
+        }
 
         // ── SeekBar appearance ────────────────────────────────────────────
         int trackHeightDp = prefs.getInt(SettingsActivity.PREF_SEEKBAR_HEIGHT,
@@ -465,6 +482,10 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
                 SettingsActivity.PREF_BTN_ROTATE_VISIBLE,
                 SettingsActivity.PREF_BTN_ROTATE_COLOR,
                 SettingsActivity.DEFAULT_BTN_COLOR, prefs);
+        applyButtonSettings(btnPlayerSettings,
+                SettingsActivity.PREF_BTN_PLAYER_SETTINGS_VISIBLE,
+                SettingsActivity.PREF_BTN_PLAYER_SETTINGS_COLOR,
+                SettingsActivity.DEFAULT_BTN_COLOR, prefs);
         applyButtonSettings(btnRewind,
                 SettingsActivity.PREF_BTN_SEEK_VISIBLE,
                 SettingsActivity.PREF_BTN_SEEK_COLOR,
@@ -473,7 +494,8 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
                 SettingsActivity.PREF_BTN_SEEK_VISIBLE,
                 SettingsActivity.PREF_BTN_SEEK_COLOR,
                 SettingsActivity.DEFAULT_BTN_COLOR, prefs);
-        applyButtonColor(btnPlayPause,
+        applyButtonSettings(btnPlayPause,
+                SettingsActivity.PREF_BTN_PLAYPAUSE_VISIBLE,
                 SettingsActivity.PREF_BTN_PLAYPAUSE_COLOR,
                 SettingsActivity.DEFAULT_BTN_COLOR, prefs);
 
@@ -501,6 +523,21 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
             btnSkipNext.setLayoutParams(sn);
         }
 
+        // ── Skip button alpha ──
+        int skipAlpha = prefs.getInt(SettingsActivity.PREF_SKIP_BTN_ALPHA,
+                SettingsActivity.DEFAULT_SKIP_BTN_ALPHA);
+        float alphaF = skipAlpha / 100f;
+        if (btnSkipPrev != null) btnSkipPrev.setAlpha(alphaF);
+        if (btnSkipNext != null) btnSkipNext.setAlpha(alphaF);
+
+        // ── Skip button vertical offset (positive = move up) ──
+        int skipOffsetDp = prefs.getInt(SettingsActivity.PREF_SKIP_BTN_OFFSET_Y,
+                SettingsActivity.DEFAULT_SKIP_BTN_OFFSET_Y);
+        View skipRow = findViewById(R.id.skipRow);
+        if (skipRow != null) {
+            skipRow.setTranslationY(-dpToPx(skipOffsetDp));
+        }
+
         // ── Button order in top/center bar ────────────────────────────────
         applyButtonOrder(prefs);
     }
@@ -512,6 +549,10 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
     private void applyButtonOrder(SharedPreferences prefs) {
         String topOrder    = prefs.getString(SettingsActivity.PREF_TOP_BTN_ORDER,
                 SettingsActivity.DEFAULT_TOP_BTN_ORDER);
+        if (!topOrder.contains("settings")) {
+            topOrder = topOrder + ",settings";
+            prefs.edit().putString(SettingsActivity.PREF_TOP_BTN_ORDER, topOrder).apply();
+        }
         String centerOrder = prefs.getString(SettingsActivity.PREF_CENTER_BTN_ORDER,
                 SettingsActivity.DEFAULT_CENTER_BTN_ORDER);
 
@@ -539,6 +580,7 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
             topBtnMap.put("subtitle",       btnSubtitle);
             topBtnMap.put("subtitle-list",  btnSubtitleList);
             topBtnMap.put("rotate",         btnRotate);
+            topBtnMap.put("settings",       btnPlayerSettings);
 
             // Remove all top-bar buttons from the layout (keep spacer and tvSpeed)
             for (View v : topBtnMap.values()) {
@@ -794,6 +836,10 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
         btnSkipPrev.setOnClickListener(v -> { playPrevious(); scheduleHideControls(); });
         btnSkipNext.setOnClickListener(v -> { playNext(); scheduleHideControls(); });
         btnRotate.setOnClickListener(v -> toggleOrientation());
+        if (btnPlayerSettings != null) {
+            btnPlayerSettings.setOnClickListener(v ->
+                    settingsLauncher.launch(new Intent(this, SettingsActivity.class)));
+        }
         btnSubtitle.setOnClickListener(v -> handleSubtitleButtonClick());
         if (btnSubtitleToggle != null) {
             btnSubtitleToggle.setOnClickListener(v -> toggleSubtitleTextOnly());

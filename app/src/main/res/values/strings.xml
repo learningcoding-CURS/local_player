@@ -15,6 +15,13 @@
     <string name="stats_clear_title">清除统计</string>
     <string name="stats_clear_message">将删除所有播放时长记录，此操作不可撤销。</string>
     <string name="stats_single_file">单文件播放</string>
+    <string name="stats_export">导出</string>
+    <string name="stats_import">导入</string>
+    <string name="stats_export_success">统计数据已导出</string>
+    <string name="stats_export_failed">导出失败</string>
+    <string name="stats_import_success">已导入 %d 条记录</string>
+    <string name="stats_import_failed">导入失败，请检查文件格式</string>
+    <string name="stats_no_data">暂无数据可导出</string>
     <string name="no_videos">暂无视频/音频\n点击右下角按钮导入</string>
     <string name="open_video">打开媒体</string>
     <string name="permission_denied">需要存储权限才能读取媒体文件</string>
@@ -98,8 +105,12 @@
     <string name="settings_restore_title">恢复设置</string>
     <string name="settings_restore_message">将撤销本次打开设置后的所有修改，恢复为进入前的状态。</string>
     <string name="settings_restored">已恢复为进入前的设置</string>
+    <string name="settings_bg_alpha">设置页背景透明度：%d%%</string>
     <string name="settings_default_tab">默认主界面</string>
-    <string name="settings_tab_order">标签顺序（点击 ↑↓ 调整）</string>
+    <string name="settings_tab_order">底部标签顺序（点击 ↑↓ 调整）</string>
+    <string name="settings_shortcut_order">工具栏按钮排序（点击 ↑↓ 调整）</string>
+    <string name="shortcut_toggle_view">布局切换</string>
+    <string name="shortcut_settings">设置</string>
     <string name="settings_portrait_swipe">竖屏切换媒体手势</string>
     <string name="settings_landscape_swipe">横屏切换媒体手势</string>
     <string name="settings_view_mode">列表显示模式</string>
@@ -153,6 +164,7 @@
     <string name="settings_seek_icon_size">按钮大小：%ddp</string>
     <string name="settings_seek_seconds">跳转时长：%d 秒</string>
     <string name="settings_seek_alpha">按钮透明度：%d%%</string>
+    <string name="settings_seek_offset">按钮上下偏移：%ddp</string>
     <string name="settings_section_seekbar">进度条</string>
     <string name="settings_seekbar_height">进度条粗细：%ddp</string>
     <string name="settings_seekbar_progress_alpha">已播放透明度：%d%%</string>
@@ -173,10 +185,13 @@
     <string name="settings_ctrl_subtitle">字幕按钮</string>
     <string name="settings_ctrl_subtlist">字幕列表</string>
     <string name="settings_ctrl_rotate">旋转按钮</string>
-    <string name="settings_ctrl_seek">跳转按钮（前进/后退）</string>
+    <string name="settings_ctrl_seek">跳转按钮</string>
     <string name="settings_ctrl_playpause">播放/暂停按钮</string>
-    <string name="settings_ctrl_skip">切换按钮（上一个/下一个）</string>
+    <string name="settings_ctrl_skip">切换按钮</string>
+    <string name="settings_ctrl_player_settings">设置按钮</string>
     <string name="settings_skip_btn_size">切换按钮大小：%ddp</string>
+    <string name="settings_skip_btn_alpha">切换按钮透明度：%d%%</string>
+    <string name="settings_skip_btn_offset">切换按钮上下偏移：%ddp</string>
 
     <!-- Accessibility -->
     <string name="btn_play">播放</string>

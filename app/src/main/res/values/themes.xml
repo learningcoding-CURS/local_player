@@ -11,6 +11,11 @@
         <item name="android:textColorPrimary">@color/textPrimary</item>
     </style>
 
+    <style name="Theme.VideoMaster.Translucent" parent="Theme.VideoMaster">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+    </style>
+
     <!-- Dark dialog style used in PlayerActivity -->
     <style name="DarkDialog" parent="Theme.MaterialComponents.Dialog">
         <item name="colorPrimary">@color/colorAccent</item>

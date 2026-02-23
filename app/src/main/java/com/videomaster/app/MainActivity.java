@@ -11,9 +11,9 @@ import android.os.Handler;
 import android.os.Looper;
 import android.provider.MediaStore;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -34,9 +34,11 @@ import com.videomaster.app.model.MediaList;
 import com.videomaster.app.model.VideoItem;
 import com.videomaster.app.playlist.MediaListManager;
 import com.videomaster.app.playlist.PlaylistAdapter;
+import com.videomaster.app.stats.PlayStats;
 import com.videomaster.app.ui.VideoAdapter;
 import com.videomaster.app.util.BuiltinMediaProvider;
 import com.videomaster.app.util.PermissionUtils;
+import com.videomaster.app.util.TimeUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,11 +47,18 @@ import java.util.concurrent.Executors;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String PREFS_NAME           = SettingsActivity.PREFS_NAME;
-    private static final String PREF_DEFAULT_TAB     = SettingsActivity.PREF_DEFAULT_TAB;
-    private static final String PREF_TAB_ORDER       = SettingsActivity.PREF_TAB_ORDER;
-    private static final String PREF_VIEW_MODE       = SettingsActivity.PREF_VIEW_MODE;
-    private static final String DEFAULT_TAB_ORDER    = SettingsActivity.DEFAULT_TAB_ORDER;
+    private static final String PREFS_NAME              = SettingsActivity.PREFS_NAME;
+    private static final String PREF_DEFAULT_TAB        = SettingsActivity.PREF_DEFAULT_TAB;
+    private static final String PREF_TAB_ORDER          = SettingsActivity.PREF_TAB_ORDER;
+    private static final String PREF_VIEW_MODE          = SettingsActivity.PREF_VIEW_MODE;
+    private static final String DEFAULT_TAB_ORDER       = SettingsActivity.DEFAULT_TAB_ORDER;
+    private static final String PREF_HOME_SHORTCUT_ORDER   = SettingsActivity.PREF_HOME_SHORTCUT_ORDER;
+    private static final String DEFAULT_HOME_SHORTCUT_ORDER = SettingsActivity.DEFAULT_HOME_SHORTCUT_ORDER;
+
+    // Toolbar action buttons
+    private LinearLayout toolbarActions;
+    private String activeShortcutId = null;
+    private ImageButton btnToggleView;
 
     // Library tab views
     private RecyclerView  recyclerView;
@@ -84,6 +93,12 @@ public class MainActivity extends AppCompatActivity {
     // Tab containers
     private View          tabLibrary;
     private View          tabBuiltin;
+    private View          tabStats;
+
+    // Stats tab views
+    private RecyclerView  recyclerStats;
+    private TextView      tvStatsEmpty;
+    private TextView      tvStatsSummary;
 
     private BottomNavigationView bottomNav;
     private MediaListManager     mediaListManager;
@@ -120,6 +135,23 @@ public class MainActivity extends AppCompatActivity {
                 applyViewMode();
             });
 
+    // Stats export/import launchers
+    private final ActivityResultLauncher<Intent> statsExportLauncher =
+            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+                if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                    Uri uri = result.getData().getData();
+                    if (uri != null) writeStatsExport(uri);
+                }
+            });
+
+    private final ActivityResultLauncher<Intent> statsImportLauncher =
+            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+                if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                    Uri uri = result.getData().getData();
+                    if (uri != null) readStatsImport(uri);
+                }
+            });
+
     // URI string of the playlist item whose thumbnail is being set
     private String pendingCustomThumbUri = null;
 
@@ -154,10 +186,14 @@ public class MainActivity extends AppCompatActivity {
 
         mediaListManager = MediaListManager.getInstance(this);
 
+        // Toolbar action buttons container
+        toolbarActions = findViewById(R.id.toolbarActions);
+
         // Tab containers
         tabLibrary  = findViewById(R.id.tabLibrary);
         tabBuiltin  = findViewById(R.id.tabBuiltin);
         tabPlaylist = findViewById(R.id.tabPlaylist);
+        tabStats    = findViewById(R.id.tabStats);
 
         // Library tab
         recyclerView = findViewById(R.id.recyclerView);
@@ -173,6 +209,15 @@ public class MainActivity extends AppCompatActivity {
         tvBuiltinEmpty  = findViewById(R.id.tvBuiltinEmpty);
         builtinAdapter  = new VideoAdapter(builtinList, item -> openPlayerWithList(item, builtinList));
         recyclerBuiltin.setAdapter(builtinAdapter);
+
+        // Stats tab (inline)
+        recyclerStats   = findViewById(R.id.recyclerStats);
+        tvStatsEmpty    = findViewById(R.id.tvStatsEmpty);
+        tvStatsSummary  = findViewById(R.id.tvStatsSummary);
+        recyclerStats.setLayoutManager(new LinearLayoutManager(this));
+        findViewById(R.id.btnClearStats).setOnClickListener(v -> confirmClearStats());
+        findViewById(R.id.btnExportStats).setOnClickListener(v -> startStatsExport());
+        findViewById(R.id.btnImportStats).setOnClickListener(v -> startStatsImport());
 
         // Playlist tab (inline)
         playlistListView   = findViewById(R.id.playlistListView);
@@ -196,12 +241,9 @@ public class MainActivity extends AppCompatActivity {
         // Bottom navigation
         bottomNav = findViewById(R.id.bottomNav);
         bottomNav.setOnItemSelectedListener(item -> {
+            highlightToolbarAction(null);
             int id = item.getItemId();
-            if (id == R.id.nav_library) {
-                showTab("library");
-                checkPermissionsAndLoad();
-                return true;
-            } else if (id == R.id.nav_playlist) {
+            if (id == R.id.nav_playlist) {
                 showTab("playlist");
                 refreshPlaylistList();
                 return true;
@@ -209,9 +251,6 @@ public class MainActivity extends AppCompatActivity {
                 showTab("builtin");
                 loadBuiltinMedia();
                 return true;
-            } else if (id == R.id.nav_stats) {
-                startActivity(new Intent(this, com.videomaster.app.stats.StatsActivity.class));
-                return false; // keep current tab highlighted
             }
             return false;
         });
@@ -236,26 +275,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    // ── Toolbar menu ───────────────────────────────────────────────────────
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            settingsLauncher.launch(new Intent(this, SettingsActivity.class));
-            return true;
-        } else if (id == R.id.action_toggle_view) {
-            toggleViewMode();
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
+    // ── Toolbar actions ────────────────────────────────────────────────────
 
     // ── Tab management ─────────────────────────────────────────────────────
 
@@ -264,11 +284,39 @@ public class MainActivity extends AppCompatActivity {
         String orderStr   = prefs.getString(PREF_TAB_ORDER, DEFAULT_TAB_ORDER);
         String defaultTab = prefs.getString(PREF_DEFAULT_TAB, "builtin");
 
+        // Migration: extract stats/library from tab order into shortcut order
+        if (orderStr.contains("stats") || orderStr.contains("library")) {
+            String[] tokens = orderStr.split(",");
+            StringBuilder tabSb = new StringBuilder();
+            StringBuilder shortcutSb = new StringBuilder();
+            for (String t : tokens) {
+                String trimmed = t.trim();
+                if ("library".equals(trimmed) || "stats".equals(trimmed)) {
+                    if (shortcutSb.length() > 0) shortcutSb.append(",");
+                    shortcutSb.append(trimmed);
+                } else {
+                    if (tabSb.length() > 0) tabSb.append(",");
+                    tabSb.append(trimmed);
+                }
+            }
+            orderStr = tabSb.length() > 0 ? tabSb.toString() : DEFAULT_TAB_ORDER;
+            if (!prefs.contains(PREF_HOME_SHORTCUT_ORDER)) {
+                String shortcutStr = shortcutSb.length() > 0 ? shortcutSb.toString() : DEFAULT_HOME_SHORTCUT_ORDER;
+                prefs.edit().putString(PREF_HOME_SHORTCUT_ORDER, shortcutStr).apply();
+            }
+            prefs.edit().putString(PREF_TAB_ORDER, orderStr).apply();
+        }
+
         String[] order = orderStr.split(",");
         rebuildBottomNav(order);
+        setupToolbarActions(prefs);
 
         switch (defaultTab) {
-            case "library":  bottomNav.setSelectedItemId(R.id.nav_library);  break;
+            case "library":
+                showTab("library");
+                checkPermissionsAndLoad();
+                highlightToolbarAction("library");
+                break;
             case "playlist": bottomNav.setSelectedItemId(R.id.nav_playlist); break;
             default:         bottomNav.setSelectedItemId(R.id.nav_builtin);  break;
         }
@@ -277,13 +325,8 @@ public class MainActivity extends AppCompatActivity {
     private void rebuildBottomNav(String[] order) {
         Menu menu = bottomNav.getMenu();
         menu.clear();
-        boolean statsAdded = false;
         for (String tabId : order) {
             switch (tabId.trim()) {
-                case "library":
-                    menu.add(Menu.NONE, R.id.nav_library, Menu.NONE, R.string.tab_library)
-                            .setIcon(R.drawable.ic_home);
-                    break;
                 case "playlist":
                     menu.add(Menu.NONE, R.id.nav_playlist, Menu.NONE, R.string.tab_playlist)
                             .setIcon(R.drawable.ic_playlist);
@@ -292,18 +335,134 @@ public class MainActivity extends AppCompatActivity {
                     menu.add(Menu.NONE, R.id.nav_builtin, Menu.NONE, R.string.tab_builtin)
                             .setIcon(R.drawable.ic_builtin);
                     break;
-                case "stats":
-                    menu.add(Menu.NONE, R.id.nav_stats, Menu.NONE, R.string.tab_stats)
-                            .setIcon(R.drawable.ic_stats);
-                    statsAdded = true;
-                    break;
             }
         }
-        // Ensure stats is always present even if missing from saved order (migration)
-        if (!statsAdded) {
-            menu.add(Menu.NONE, R.id.nav_stats, Menu.NONE, R.string.tab_stats)
-                    .setIcon(R.drawable.ic_stats);
+    }
+
+    // ── Toolbar action buttons ─────────────────────────────────────────────
+
+    private void setupToolbarActions(SharedPreferences prefs) {
+        toolbarActions.removeAllViews();
+        btnToggleView = null;
+        String shortcutStr = prefs.getString(PREF_HOME_SHORTCUT_ORDER, DEFAULT_HOME_SHORTCUT_ORDER);
+        String[] shortcuts = migrateShortcutOrder(shortcutStr, prefs);
+
+        for (String s : shortcuts) {
+            String id = s.trim();
+            if (!isToolbarActionVisible(prefs, id)) continue;
+            ImageButton btn = createToolbarAction(id);
+            if (btn != null) {
+                int size = dp(40);
+                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(size, size);
+                lp.setMarginEnd(dp(2));
+                btn.setLayoutParams(lp);
+                btn.setPadding(dp(8), dp(8), dp(8), dp(8));
+                btn.setScaleType(ImageButton.ScaleType.FIT_CENTER);
+                btn.setBackgroundResource(android.R.drawable.list_selector_background);
+                btn.setTag(id);
+                toolbarActions.addView(btn);
+            }
         }
+        updateToggleViewIcon();
+        highlightToolbarAction(activeShortcutId);
+    }
+
+    private boolean isToolbarActionVisible(SharedPreferences prefs, String id) {
+        switch (id) {
+            case "stats":       return prefs.getBoolean(SettingsActivity.PREF_HOME_BTN_STATS_VISIBLE, true);
+            case "library":     return prefs.getBoolean(SettingsActivity.PREF_HOME_BTN_LIBRARY_VISIBLE, true);
+            case "toggle_view": return prefs.getBoolean(SettingsActivity.PREF_HOME_BTN_TOGGLE_VIEW_VISIBLE, true);
+            default:            return true;
+        }
+    }
+
+    private ImageButton createToolbarAction(String id) {
+        int iconRes;
+        switch (id) {
+            case "library":    iconRes = R.drawable.ic_home;      break;
+            case "stats":      iconRes = R.drawable.ic_stats;     break;
+            case "toggle_view": iconRes = R.drawable.ic_view_list; break;
+            case "settings":   iconRes = R.drawable.ic_settings;  break;
+            default: return null;
+        }
+
+        ImageButton btn = new ImageButton(this);
+        btn.setImageResource(iconRes);
+        btn.setColorFilter(getResources().getColor(R.color.textPrimary, null));
+
+        if ("toggle_view".equals(id)) {
+            btnToggleView = btn;
+        }
+
+        btn.setOnClickListener(v -> onToolbarActionClick(id));
+        return btn;
+    }
+
+    private void onToolbarActionClick(String id) {
+        switch (id) {
+            case "library":
+                showTab("library");
+                checkPermissionsAndLoad();
+                highlightToolbarAction("library");
+                break;
+            case "stats":
+                showTab("stats");
+                loadStats();
+                highlightToolbarAction("stats");
+                break;
+            case "toggle_view":
+                toggleViewMode();
+                break;
+            case "settings":
+                settingsLauncher.launch(new Intent(this, SettingsActivity.class));
+                break;
+        }
+    }
+
+    private void highlightToolbarAction(String activeId) {
+        this.activeShortcutId = activeId;
+        for (int i = 0; i < toolbarActions.getChildCount(); i++) {
+            View child = toolbarActions.getChildAt(i);
+            String tagId = (String) child.getTag();
+            boolean active = activeId != null && activeId.equals(tagId);
+            if (child instanceof ImageButton) {
+                ((ImageButton) child).setColorFilter(
+                        getResources().getColor(active ? R.color.colorAccent : R.color.textPrimary, null));
+            }
+        }
+    }
+
+    private void updateToggleViewIcon() {
+        if (btnToggleView == null) return;
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        String mode = prefs.getString(PREF_VIEW_MODE, SettingsActivity.VIEW_MODE_GRID);
+        boolean isGrid = SettingsActivity.VIEW_MODE_GRID.equals(mode);
+        btnToggleView.setImageResource(isGrid ? R.drawable.ic_view_list : R.drawable.ic_view_grid);
+    }
+
+    private String[] migrateShortcutOrder(String orderStr, SharedPreferences prefs) {
+        String[] ALL = {"library", "stats", "toggle_view", "settings"};
+        java.util.List<String> current = new java.util.ArrayList<>();
+        for (String s : orderStr.split(",")) {
+            String t = s.trim();
+            if (!t.isEmpty()) current.add(t);
+        }
+        boolean changed = false;
+        for (String key : ALL) {
+            if (!current.contains(key)) {
+                current.add(key);
+                changed = true;
+            }
+        }
+        if (changed) {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < current.size(); i++) {
+                if (i > 0) sb.append(",");
+                sb.append(current.get(i));
+            }
+            prefs.edit().putString(PREF_HOME_SHORTCUT_ORDER, sb.toString()).apply();
+        }
+        return current.toArray(new String[0]);
     }
 
     private void showTab(String tabId) {
@@ -311,11 +470,13 @@ public class MainActivity extends AppCompatActivity {
         tabLibrary.setVisibility("library".equals(tabId)  ? View.VISIBLE : View.GONE);
         tabBuiltin.setVisibility("builtin".equals(tabId)  ? View.VISIBLE : View.GONE);
         tabPlaylist.setVisibility("playlist".equals(tabId) ? View.VISIBLE : View.GONE);
+        tabStats.setVisibility("stats".equals(tabId)      ? View.VISIBLE : View.GONE);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
-        if ("library".equals(tabId))  toolbar.setTitle(R.string.library_title);
+        if ("library".equals(tabId))       toolbar.setTitle(R.string.library_title);
         else if ("builtin".equals(tabId))  toolbar.setTitle(R.string.tab_builtin);
         else if ("playlist".equals(tabId)) toolbar.setTitle(R.string.tab_playlist);
+        else if ("stats".equals(tabId))    toolbar.setTitle(R.string.stats_title);
     }
 
     @Override
@@ -323,6 +484,7 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         if ("library".equals(currentTabId))  loadVideos();
         if ("playlist".equals(currentTabId)) refreshPlaylistList();
+        if ("stats".equals(currentTabId))    loadStats();
     }
 
     // ── View mode (grid / list) ────────────────────────────────────────────
@@ -352,7 +514,7 @@ public class MainActivity extends AppCompatActivity {
         recyclerPlaylists.setLayoutManager(
                 isGrid ? new GridLayoutManager(this, 2) : new LinearLayoutManager(this));
 
-        invalidateOptionsMenu();
+        updateToggleViewIcon();
     }
 
     private void toggleViewMode() {
@@ -363,23 +525,140 @@ public class MainActivity extends AppCompatActivity {
                 : SettingsActivity.VIEW_MODE_GRID;
         prefs.edit().putString(PREF_VIEW_MODE, next).apply();
         applyViewMode();
-        // Refresh playlist items if open
+        updateToggleViewIcon();
         if ("playlist".equals(currentTabId) && playlistDetailView.getVisibility() == View.VISIBLE) {
             refreshPlaylistDetail(currentOpenList);
         }
     }
 
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        MenuItem toggleItem = menu.findItem(R.id.action_toggle_view);
-        if (toggleItem != null) {
-            SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-            String mode = prefs.getString(PREF_VIEW_MODE, SettingsActivity.VIEW_MODE_GRID);
-            boolean isGrid = SettingsActivity.VIEW_MODE_GRID.equals(mode);
-            toggleItem.setIcon(isGrid ? R.drawable.ic_view_list : R.drawable.ic_view_grid);
-            toggleItem.setTitle(isGrid ? R.string.settings_view_list : R.string.settings_view_grid);
+    // ── Stats tab ─────────────────────────────────────────────────────────
+
+    private void loadStats() {
+        PlayStats stats = PlayStats.getInstance(this);
+        java.util.List<PlayStats.StatEntry> entries = stats.getStats();
+
+        if (entries.isEmpty()) {
+            recyclerStats.setVisibility(View.GONE);
+            tvStatsEmpty.setVisibility(View.VISIBLE);
+            tvStatsSummary.setText(R.string.stats_empty);
+            return;
         }
-        return super.onPrepareOptionsMenu(menu);
+
+        recyclerStats.setVisibility(View.VISIBLE);
+        tvStatsEmpty.setVisibility(View.GONE);
+
+        long totalMs = stats.getTotalMs();
+        tvStatsSummary.setText(getString(R.string.stats_summary,
+                entries.size(), TimeUtils.formatDuration(totalMs)));
+
+        long maxMs = entries.get(0).totalMs;
+        recyclerStats.setAdapter(new StatsInlineAdapter(entries, maxMs));
+    }
+
+    private void confirmClearStats() {
+        new AlertDialog.Builder(this, R.style.DarkDialog)
+                .setTitle(R.string.stats_clear_title)
+                .setMessage(R.string.stats_clear_message)
+                .setPositiveButton(android.R.string.ok, (d, w) -> {
+                    PlayStats.getInstance(this).clearAll();
+                    loadStats();
+                })
+                .setNegativeButton(R.string.cancel, null)
+                .show();
+    }
+
+    private void startStatsExport() {
+        PlayStats stats = PlayStats.getInstance(this);
+        if (stats.getStats().isEmpty()) {
+            Toast.makeText(this, R.string.stats_no_data, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("application/json");
+        intent.putExtra(Intent.EXTRA_TITLE, "videomaster_stats.json");
+        statsExportLauncher.launch(intent);
+    }
+
+    private void writeStatsExport(Uri uri) {
+        try (java.io.OutputStream out = getContentResolver().openOutputStream(uri)) {
+            if (out == null) throw new Exception("null stream");
+            String json = PlayStats.getInstance(this).exportToJson();
+            out.write(json.getBytes("UTF-8"));
+            out.flush();
+            Toast.makeText(this, R.string.stats_export_success, Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            Toast.makeText(this, R.string.stats_export_failed, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void startStatsImport() {
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("*/*");
+        intent.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{
+                "application/json", "text/plain", "application/octet-stream"});
+        statsImportLauncher.launch(intent);
+    }
+
+    private void readStatsImport(Uri uri) {
+        try (java.io.BufferedReader reader = new java.io.BufferedReader(
+                new java.io.InputStreamReader(getContentResolver().openInputStream(uri), "UTF-8"))) {
+            StringBuilder sb = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) sb.append(line);
+            int count = PlayStats.getInstance(this).importFromJson(sb.toString());
+            if (count >= 0) {
+                Toast.makeText(this, getString(R.string.stats_import_success, count),
+                        Toast.LENGTH_SHORT).show();
+                loadStats();
+            } else {
+                Toast.makeText(this, R.string.stats_import_failed, Toast.LENGTH_SHORT).show();
+            }
+        } catch (Exception e) {
+            Toast.makeText(this, R.string.stats_import_failed, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private static class StatsInlineAdapter extends RecyclerView.Adapter<StatsInlineAdapter.VH> {
+        private final java.util.List<PlayStats.StatEntry> entries;
+        private final long maxMs;
+
+        StatsInlineAdapter(java.util.List<PlayStats.StatEntry> entries, long maxMs) {
+            this.entries = entries;
+            this.maxMs   = maxMs;
+        }
+
+        @NonNull @Override
+        public VH onCreateViewHolder(@NonNull android.view.ViewGroup parent, int viewType) {
+            View v = android.view.LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.item_stats_bar, parent, false);
+            return new VH(v);
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull VH h, int pos) {
+            PlayStats.StatEntry e = entries.get(pos);
+            h.tvName.setText(String.format(java.util.Locale.getDefault(), "%d. %s", pos + 1, e.name));
+            h.tvTime.setText(TimeUtils.formatDuration(e.totalMs));
+            int progress = maxMs > 0 ? (int) (e.totalMs * 1000L / maxMs) : 0;
+            h.progressBar.setProgress(progress);
+        }
+
+        @Override public int getItemCount() { return entries.size(); }
+
+        static class VH extends RecyclerView.ViewHolder {
+            final TextView tvName;
+            final TextView tvTime;
+            final android.widget.ProgressBar progressBar;
+
+            VH(@NonNull View v) {
+                super(v);
+                tvName      = v.findViewById(R.id.tvStatName);
+                tvTime      = v.findViewById(R.id.tvStatTime);
+                progressBar = v.findViewById(R.id.pbStatBar);
+            }
+        }
     }
 
     // ── Permissions ────────────────────────────────────────────────────────

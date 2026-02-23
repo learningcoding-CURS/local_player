@@ -3,6 +3,9 @@ package com.videomaster.app.stats;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -84,6 +87,57 @@ public class PlayStats {
     /** Removes all recorded stats. */
     public void clearAll() {
         prefs.edit().clear().apply();
+    }
+
+    // ── Export / Import ──────────────────────────────────────────────────────
+
+    /**
+     * Serialises all stats entries to a JSON string.
+     * Format: [ { "id":"...", "name":"...", "totalMs":12345 }, ... ]
+     */
+    public String exportToJson() {
+        try {
+            JSONArray arr = new JSONArray();
+            for (StatEntry e : getStats()) {
+                JSONObject obj = new JSONObject();
+                obj.put("id", e.id);
+                obj.put("name", e.name);
+                obj.put("totalMs", e.totalMs);
+                arr.put(obj);
+            }
+            return arr.toString(2);
+        } catch (Exception e) {
+            return "[]";
+        }
+    }
+
+    /**
+     * Imports stats from a JSON string. Existing entries with the same ID are
+     * merged (times added together); new entries are created.
+     *
+     * @return number of entries imported / merged
+     */
+    public int importFromJson(String json) {
+        try {
+            JSONArray arr = new JSONArray(json);
+            int count = 0;
+            SharedPreferences.Editor editor = prefs.edit();
+            for (int i = 0; i < arr.length(); i++) {
+                JSONObject obj = arr.getJSONObject(i);
+                String id   = obj.getString("id");
+                String name = obj.optString("name", id);
+                long   ms   = obj.optLong("totalMs", 0);
+                if (ms <= 0 || id == null) continue;
+                long existing = prefs.getLong(PREFIX_TIME + id, 0);
+                editor.putLong(PREFIX_TIME + id, existing + ms);
+                editor.putString(PREFIX_NAME + id, name);
+                count++;
+            }
+            editor.apply();
+            return count;
+        } catch (Exception e) {
+            return -1;
+        }
     }
 
     // ── Data holder ──────────────────────────────────────────────────────────

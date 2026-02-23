@@ -48,7 +48,7 @@
                 android:id="@+id/rgDefaultTab"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical" />
+                android:orientation="horizontal" />
 
             <View
                 android:layout_width="match_parent"
@@ -81,6 +81,30 @@
                 android:layout_marginTop="12dp"
                 android:layout_marginBottom="4dp" />
 
+            <!-- ── 主页快捷按钮排序 ── -->
+            <TextView
+                android:id="@+id/titleShortcutOrder"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/settings_shortcut_order"
+                android:textColor="@color/colorAccentLight"
+                android:textSize="13sp"
+                android:paddingTop="8dp"
+                android:paddingBottom="4dp" />
+
+            <LinearLayout
+                android:id="@+id/shortcutOrderContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/divider"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="4dp" />
+
             <!-- ── 列表显示模式 ── -->
             <TextView
                 android:layout_width="match_parent"
@@ -95,27 +119,29 @@
                 android:id="@+id/rgViewMode"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:orientation="horizontal">
 
                 <RadioButton
                     android:id="@+id/rbViewGrid"
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
                     android:layout_height="wrap_content"
                     android:text="@string/settings_view_grid"
                     android:textColor="@color/textPrimary"
-                    android:paddingStart="8dp"
-                    android:paddingTop="8dp"
-                    android:paddingBottom="8dp" />
+                    android:paddingStart="4dp"
+                    android:paddingTop="6dp"
+                    android:paddingBottom="6dp" />
 
                 <RadioButton
                     android:id="@+id/rbViewList"
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
                     android:layout_height="wrap_content"
                     android:text="@string/settings_view_list"
                     android:textColor="@color/textPrimary"
-                    android:paddingStart="8dp"
-                    android:paddingTop="8dp"
-                    android:paddingBottom="8dp" />
+                    android:paddingStart="4dp"
+                    android:paddingTop="6dp"
+                    android:paddingBottom="6dp" />
 
             </RadioGroup>
 
@@ -140,27 +166,29 @@
                 android:id="@+id/rgPortraitSwipe"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:orientation="horizontal">
 
                 <RadioButton
                     android:id="@+id/rbPortraitVertical"
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
                     android:layout_height="wrap_content"
                     android:text="@string/swipe_vertical_desc"
                     android:textColor="@color/textPrimary"
-                    android:paddingStart="8dp"
-                    android:paddingTop="8dp"
-                    android:paddingBottom="8dp" />
+                    android:paddingStart="4dp"
+                    android:paddingTop="6dp"
+                    android:paddingBottom="6dp" />
 
                 <RadioButton
                     android:id="@+id/rbPortraitHorizontal"
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
                     android:layout_height="wrap_content"
                     android:text="@string/swipe_horizontal_desc"
                     android:textColor="@color/textPrimary"
-                    android:paddingStart="8dp"
-                    android:paddingTop="8dp"
-                    android:paddingBottom="8dp" />
+                    android:paddingStart="4dp"
+                    android:paddingTop="6dp"
+                    android:paddingBottom="6dp" />
 
             </RadioGroup>
 
@@ -185,27 +213,29 @@
                 android:id="@+id/rgLandscapeSwipe"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:orientation="horizontal">
 
                 <RadioButton
                     android:id="@+id/rbLandscapeHorizontal"
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
                     android:layout_height="wrap_content"
                     android:text="@string/swipe_horizontal_desc"
                     android:textColor="@color/textPrimary"
-                    android:paddingStart="8dp"
-                    android:paddingTop="8dp"
-                    android:paddingBottom="8dp" />
+                    android:paddingStart="4dp"
+                    android:paddingTop="6dp"
+                    android:paddingBottom="6dp" />
 
                 <RadioButton
                     android:id="@+id/rbLandscapeVertical"
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
                     android:layout_height="wrap_content"
                     android:text="@string/swipe_vertical_desc"
                     android:textColor="@color/textPrimary"
-                    android:paddingStart="8dp"
-                    android:paddingTop="8dp"
-                    android:paddingBottom="8dp" />
+                    android:paddingStart="4dp"
+                    android:paddingTop="6dp"
+                    android:paddingBottom="6dp" />
 
             </RadioGroup>
 
@@ -226,53 +256,71 @@
                 android:paddingTop="8dp"
                 android:paddingBottom="4dp" />
 
-            <RadioGroup
+            <LinearLayout
                 android:id="@+id/rgPanelDirPortrait"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <RadioButton
-                    android:id="@+id/rbPanelDirPortraitTop"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/panel_dir_top"
-                    android:textColor="@color/textPrimary"
-                    android:paddingStart="8dp"
-                    android:paddingTop="8dp"
-                    android:paddingBottom="8dp" />
+                    android:orientation="horizontal">
 
-                <RadioButton
-                    android:id="@+id/rbPanelDirPortraitBottom"
+                    <RadioButton
+                        android:id="@+id/rbPanelDirPortraitTop"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:text="@string/panel_dir_top"
+                        android:textColor="@color/textPrimary"
+                        android:paddingStart="4dp"
+                        android:paddingTop="6dp"
+                        android:paddingBottom="6dp" />
+
+                    <RadioButton
+                        android:id="@+id/rbPanelDirPortraitBottom"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:text="@string/panel_dir_bottom"
+                        android:textColor="@color/textPrimary"
+                        android:paddingStart="4dp"
+                        android:paddingTop="6dp"
+                        android:paddingBottom="6dp" />
+
+                </LinearLayout>
+
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/panel_dir_bottom"
-                    android:textColor="@color/textPrimary"
-                    android:paddingStart="8dp"
-                    android:paddingTop="8dp"
-                    android:paddingBottom="8dp" />
+                    android:orientation="horizontal">
 
-                <RadioButton
-                    android:id="@+id/rbPanelDirPortraitLeft"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/panel_dir_left"
-                    android:textColor="@color/textPrimary"
-                    android:paddingStart="8dp"
-                    android:paddingTop="8dp"
-                    android:paddingBottom="8dp" />
+                    <RadioButton
+                        android:id="@+id/rbPanelDirPortraitLeft"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:text="@string/panel_dir_left"
+                        android:textColor="@color/textPrimary"
+                        android:paddingStart="4dp"
+                        android:paddingTop="6dp"
+                        android:paddingBottom="6dp" />
 
-                <RadioButton
-                    android:id="@+id/rbPanelDirPortraitRight"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/panel_dir_right"
-                    android:textColor="@color/textPrimary"
-                    android:paddingStart="8dp"
-                    android:paddingTop="8dp"
-                    android:paddingBottom="8dp" />
+                    <RadioButton
+                        android:id="@+id/rbPanelDirPortraitRight"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:text="@string/panel_dir_right"
+                        android:textColor="@color/textPrimary"
+                        android:paddingStart="4dp"
+                        android:paddingTop="6dp"
+                        android:paddingBottom="6dp" />
 
-            </RadioGroup>
+                </LinearLayout>
+
+            </LinearLayout>
 
             <View
                 android:layout_width="match_parent"
@@ -291,53 +339,71 @@
                 android:paddingTop="8dp"
                 android:paddingBottom="4dp" />
 
-            <RadioGroup
+            <LinearLayout
                 android:id="@+id/rgPanelDirLandscape"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <RadioButton
-                    android:id="@+id/rbPanelDirLandscapeTop"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/panel_dir_top"
-                    android:textColor="@color/textPrimary"
-                    android:paddingStart="8dp"
-                    android:paddingTop="8dp"
-                    android:paddingBottom="8dp" />
+                    android:orientation="horizontal">
 
-                <RadioButton
-                    android:id="@+id/rbPanelDirLandscapeBottom"
+                    <RadioButton
+                        android:id="@+id/rbPanelDirLandscapeTop"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:text="@string/panel_dir_top"
+                        android:textColor="@color/textPrimary"
+                        android:paddingStart="4dp"
+                        android:paddingTop="6dp"
+                        android:paddingBottom="6dp" />
+
+                    <RadioButton
+                        android:id="@+id/rbPanelDirLandscapeBottom"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:text="@string/panel_dir_bottom"
+                        android:textColor="@color/textPrimary"
+                        android:paddingStart="4dp"
+                        android:paddingTop="6dp"
+                        android:paddingBottom="6dp" />
+
+                </LinearLayout>
+
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/panel_dir_bottom"
-                    android:textColor="@color/textPrimary"
-                    android:paddingStart="8dp"
-                    android:paddingTop="8dp"
-                    android:paddingBottom="8dp" />
+                    android:orientation="horizontal">
 
-                <RadioButton
-                    android:id="@+id/rbPanelDirLandscapeLeft"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/panel_dir_left"
-                    android:textColor="@color/textPrimary"
-                    android:paddingStart="8dp"
-                    android:paddingTop="8dp"
-                    android:paddingBottom="8dp" />
+                    <RadioButton
+                        android:id="@+id/rbPanelDirLandscapeLeft"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:text="@string/panel_dir_left"
+                        android:textColor="@color/textPrimary"
+                        android:paddingStart="4dp"
+                        android:paddingTop="6dp"
+                        android:paddingBottom="6dp" />
 
-                <RadioButton
-                    android:id="@+id/rbPanelDirLandscapeRight"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/panel_dir_right"
-                    android:textColor="@color/textPrimary"
-                    android:paddingStart="8dp"
-                    android:paddingTop="8dp"
-                    android:paddingBottom="8dp" />
+                    <RadioButton
+                        android:id="@+id/rbPanelDirLandscapeRight"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:text="@string/panel_dir_right"
+                        android:textColor="@color/textPrimary"
+                        android:paddingStart="4dp"
+                        android:paddingTop="6dp"
+                        android:paddingBottom="6dp" />
 
-            </RadioGroup>
+                </LinearLayout>
+
+            </LinearLayout>
 
             <View
                 android:layout_width="match_parent"
@@ -417,7 +483,7 @@
                 android:id="@+id/sbSeekIconSize"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:max="64"
+                android:max="128"
                 android:progressTint="@color/colorAccent"
                 android:thumbTint="@color/colorAccent"
                 android:layout_marginBottom="8dp" />
@@ -456,6 +522,96 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:max="90"
+                android:progressTint="@color/colorAccent"
+                android:thumbTint="@color/colorAccent"
+                android:layout_marginBottom="8dp" />
+
+            <TextView
+                android:id="@+id/tvSeekOffsetLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/settings_seek_offset"
+                android:textColor="@color/textSecondary"
+                android:textSize="13sp"
+                android:paddingTop="4dp"
+                android:paddingBottom="2dp" />
+
+            <SeekBar
+                android:id="@+id/sbSeekOffset"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="300"
+                android:progressTint="@color/colorAccent"
+                android:thumbTint="@color/colorAccent"
+                android:layout_marginBottom="8dp" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/divider"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="4dp" />
+
+            <!-- ── 切换按钮设置 ── -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/settings_ctrl_skip"
+                android:textColor="@color/colorAccentLight"
+                android:textSize="13sp"
+                android:paddingTop="8dp"
+                android:paddingBottom="4dp" />
+
+            <TextView
+                android:id="@+id/tvSkipSizeLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/textSecondary"
+                android:textSize="13sp"
+                android:paddingTop="4dp"
+                android:paddingBottom="2dp" />
+
+            <SeekBar
+                android:id="@+id/sbSkipSize"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="128"
+                android:progressTint="@color/colorAccent"
+                android:thumbTint="@color/colorAccent"
+                android:layout_marginBottom="8dp" />
+
+            <TextView
+                android:id="@+id/tvSkipAlphaLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/textSecondary"
+                android:textSize="13sp"
+                android:paddingTop="4dp"
+                android:paddingBottom="2dp" />
+
+            <SeekBar
+                android:id="@+id/sbSkipAlpha"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="90"
+                android:progressTint="@color/colorAccent"
+                android:thumbTint="@color/colorAccent"
+                android:layout_marginBottom="8dp" />
+
+            <TextView
+                android:id="@+id/tvSkipOffsetLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/textSecondary"
+                android:textSize="13sp"
+                android:paddingTop="4dp"
+                android:paddingBottom="2dp" />
+
+            <SeekBar
+                android:id="@+id/sbSkipOffset"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="300"
                 android:progressTint="@color/colorAccent"
                 android:thumbTint="@color/colorAccent"
                 android:layout_marginBottom="8dp" />
@@ -590,6 +746,32 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/divider"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="4dp" />
+
+            <!-- ── 设置页背景透明度 ── -->
+            <TextView
+                android:id="@+id/tvSettingsBgAlphaLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/colorAccentLight"
+                android:textSize="13sp"
+                android:paddingTop="8dp"
+                android:paddingBottom="4dp" />
+
+            <SeekBar
+                android:id="@+id/sbSettingsBgAlpha"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="100"
+                android:progressTint="@color/colorAccent"
+                android:thumbTint="@color/colorAccent"
+                android:layout_marginBottom="8dp" />
 
             <!-- Bottom spacer -->
             <View

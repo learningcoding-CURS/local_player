@@ -43,6 +43,9 @@ public class SettingsActivity extends AppCompatActivity {
     public static final String PREF_SEEK_ICON_SIZE         = "seek_icon_size";
     public static final String PREF_SEEK_SECONDS           = "seek_seconds";
     public static final String PREF_SEEK_ALPHA             = "seek_alpha";
+    public static final String PREF_SEEK_OFFSET_Y           = "seek_offset_y";
+    public static final int    DEFAULT_SEEK_OFFSET_Y       = 0;
+
     // Seekbar settings
     public static final String PREF_SEEKBAR_HEIGHT         = "seekbar_height";
     public static final String PREF_SEEKBAR_PROGRESS_ALPHA = "seekbar_progress_alpha";
@@ -74,6 +77,10 @@ public class SettingsActivity extends AppCompatActivity {
     public static final String PREF_BTN_SKIP_COLOR           = "btn_skip_color";
     public static final String PREF_SKIP_BTN_SIZE            = "skip_btn_size";
     public static final int    DEFAULT_SKIP_BTN_SIZE         = 48;
+    public static final String PREF_SKIP_BTN_ALPHA           = "skip_btn_alpha";
+    public static final int    DEFAULT_SKIP_BTN_ALPHA        = 100;
+    public static final String PREF_SKIP_BTN_OFFSET_Y        = "skip_btn_offset_y";
+    public static final int    DEFAULT_SKIP_BTN_OFFSET_Y     = 0;
 
     // Player control button colors (string: "white","accent","orange","cyan","green","yellow")
     public static final String PREF_BTN_LOCK_COLOR           = "btn_lock_color";
@@ -85,7 +92,15 @@ public class SettingsActivity extends AppCompatActivity {
     public static final String PREF_BTN_ROTATE_COLOR         = "btn_rotate_color";
     public static final String PREF_BTN_SEEK_VISIBLE          = "btn_seek_visible";
     public static final String PREF_BTN_SEEK_COLOR           = "btn_seek_color";
+    public static final String PREF_BTN_PLAYER_SETTINGS_VISIBLE = "btn_player_settings_visible";
+    public static final String PREF_BTN_PLAYER_SETTINGS_COLOR   = "btn_player_settings_color";
+    public static final String PREF_BTN_PLAYPAUSE_VISIBLE     = "btn_playpause_visible";
     public static final String PREF_BTN_PLAYPAUSE_COLOR      = "btn_playpause_color";
+
+    // Home toolbar button visibility
+    public static final String PREF_HOME_BTN_STATS_VISIBLE       = "home_btn_stats_visible";
+    public static final String PREF_HOME_BTN_LIBRARY_VISIBLE     = "home_btn_library_visible";
+    public static final String PREF_HOME_BTN_TOGGLE_VIEW_VISIBLE = "home_btn_toggle_view_visible";
 
     // Button order preferences (comma-separated IDs within each bar)
     public static final String PREF_TOP_BTN_ORDER    = "top_btn_order";
@@ -93,7 +108,7 @@ public class SettingsActivity extends AppCompatActivity {
 
     // Default button orders
     public static final String DEFAULT_TOP_BTN_ORDER =
-            "lock,play-mode,playlist-panel,subtitle-toggle,subtitle,subtitle-list,rotate";
+            "lock,play-mode,playlist-panel,subtitle-toggle,subtitle,subtitle-list,rotate,settings";
     public static final String DEFAULT_CENTER_BTN_ORDER = "rewind,play-pause,forward";
 
     public static final String DEFAULT_BTN_COLOR         = "white";
@@ -112,7 +127,14 @@ public class SettingsActivity extends AppCompatActivity {
     public static final int DEFAULT_SEEKBAR_PROGRESS_ALPHA = 80;
     public static final int DEFAULT_SUBTITLE_PANEL_ALPHA   = 60;
 
-    static final String DEFAULT_TAB_ORDER = "builtin,library,stats,playlist";
+    public static final String PREF_SETTINGS_BG_ALPHA      = "settings_bg_alpha";
+    public static final int    DEFAULT_SETTINGS_BG_ALPHA    = 100;
+
+    static final String DEFAULT_TAB_ORDER = "builtin,playlist";
+
+    // Home shortcut buttons (top row on main page)
+    public static final String PREF_HOME_SHORTCUT_ORDER   = "home_shortcut_order";
+    public static final String DEFAULT_HOME_SHORTCUT_ORDER = "library,stats,toggle_view,settings";
 
     // Available button color options
     private static final String[] COLOR_VALUES = {"white","accent","orange","cyan","green","yellow"};
@@ -120,6 +142,7 @@ public class SettingsActivity extends AppCompatActivity {
     private static final String[] COLOR_LABELS = {"白","红","橙","青","绿","黄"};
 
     private String[] tabOrder;
+    private String[] shortcutOrder;
     private String[] topBtnOrder;
     private String[] centerBtnOrder;
 
@@ -147,13 +170,26 @@ public class SettingsActivity extends AppCompatActivity {
         // Snapshot the state on entry — used by the Restore button
         originalPrefs = new HashMap<>(prefs.getAll());
         String savedOrderStr  = prefs.getString(PREF_TAB_ORDER, DEFAULT_TAB_ORDER);
-        // Migration: inject "stats" if missing from saved tab order
-        if (!savedOrderStr.contains("stats")) {
-            int playlistIdx = savedOrderStr.indexOf("playlist");
-            if (playlistIdx > 0) {
-                savedOrderStr = savedOrderStr.substring(0, playlistIdx) + "stats," + savedOrderStr.substring(playlistIdx);
-            } else {
-                savedOrderStr = savedOrderStr + ",stats";
+        // Migration: extract "stats" and "library" from tab order into shortcut order
+        if (savedOrderStr.contains("stats") || savedOrderStr.contains("library")) {
+            String[] tokens = savedOrderStr.split(",");
+            StringBuilder tabSb = new StringBuilder();
+            StringBuilder shortcutSb = new StringBuilder();
+            for (String t : tokens) {
+                String trimmed = t.trim();
+                if ("library".equals(trimmed) || "stats".equals(trimmed)) {
+                    if (shortcutSb.length() > 0) shortcutSb.append(",");
+                    shortcutSb.append(trimmed);
+                } else {
+                    if (tabSb.length() > 0) tabSb.append(",");
+                    tabSb.append(trimmed);
+                }
+            }
+            savedOrderStr = tabSb.length() > 0 ? tabSb.toString() : DEFAULT_TAB_ORDER;
+            String shortcutStr = shortcutSb.length() > 0 ? shortcutSb.toString() : DEFAULT_HOME_SHORTCUT_ORDER;
+            // Only write shortcut order if not already migrated
+            if (!prefs.contains(PREF_HOME_SHORTCUT_ORDER)) {
+                prefs.edit().putString(PREF_HOME_SHORTCUT_ORDER, shortcutStr).apply();
             }
             prefs.edit().putString(PREF_TAB_ORDER, savedOrderStr).apply();
         }
@@ -168,13 +204,17 @@ public class SettingsActivity extends AppCompatActivity {
         int    savedSeekIconSize   = prefs.getInt(PREF_SEEK_ICON_SIZE,         DEFAULT_SEEK_ICON_SIZE);
         int    savedSeekSeconds    = prefs.getInt(PREF_SEEK_SECONDS,           DEFAULT_SEEK_SECONDS);
         int    savedSeekAlpha      = prefs.getInt(PREF_SEEK_ALPHA,             DEFAULT_SEEK_ALPHA);
+        int    savedSeekOffset     = prefs.getInt(PREF_SEEK_OFFSET_Y,          DEFAULT_SEEK_OFFSET_Y);
         int    savedSeekbarHeight  = prefs.getInt(PREF_SEEKBAR_HEIGHT,         DEFAULT_SEEKBAR_HEIGHT);
         int    savedProgAlpha      = prefs.getInt(PREF_SEEKBAR_PROGRESS_ALPHA, DEFAULT_SEEKBAR_PROGRESS_ALPHA);
         int    savedPanelAlpha     = prefs.getInt(PREF_SUBTITLE_PANEL_ALPHA,   DEFAULT_SUBTITLE_PANEL_ALPHA);
         boolean savedSubDefaultVisible = prefs.getBoolean(PREF_SUBTITLE_DEFAULT_VISIBLE, true);
 
         tabOrder       = savedOrderStr.split(",");
-        topBtnOrder    = prefs.getString(PREF_TOP_BTN_ORDER, DEFAULT_TOP_BTN_ORDER).split(",");
+        shortcutOrder  = migrateShortcutOrder(
+                prefs.getString(PREF_HOME_SHORTCUT_ORDER, DEFAULT_HOME_SHORTCUT_ORDER));
+        topBtnOrder    = migrateTopBtnOrder(
+                prefs.getString(PREF_TOP_BTN_ORDER, DEFAULT_TOP_BTN_ORDER));
         centerBtnOrder = prefs.getString(PREF_CENTER_BTN_ORDER, DEFAULT_CENTER_BTN_ORDER).split(",");
 
         // ── Default tab RadioGroup ────────────────────────────────────────────
@@ -188,7 +228,9 @@ public class SettingsActivity extends AppCompatActivity {
         for (int i = 0; i < tabValues.length; i++) {
             RadioButton rb = makeRadioButton(tabLabels[i]);
             rb.setChecked(tabValues[i].equals(savedDefault));
-            rgDefault.addView(rb);
+            RadioGroup.LayoutParams rlp = new RadioGroup.LayoutParams(
+                    0, RadioGroup.LayoutParams.WRAP_CONTENT, 1f);
+            rgDefault.addView(rb, rlp);
         }
         rgDefault.setOnCheckedChangeListener((group, checkedId) -> {
             for (int i = 0; i < tabValues.length; i++) {
@@ -203,6 +245,10 @@ public class SettingsActivity extends AppCompatActivity {
         // ── Tab order ─────────────────────────────────────────────────────────
         LinearLayout tabOrderContainer = findViewById(R.id.tabOrderContainer);
         refreshTabOrderRows(tabOrderContainer);
+
+        // ── Shortcut order ───────────────────────────────────────────────────
+        LinearLayout shortcutOrderContainer = findViewById(R.id.shortcutOrderContainer);
+        refreshShortcutOrderRows(shortcutOrderContainer);
 
         // ── View mode ─────────────────────────────────────────────────────────
         RadioButton rbGrid = findViewById(R.id.rbViewGrid);
@@ -232,32 +278,23 @@ public class SettingsActivity extends AppCompatActivity {
                         id == R.id.rbLandscapeVertical ? "VERTICAL" : "HORIZONTAL").apply());
 
         // ── 播放列表面板方向（竖屏） ────────────────────────────────────────────
-        RadioButton rbPanelPortraitTop    = findViewById(R.id.rbPanelDirPortraitTop);
-        RadioButton rbPanelPortraitBottom = findViewById(R.id.rbPanelDirPortraitBottom);
-        RadioButton rbPanelPortraitLeft   = findViewById(R.id.rbPanelDirPortraitLeft);
-        RadioButton rbPanelPortraitRight  = findViewById(R.id.rbPanelDirPortraitRight);
-        rbPanelPortraitTop.setChecked(PANEL_DIR_TOP.equals(savedPanelDirPortrait));
-        rbPanelPortraitBottom.setChecked(PANEL_DIR_BOTTOM.equals(savedPanelDirPortrait));
-        rbPanelPortraitLeft.setChecked(PANEL_DIR_LEFT.equals(savedPanelDirPortrait));
-        rbPanelPortraitRight.setChecked(PANEL_DIR_RIGHT.equals(savedPanelDirPortrait));
-        rbPanelPortraitTop.setOnCheckedChangeListener((b, c) -> { if (c) prefs.edit().putString(PREF_PANEL_DIR_PORTRAIT, PANEL_DIR_TOP).apply(); });
-        rbPanelPortraitBottom.setOnCheckedChangeListener((b, c) -> { if (c) prefs.edit().putString(PREF_PANEL_DIR_PORTRAIT, PANEL_DIR_BOTTOM).apply(); });
-        rbPanelPortraitLeft.setOnCheckedChangeListener((b, c) -> { if (c) prefs.edit().putString(PREF_PANEL_DIR_PORTRAIT, PANEL_DIR_LEFT).apply(); });
-        rbPanelPortraitRight.setOnCheckedChangeListener((b, c) -> { if (c) prefs.edit().putString(PREF_PANEL_DIR_PORTRAIT, PANEL_DIR_RIGHT).apply(); });
+        setupPanelDirGroup(
+                new RadioButton[]{
+                        findViewById(R.id.rbPanelDirPortraitTop),
+                        findViewById(R.id.rbPanelDirPortraitBottom),
+                        findViewById(R.id.rbPanelDirPortraitLeft),
+                        findViewById(R.id.rbPanelDirPortraitRight)},
+                new String[]{PANEL_DIR_TOP, PANEL_DIR_BOTTOM, PANEL_DIR_LEFT, PANEL_DIR_RIGHT},
+                savedPanelDirPortrait, PREF_PANEL_DIR_PORTRAIT);
 
-        // ── 播放列表面板方向（横屏） ────────────────────────────────────────────
-        RadioButton rbPanelLandTop    = findViewById(R.id.rbPanelDirLandscapeTop);
-        RadioButton rbPanelLandBottom = findViewById(R.id.rbPanelDirLandscapeBottom);
-        RadioButton rbPanelLandLeft   = findViewById(R.id.rbPanelDirLandscapeLeft);
-        RadioButton rbPanelLandRight  = findViewById(R.id.rbPanelDirLandscapeRight);
-        rbPanelLandTop.setChecked(PANEL_DIR_TOP.equals(savedPanelDirLandscape));
-        rbPanelLandBottom.setChecked(PANEL_DIR_BOTTOM.equals(savedPanelDirLandscape));
-        rbPanelLandLeft.setChecked(PANEL_DIR_LEFT.equals(savedPanelDirLandscape));
-        rbPanelLandRight.setChecked(PANEL_DIR_RIGHT.equals(savedPanelDirLandscape));
-        rbPanelLandTop.setOnCheckedChangeListener((b, c) -> { if (c) prefs.edit().putString(PREF_PANEL_DIR_LANDSCAPE, PANEL_DIR_TOP).apply(); });
-        rbPanelLandBottom.setOnCheckedChangeListener((b, c) -> { if (c) prefs.edit().putString(PREF_PANEL_DIR_LANDSCAPE, PANEL_DIR_BOTTOM).apply(); });
-        rbPanelLandLeft.setOnCheckedChangeListener((b, c) -> { if (c) prefs.edit().putString(PREF_PANEL_DIR_LANDSCAPE, PANEL_DIR_LEFT).apply(); });
-        rbPanelLandRight.setOnCheckedChangeListener((b, c) -> { if (c) prefs.edit().putString(PREF_PANEL_DIR_LANDSCAPE, PANEL_DIR_RIGHT).apply(); });
+        setupPanelDirGroup(
+                new RadioButton[]{
+                        findViewById(R.id.rbPanelDirLandscapeTop),
+                        findViewById(R.id.rbPanelDirLandscapeBottom),
+                        findViewById(R.id.rbPanelDirLandscapeLeft),
+                        findViewById(R.id.rbPanelDirLandscapeRight)},
+                new String[]{PANEL_DIR_TOP, PANEL_DIR_BOTTOM, PANEL_DIR_LEFT, PANEL_DIR_RIGHT},
+                savedPanelDirLandscape, PREF_PANEL_DIR_LANDSCAPE);
 
         // ── 字幕大小 ───────────────────────────────────────────────────────────
         SeekBar sbSubSize = findViewById(R.id.sbSubtitleSize);
@@ -299,8 +336,8 @@ public class SettingsActivity extends AppCompatActivity {
         // ── 跳转按钮大小 ──────────────────────────────────────────────────────
         SeekBar sbSeekIconSize = findViewById(R.id.sbSeekIconSize);
         TextView tvSeekIconSizeLabel = findViewById(R.id.tvSeekIconSizeLabel);
-        sbSeekIconSize.setMax(64);
-        sbSeekIconSize.setProgress(Math.max(0, Math.min(64, savedSeekIconSize - 32)));
+        sbSeekIconSize.setMax(128); // 32-160 dp
+        sbSeekIconSize.setProgress(Math.max(0, Math.min(128, savedSeekIconSize - 32)));
         tvSeekIconSizeLabel.setText(getString(R.string.settings_seek_icon_size, savedSeekIconSize));
         sbSeekIconSize.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override public void onProgressChanged(SeekBar sb, int p, boolean user) {
@@ -343,6 +380,71 @@ public class SettingsActivity extends AppCompatActivity {
                 prefs.edit().putInt(PREF_SEEK_ALPHA, sb.getProgress() + 10).apply();
             }
         });
+
+        // ── 跳转按钮上下偏移 ─────────────────────────────────────────────
+        SeekBar sbSeekOffset = findViewById(R.id.sbSeekOffset);
+        TextView tvSeekOffsetLabel = findViewById(R.id.tvSeekOffsetLabel);
+        sbSeekOffset.setMax(300); // -150 to +150 dp
+        sbSeekOffset.setProgress(Math.max(0, Math.min(300, savedSeekOffset + 150)));
+        tvSeekOffsetLabel.setText(getString(R.string.settings_seek_offset, savedSeekOffset));
+        sbSeekOffset.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override public void onProgressChanged(SeekBar sb, int p, boolean user) {
+                tvSeekOffsetLabel.setText(getString(R.string.settings_seek_offset, p - 150));
+            }
+            @Override public void onStartTrackingTouch(SeekBar sb) {}
+            @Override public void onStopTrackingTouch(SeekBar sb) {
+                prefs.edit().putInt(PREF_SEEK_OFFSET_Y, sb.getProgress() - 150).apply();
+            }
+        });
+
+        // ── 切换按钮大小 ──────────────────────────────────────────────────────
+        {
+            int savedSkipBtnSize   = prefs.getInt(PREF_SKIP_BTN_SIZE,      DEFAULT_SKIP_BTN_SIZE);
+            int savedSkipBtnAlpha  = prefs.getInt(PREF_SKIP_BTN_ALPHA,     DEFAULT_SKIP_BTN_ALPHA);
+            int savedSkipBtnOffset = prefs.getInt(PREF_SKIP_BTN_OFFSET_Y,  DEFAULT_SKIP_BTN_OFFSET_Y);
+
+            SeekBar sbSkipSize = findViewById(R.id.sbSkipSize);
+            TextView tvSkipSizeLabel = findViewById(R.id.tvSkipSizeLabel);
+            sbSkipSize.setProgress(Math.max(0, Math.min(128, savedSkipBtnSize - 32)));
+            tvSkipSizeLabel.setText(getString(R.string.settings_skip_btn_size, savedSkipBtnSize));
+            sbSkipSize.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override public void onProgressChanged(SeekBar sb, int p, boolean user) {
+                    tvSkipSizeLabel.setText(getString(R.string.settings_skip_btn_size, p + 32));
+                }
+                @Override public void onStartTrackingTouch(SeekBar sb) {}
+                @Override public void onStopTrackingTouch(SeekBar sb) {
+                    prefs.edit().putInt(PREF_SKIP_BTN_SIZE, sb.getProgress() + 32).apply();
+                }
+            });
+
+            SeekBar sbSkipAlpha = findViewById(R.id.sbSkipAlpha);
+            TextView tvSkipAlphaLabel = findViewById(R.id.tvSkipAlphaLabel);
+            sbSkipAlpha.setProgress(Math.max(0, Math.min(90, savedSkipBtnAlpha - 10)));
+            tvSkipAlphaLabel.setText(getString(R.string.settings_skip_btn_alpha, savedSkipBtnAlpha));
+            sbSkipAlpha.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override public void onProgressChanged(SeekBar sb, int p, boolean user) {
+                    tvSkipAlphaLabel.setText(getString(R.string.settings_skip_btn_alpha, p + 10));
+                }
+                @Override public void onStartTrackingTouch(SeekBar sb) {}
+                @Override public void onStopTrackingTouch(SeekBar sb) {
+                    prefs.edit().putInt(PREF_SKIP_BTN_ALPHA, sb.getProgress() + 10).apply();
+                }
+            });
+
+            SeekBar sbSkipOffset = findViewById(R.id.sbSkipOffset);
+            TextView tvSkipOffsetLabel = findViewById(R.id.tvSkipOffsetLabel);
+            sbSkipOffset.setProgress(Math.max(0, Math.min(300, savedSkipBtnOffset + 150)));
+            tvSkipOffsetLabel.setText(getString(R.string.settings_skip_btn_offset, savedSkipBtnOffset));
+            sbSkipOffset.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override public void onProgressChanged(SeekBar sb, int p, boolean user) {
+                    tvSkipOffsetLabel.setText(getString(R.string.settings_skip_btn_offset, p - 150));
+                }
+                @Override public void onStartTrackingTouch(SeekBar sb) {}
+                @Override public void onStopTrackingTouch(SeekBar sb) {
+                    prefs.edit().putInt(PREF_SKIP_BTN_OFFSET_Y, sb.getProgress() - 150).apply();
+                }
+            });
+        }
 
         // ── 进度条粗细 ────────────────────────────────────────────────────
         SeekBar sbSeekbarHeight = findViewById(R.id.sbSeekbarHeight);
@@ -406,19 +508,20 @@ public class SettingsActivity extends AppCompatActivity {
                 PREF_BTN_LOCK_VISIBLE, PREF_BTN_PLAYMODE_VISIBLE,
                 PREF_BTN_PLAYLIST_VISIBLE, PREF_BTN_SUBTITLE_TOGGLE_VISIBLE,
                 PREF_BTN_SUBTITLE_VISIBLE, PREF_BTN_SUBTLIST_VISIBLE,
-                PREF_BTN_ROTATE_VISIBLE, PREF_BTN_SEEK_VISIBLE, null, PREF_BTN_SKIP_VISIBLE };
+                PREF_BTN_ROTATE_VISIBLE, PREF_BTN_SEEK_VISIBLE, PREF_BTN_PLAYPAUSE_VISIBLE,
+                PREF_BTN_SKIP_VISIBLE, PREF_BTN_PLAYER_SETTINGS_VISIBLE };
         ctrlPrefsColor = new String[]{
                 PREF_BTN_LOCK_COLOR, PREF_BTN_PLAYMODE_COLOR,
                 PREF_BTN_PLAYLIST_COLOR, PREF_BTN_SUBTITLE_TOGGLE_COLOR,
                 PREF_BTN_SUBTITLE_COLOR, PREF_BTN_SUBTLIST_COLOR,
                 PREF_BTN_ROTATE_COLOR, PREF_BTN_SEEK_COLOR, PREF_BTN_PLAYPAUSE_COLOR,
-                PREF_BTN_SKIP_COLOR };
+                PREF_BTN_SKIP_COLOR, PREF_BTN_PLAYER_SETTINGS_COLOR };
         String[] ctrlDefColor   = {
                 DEFAULT_BTN_COLOR, DEFAULT_BTN_COLOR,
                 DEFAULT_PLAYLIST_BTN_COLOR, DEFAULT_BTN_COLOR,
                 DEFAULT_BTN_COLOR, DEFAULT_BTN_COLOR,
                 DEFAULT_BTN_COLOR, DEFAULT_BTN_COLOR, DEFAULT_BTN_COLOR,
-                DEFAULT_BTN_COLOR };
+                DEFAULT_BTN_COLOR, DEFAULT_BTN_COLOR };
         String[] ctrlLabels     = {
                 getString(R.string.settings_ctrl_lock),
                 getString(R.string.settings_ctrl_playmode),
@@ -429,7 +532,8 @@ public class SettingsActivity extends AppCompatActivity {
                 getString(R.string.settings_ctrl_rotate),
                 getString(R.string.settings_ctrl_seek),
                 getString(R.string.settings_ctrl_playpause),
-                getString(R.string.settings_ctrl_skip)
+                getString(R.string.settings_ctrl_skip),
+                getString(R.string.settings_ctrl_player_settings)
         };
 
         int numControls = ctrlLabels.length;
@@ -439,42 +543,39 @@ public class SettingsActivity extends AppCompatActivity {
 
         int dp4 = dp(4);
         int dp8 = dp(8);
+        LinearLayout pairRow = null;
         for (int i = 0; i < numControls; i++) {
             final int ci = i;
             String savedColor = prefs.getString(ctrlPrefsColor[i], ctrlDefColor[i]);
             selectedColors[i] = savedColor;
 
-            // Row container
-            LinearLayout row = new LinearLayout(this);
-            row.setOrientation(LinearLayout.VERTICAL);
-            row.setPadding(0, dp4, 0, dp4);
-
-            // Top line: label + optional switch + color swatch button
-            LinearLayout topLine = new LinearLayout(this);
-            topLine.setOrientation(LinearLayout.HORIZONTAL);
-            topLine.setGravity(android.view.Gravity.CENTER_VERTICAL);
+            LinearLayout cell = new LinearLayout(this);
+            cell.setOrientation(LinearLayout.HORIZONTAL);
+            cell.setGravity(android.view.Gravity.CENTER_VERTICAL);
+            cell.setPadding(0, dp4, dp4, dp4);
 
             TextView tvLabel = new TextView(this);
             tvLabel.setText(ctrlLabels[i]);
             tvLabel.setTextColor(getResources().getColor(R.color.textPrimary, null));
-            tvLabel.setTextSize(14f);
+            tvLabel.setTextSize(13f);
+            tvLabel.setSingleLine(true);
+            tvLabel.setEllipsize(android.text.TextUtils.TruncateAt.END);
             LinearLayout.LayoutParams lp =
                     new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
             tvLabel.setLayoutParams(lp);
-            topLine.addView(tvLabel);
+            cell.addView(tvLabel);
 
-            // Color swatch button (circle, tappable → opens color picker dialog)
             View swatch = new View(this);
-            int swatchSize = dp(28);
+            int swatchSize = dp(24);
             LinearLayout.LayoutParams swatchLp = new LinearLayout.LayoutParams(swatchSize, swatchSize);
-            swatchLp.setMargins(dp4, 0, dp8, 0);
+            swatchLp.setMargins(dp4, 0, dp4, 0);
             swatch.setLayoutParams(swatchLp);
             updateSwatchColor(swatch, savedColor);
             swatch.setClickable(true);
             swatch.setFocusable(true);
             colorSwatches[i] = swatch;
             swatch.setOnClickListener(v -> showColorPickerDialog(ci, colorSwatches[ci]));
-            topLine.addView(swatch);
+            cell.addView(swatch);
 
             if (ctrlPrefsVis[i] != null) {
                 Switch sw = new Switch(this);
@@ -483,13 +584,19 @@ public class SettingsActivity extends AppCompatActivity {
                 sw.setOnCheckedChangeListener((b, checked) ->
                         prefs.edit().putBoolean(visPref, checked).apply());
                 ctrlSwitches[i] = sw;
-                topLine.addView(sw);
+                cell.addView(sw);
             }
-            row.addView(topLine);
-            controlsContainer.addView(row);
 
-            // Divider between controls (not after last)
-            if (i < numControls - 1) {
+            if (i % 2 == 0) {
+                pairRow = new LinearLayout(this);
+                pairRow.setOrientation(LinearLayout.HORIZONTAL);
+                controlsContainer.addView(pairRow);
+            }
+            LinearLayout.LayoutParams cellLp =
+                    new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
+            pairRow.addView(cell, cellLp);
+
+            if (i % 2 == 1 || i == numControls - 1) {
                 View div = new View(this);
                 div.setBackgroundColor(getResources().getColor(R.color.divider, null));
                 LinearLayout.LayoutParams divLp = new LinearLayout.LayoutParams(
@@ -500,56 +607,6 @@ public class SettingsActivity extends AppCompatActivity {
             }
         }
 
-        // ── 切换按钮大小 ─────────────────────────────────────────────────────
-        {
-            int savedSkipBtnSize = prefs.getInt(PREF_SKIP_BTN_SIZE, DEFAULT_SKIP_BTN_SIZE);
-            LinearLayout root = findViewById(R.id.settingsRoot);
-            // Section title
-            TextView skipTitle = new TextView(this);
-            skipTitle.setText(getString(R.string.settings_ctrl_skip));
-            skipTitle.setTextColor(getResources().getColor(R.color.colorAccentLight, null));
-            skipTitle.setTextSize(13f);
-            skipTitle.setPadding(0, dp(8), 0, dp(4));
-            root.addView(skipTitle, root.indexOfChild(controlsContainer));
-
-            TextView tvSkipSizeLabel = new TextView(this);
-            tvSkipSizeLabel.setText(getString(R.string.settings_skip_btn_size, savedSkipBtnSize));
-            tvSkipSizeLabel.setTextColor(getResources().getColor(R.color.textSecondary, null));
-            tvSkipSizeLabel.setTextSize(13f);
-            tvSkipSizeLabel.setPadding(0, dp(4), 0, dp(2));
-            root.addView(tvSkipSizeLabel, root.indexOfChild(controlsContainer));
-
-            SeekBar sbSkipSize = new SeekBar(this);
-            sbSkipSize.setMax(64); // 32-96 dp
-            sbSkipSize.setProgress(Math.max(0, Math.min(64, savedSkipBtnSize - 32)));
-            sbSkipSize.setProgressTintList(android.content.res.ColorStateList.valueOf(
-                    getResources().getColor(R.color.colorAccent, null)));
-            sbSkipSize.setThumbTintList(android.content.res.ColorStateList.valueOf(
-                    getResources().getColor(R.color.colorAccent, null)));
-            LinearLayout.LayoutParams sbLp = new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-            sbLp.bottomMargin = dp(8);
-            sbSkipSize.setLayoutParams(sbLp);
-            sbSkipSize.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                @Override public void onProgressChanged(SeekBar sb, int p, boolean user) {
-                    tvSkipSizeLabel.setText(getString(R.string.settings_skip_btn_size, p + 32));
-                }
-                @Override public void onStartTrackingTouch(SeekBar sb) {}
-                @Override public void onStopTrackingTouch(SeekBar sb) {
-                    prefs.edit().putInt(PREF_SKIP_BTN_SIZE, sb.getProgress() + 32).apply();
-                }
-            });
-            root.addView(sbSkipSize, root.indexOfChild(controlsContainer));
-
-            View div = new View(this);
-            div.setBackgroundColor(getResources().getColor(R.color.divider, null));
-            LinearLayout.LayoutParams divLp = new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT, 1);
-            divLp.setMargins(0, dp(4), 0, dp(4));
-            div.setLayoutParams(divLp);
-            root.addView(div, root.indexOfChild(controlsContainer));
-        }
-
         // ── 顶栏按钮排序 ─────────────────────────────────────────────────────
         LinearLayout topBtnOrderContainer = getOrCreateBtnOrderContainer("topBtnOrderContainer");
         refreshBtnOrderRows(topBtnOrderContainer, topBtnOrder, getTopBtnLabels());
@@ -557,6 +614,25 @@ public class SettingsActivity extends AppCompatActivity {
         // ── 中央按钮排序 ──────────────────────────────────────────────────────
         LinearLayout centerBtnOrderContainer = getOrCreateBtnOrderContainer("centerBtnOrderContainer");
         refreshBtnOrderRows(centerBtnOrderContainer, centerBtnOrder, getCenterBtnLabels());
+
+        // ── 设置页背景透明度 ─────────────────────────────────────────────────
+        int savedBgAlpha = prefs.getInt(PREF_SETTINGS_BG_ALPHA, DEFAULT_SETTINGS_BG_ALPHA);
+        applySettingsBgAlpha(savedBgAlpha);
+
+        SeekBar sbSettingsBgAlpha = findViewById(R.id.sbSettingsBgAlpha);
+        TextView tvSettingsBgAlphaLabel = findViewById(R.id.tvSettingsBgAlphaLabel);
+        sbSettingsBgAlpha.setProgress(savedBgAlpha);
+        tvSettingsBgAlphaLabel.setText(getString(R.string.settings_bg_alpha, savedBgAlpha));
+        sbSettingsBgAlpha.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override public void onProgressChanged(SeekBar sb, int p, boolean user) {
+                tvSettingsBgAlphaLabel.setText(getString(R.string.settings_bg_alpha, p));
+                applySettingsBgAlpha(p);
+            }
+            @Override public void onStartTrackingTouch(SeekBar sb) {}
+            @Override public void onStopTrackingTouch(SeekBar sb) {
+                prefs.edit().putInt(PREF_SETTINGS_BG_ALPHA, sb.getProgress()).apply();
+            }
+        });
 
         // ── Restore button (settings auto-save; button reverts to pre-entry state) ─
         Button btnRestore = findViewById(R.id.btnSaveSettings);
@@ -771,6 +847,152 @@ public class SettingsActivity extends AppCompatActivity {
         }
     }
 
+    // ── Shortcut order rows ──────────────────────────────────────────────────
+
+    private void refreshShortcutOrderRows(LinearLayout container) {
+        container.removeAllViews();
+        int dp8 = dp(8);
+        int dp4 = dp(4);
+        for (int i = 0; i < shortcutOrder.length; i++) {
+            final int idx = i;
+            String id = shortcutOrder[i].trim();
+            LinearLayout row = new LinearLayout(this);
+            row.setOrientation(LinearLayout.HORIZONTAL);
+            row.setGravity(android.view.Gravity.CENTER_VERTICAL);
+            row.setPadding(0, dp4, 0, dp4);
+
+            String visPref = getShortcutVisPref(id);
+            if (visPref != null) {
+                Switch sw = new Switch(this);
+                sw.setChecked(prefs.getBoolean(visPref, true));
+                sw.setOnCheckedChangeListener((btn, checked) ->
+                        prefs.edit().putBoolean(visPref, checked).apply());
+                sw.setPadding(0, 0, dp(6), 0);
+                row.addView(sw);
+            }
+
+            TextView tvName = new TextView(this);
+            tvName.setText((i + 1) + ". " + getShortcutLabel(id));
+            tvName.setTextColor(getResources().getColor(R.color.textPrimary, null));
+            tvName.setTextSize(15f);
+            LinearLayout.LayoutParams nameParams =
+                    new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
+            nameParams.gravity = android.view.Gravity.CENTER_VERTICAL;
+            tvName.setLayoutParams(nameParams);
+            row.addView(tvName);
+
+            if (i > 0) {
+                Button btnUp = new Button(this);
+                btnUp.setText("↑");
+                btnUp.setTextSize(16f);
+                btnUp.setPadding(dp8, dp4, dp8, dp4);
+                btnUp.setOnClickListener(v -> {
+                    String tmp = shortcutOrder[idx - 1];
+                    shortcutOrder[idx - 1] = shortcutOrder[idx];
+                    shortcutOrder[idx] = tmp;
+                    refreshShortcutOrderRows(container);
+                    saveShortcutOrder();
+                });
+                row.addView(btnUp);
+            }
+
+            if (i < shortcutOrder.length - 1) {
+                Button btnDown = new Button(this);
+                btnDown.setText("↓");
+                btnDown.setTextSize(16f);
+                btnDown.setPadding(dp8, dp4, dp8, dp4);
+                btnDown.setOnClickListener(v -> {
+                    String tmp = shortcutOrder[idx + 1];
+                    shortcutOrder[idx + 1] = shortcutOrder[idx];
+                    shortcutOrder[idx] = tmp;
+                    refreshShortcutOrderRows(container);
+                    saveShortcutOrder();
+                });
+                row.addView(btnDown);
+            }
+
+            container.addView(row);
+        }
+    }
+
+    private String[] migrateShortcutOrder(String orderStr) {
+        String[] ALL_SHORTCUTS = {"library", "stats", "toggle_view", "settings"};
+        java.util.List<String> current = new java.util.ArrayList<>();
+        for (String s : orderStr.split(",")) {
+            String t = s.trim();
+            if (!t.isEmpty()) current.add(t);
+        }
+        boolean changed = false;
+        for (String key : ALL_SHORTCUTS) {
+            if (!current.contains(key)) {
+                current.add(key);
+                changed = true;
+            }
+        }
+        if (changed) {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < current.size(); i++) {
+                if (i > 0) sb.append(",");
+                sb.append(current.get(i));
+            }
+            prefs.edit().putString(PREF_HOME_SHORTCUT_ORDER, sb.toString()).apply();
+        }
+        return current.toArray(new String[0]);
+    }
+
+    private String[] migrateTopBtnOrder(String orderStr) {
+        String[] ALL = DEFAULT_TOP_BTN_ORDER.split(",");
+        java.util.List<String> current = new java.util.ArrayList<>();
+        for (String s : orderStr.split(",")) {
+            String t = s.trim();
+            if (!t.isEmpty()) current.add(t);
+        }
+        boolean changed = false;
+        for (String key : ALL) {
+            if (!current.contains(key)) {
+                current.add(key);
+                changed = true;
+            }
+        }
+        if (changed) {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < current.size(); i++) {
+                if (i > 0) sb.append(",");
+                sb.append(current.get(i));
+            }
+            prefs.edit().putString(PREF_TOP_BTN_ORDER, sb.toString()).apply();
+        }
+        return current.toArray(new String[0]);
+    }
+
+    private void saveShortcutOrder() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < shortcutOrder.length; i++) {
+            if (i > 0) sb.append(",");
+            sb.append(shortcutOrder[i].trim());
+        }
+        prefs.edit().putString(PREF_HOME_SHORTCUT_ORDER, sb.toString()).apply();
+    }
+
+    private String getShortcutLabel(String id) {
+        switch (id) {
+            case "stats":       return getString(R.string.tab_stats);
+            case "library":     return getString(R.string.tab_library);
+            case "toggle_view": return getString(R.string.shortcut_toggle_view);
+            case "settings":    return getString(R.string.shortcut_settings);
+            default:            return id;
+        }
+    }
+
+    private String getShortcutVisPref(String id) {
+        switch (id) {
+            case "stats":       return PREF_HOME_BTN_STATS_VISIBLE;
+            case "library":     return PREF_HOME_BTN_LIBRARY_VISIBLE;
+            case "toggle_view": return PREF_HOME_BTN_TOGGLE_VIEW_VISIBLE;
+            default:            return null;
+        }
+    }
+
     // ── Button order rows ────────────────────────────────────────────────────
 
     private LinearLayout getOrCreateBtnOrderContainer(String tag) {
@@ -886,7 +1108,8 @@ public class SettingsActivity extends AppCompatActivity {
                 getString(R.string.settings_ctrl_subtitle_toggle),
                 getString(R.string.settings_ctrl_subtitle),
                 getString(R.string.settings_ctrl_subtlist),
-                getString(R.string.settings_ctrl_rotate)
+                getString(R.string.settings_ctrl_rotate),
+                getString(R.string.settings_ctrl_player_settings)
         };
     }
 
@@ -916,6 +1139,40 @@ public class SettingsActivity extends AppCompatActivity {
             case "builtin":  return getString(R.string.tab_builtin);
             case "stats":    return getString(R.string.tab_stats);
             default:         return tabId;
+        }
+    }
+
+    private void applySettingsBgAlpha(int percent) {
+        int alpha = (int) (percent / 100f * 255);
+
+        int bgColor = getResources().getColor(R.color.bgDark, null);
+        int bgWithAlpha = (bgColor & 0x00FFFFFF) | (alpha << 24);
+        View coord = findViewById(android.R.id.content);
+        if (coord != null) {
+            View topView = ((android.view.ViewGroup) coord).getChildAt(0);
+            if (topView != null) topView.setBackgroundColor(bgWithAlpha);
+        }
+
+        int toolbarBg = getResources().getColor(R.color.colorPrimary, null);
+        int toolbarWithAlpha = (toolbarBg & 0x00FFFFFF) | (alpha << 24);
+        View toolbar = findViewById(R.id.toolbar);
+        if (toolbar != null && toolbar.getParent() instanceof View) {
+            ((View) toolbar.getParent()).setBackgroundColor(toolbarWithAlpha);
+        }
+    }
+
+    private void setupPanelDirGroup(RadioButton[] buttons, String[] values,
+                                    String savedValue, String prefKey) {
+        for (int i = 0; i < buttons.length; i++) {
+            buttons[i].setChecked(values[i].equals(savedValue));
+        }
+        for (int i = 0; i < buttons.length; i++) {
+            final String val = values[i];
+            buttons[i].setOnClickListener(v -> {
+                for (RadioButton rb : buttons) rb.setChecked(false);
+                ((RadioButton) v).setChecked(true);
+                prefs.edit().putString(prefKey, val).apply();
+            });
         }
     }
 
