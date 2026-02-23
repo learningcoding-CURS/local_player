@@ -207,38 +207,14 @@
                 android:layout_marginTop="4dp"
                 android:layout_marginBottom="4dp" />
 
-            <!-- ── 按钮调试区（可折叠标签切换） ── -->
+            <!-- ── 按钮调试区：暂停/进度条/长按（第一行） ── -->
             <LinearLayout
-                android:id="@+id/btnTuneTabRow"
+                android:id="@+id/btnTuneTabRow2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:paddingTop="4dp"
                 android:paddingBottom="4dp">
-
-                <TextView
-                    android:id="@+id/tabSeek"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="36dp"
-                    android:text="跳转"
-                    android:textColor="@color/textPrimary"
-                    android:textSize="12sp"
-                    android:gravity="center"
-                    android:background="@drawable/bg_speed_badge"
-                    android:layout_marginEnd="4dp" />
-
-                <TextView
-                    android:id="@+id/tabSkip"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="36dp"
-                    android:text="切换"
-                    android:textColor="@color/textPrimary"
-                    android:textSize="12sp"
-                    android:gravity="center"
-                    android:background="@drawable/bg_speed_badge"
-                    android:layout_marginEnd="4dp" />
 
                 <TextView
                     android:id="@+id/tabPlayPause"
@@ -270,6 +246,40 @@
                     android:layout_weight="1"
                     android:layout_height="36dp"
                     android:text="长按"
+                    android:textColor="@color/textPrimary"
+                    android:textSize="12sp"
+                    android:gravity="center"
+                    android:background="@drawable/bg_speed_badge" />
+
+            </LinearLayout>
+
+            <!-- ── 按钮调试区：跳转/切换（第二行） ── -->
+            <LinearLayout
+                android:id="@+id/btnTuneTabRow1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp">
+
+                <TextView
+                    android:id="@+id/tabSeek"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="36dp"
+                    android:text="跳转"
+                    android:textColor="@color/textPrimary"
+                    android:textSize="12sp"
+                    android:gravity="center"
+                    android:background="@drawable/bg_speed_badge"
+                    android:layout_marginEnd="4dp" />
+
+                <TextView
+                    android:id="@+id/tabSkip"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="36dp"
+                    android:text="切换"
                     android:textColor="@color/textPrimary"
                     android:textSize="12sp"
                     android:gravity="center"
@@ -376,24 +386,13 @@
                 android:layout_marginTop="4dp"
                 android:layout_marginBottom="4dp" />
 
-            <!-- ── 设置页背景（单独一行，位于进度条之下、字幕面板之上） ── -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:paddingTop="4dp"
-                android:paddingBottom="4dp">
-
-                <TextView android:id="@+id/tabSettingsBg" android:layout_width="match_parent" android:layout_height="36dp" android:text="设置页背景" android:textColor="@color/textPrimary" android:textSize="12sp" android:gravity="center" android:background="@drawable/bg_speed_badge" />
-
-            </LinearLayout>
-
-            <LinearLayout android:id="@+id/sectionSettingsBg" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone">
+            <!-- ── 设置页背景透明度（直接显示，无折叠按钮） ── -->
+            <LinearLayout android:id="@+id/sectionSettingsBg" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingTop="4dp" android:paddingBottom="4dp">
                 <TextView android:id="@+id/tvSettingsBgAlphaLabel" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/colorAccentLight" android:textSize="13sp" android:paddingTop="4dp" android:paddingBottom="4dp" />
                 <SeekBar android:id="@+id/sbSettingsBgAlpha" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="100" android:progressTint="@color/colorAccent" android:thumbTint="@color/colorAccent" android:layout_marginBottom="6dp" />
             </LinearLayout>
 
-            <!-- ── 字幕面板/字幕默认/播放控件（可折叠标签切换） ── -->
+            <!-- ── 字幕面板/字幕默认（第一行） ── -->
             <LinearLayout
                 android:id="@+id/miscTabRow"
                 android:layout_width="match_parent"
@@ -403,8 +402,20 @@
                 android:paddingBottom="4dp">
 
                 <TextView android:id="@+id/tabSubtitlePanel" android:layout_width="0dp" android:layout_weight="1" android:layout_height="36dp" android:text="字幕面板" android:textColor="@color/textPrimary" android:textSize="12sp" android:gravity="center" android:background="@drawable/bg_speed_badge" android:layout_marginEnd="4dp" />
-                <TextView android:id="@+id/tabSubtitleDefault" android:layout_width="0dp" android:layout_weight="1" android:layout_height="36dp" android:text="字幕默认" android:textColor="@color/textPrimary" android:textSize="12sp" android:gravity="center" android:background="@drawable/bg_speed_badge" android:layout_marginEnd="4dp" />
-                <TextView android:id="@+id/tabPlayerControls" android:layout_width="0dp" android:layout_weight="1" android:layout_height="36dp" android:text="播放控件" android:textColor="@color/textPrimary" android:textSize="12sp" android:gravity="center" android:background="@drawable/bg_speed_badge" />
+                <TextView android:id="@+id/tabSubtitleDefault" android:layout_width="0dp" android:layout_weight="1" android:layout_height="36dp" android:text="字幕默认" android:textColor="@color/textPrimary" android:textSize="12sp" android:gravity="center" android:background="@drawable/bg_speed_badge" />
+
+            </LinearLayout>
+
+            <!-- ── 播放控件（字幕默认下面单独一行） ── -->
+            <LinearLayout
+                android:id="@+id/playerControlsTabRow"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp">
+
+                <TextView android:id="@+id/tabPlayerControls" android:layout_width="match_parent" android:layout_height="36dp" android:text="播放控件" android:textColor="@color/textPrimary" android:textSize="12sp" android:gravity="center" android:background="@drawable/bg_speed_badge" />
 
             </LinearLayout>
 

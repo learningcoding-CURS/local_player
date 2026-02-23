@@ -873,14 +873,15 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
         tv.setVisibility(visible ? View.VISIBLE : View.GONE);
         String color = prefs.getString(colorPrefKey, defaultColor);
         tv.setTextColor(resolveButtonColor(color));
-        // 倍速外圈颜色：动态创建带描边的背景
+        // 倍速外圈：动态创建带描边的背景，可开关有无
+        boolean strokeVisible = prefs.getBoolean(SettingsActivity.PREF_BTN_SPEED_STROKE_VISIBLE, true);
         String strokeColor = prefs.getString(SettingsActivity.PREF_BTN_SPEED_STROKE_COLOR, "accent");
-        int strokeColorInt = resolveButtonColor(strokeColor);
+        int strokeColorInt = strokeVisible ? resolveButtonColor(strokeColor) : 0;
         GradientDrawable bg = new GradientDrawable();
         bg.setShape(GradientDrawable.RECTANGLE);
         bg.setColor(0xCC1A1A2E);  // 与 bg_speed_badge 一致
         bg.setCornerRadius(dpToPx(20));
-        bg.setStroke(dpToPx(1), strokeColorInt);
+        bg.setStroke(strokeVisible ? dpToPx(1) : 0, strokeColorInt);
         tv.setBackground(bg);
     }
 

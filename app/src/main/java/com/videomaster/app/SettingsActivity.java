@@ -120,6 +120,7 @@ public class SettingsActivity extends AppCompatActivity {
     public static final String PREF_BTN_ROTATE_COLOR         = "btn_rotate_color";
     public static final String PREF_BTN_SPEED_COLOR           = "btn_speed_color";
     public static final String PREF_BTN_SPEED_STROKE_COLOR    = "btn_speed_stroke_color";  // 倍速图标外圈颜色
+    public static final String PREF_BTN_SPEED_STROKE_VISIBLE  = "btn_speed_stroke_visible";  // 倍速外圈有无
     public static final String PREF_BTN_SEEK_VISIBLE          = "btn_seek_visible";
     public static final String PREF_BTN_SEEK_COLOR           = "btn_seek_color";
     public static final String PREF_BTN_PLAYER_SETTINGS_VISIBLE = "btn_player_settings_visible";
@@ -810,19 +811,16 @@ public class SettingsActivity extends AppCompatActivity {
             View sectionSubtitlePanel  = findViewById(R.id.sectionSubtitlePanel);
             View sectionSubtitleDefault = findViewById(R.id.sectionSubtitleDefault);
             View sectionPlayerControls  = findViewById(R.id.sectionPlayerControls);
-            View sectionSettingsBg     = findViewById(R.id.sectionSettingsBg);
 
             TextView tabSubtitlePanel  = findViewById(R.id.tabSubtitlePanel);
             TextView tabSubtitleDefault = findViewById(R.id.tabSubtitleDefault);
             TextView tabPlayerControls = findViewById(R.id.tabPlayerControls);
-            TextView tabSettingsBg     = findViewById(R.id.tabSettingsBg);
 
             View.OnClickListener miscTabToggle = v -> {
                 View section;
                 if (v == tabSubtitlePanel)   section = sectionSubtitlePanel;
                 else if (v == tabSubtitleDefault) section = sectionSubtitleDefault;
-                else if (v == tabPlayerControls)  section = sectionPlayerControls;
-                else                             section = sectionSettingsBg;
+                else                             section = sectionPlayerControls;
 
                 boolean wasVisible = section.getVisibility() == View.VISIBLE;
                 section.setVisibility(wasVisible ? View.GONE : View.VISIBLE);
@@ -834,7 +832,6 @@ public class SettingsActivity extends AppCompatActivity {
             tabSubtitlePanel.setOnClickListener(miscTabToggle);
             tabSubtitleDefault.setOnClickListener(miscTabToggle);
             tabPlayerControls.setOnClickListener(miscTabToggle);
-            tabSettingsBg.setOnClickListener(miscTabToggle);
         }
 
         // ── 字幕面板背景透明度 ─────────────────────────────────────────────
@@ -866,7 +863,7 @@ public class SettingsActivity extends AppCompatActivity {
         ctrlPrefsVis   = new String[]{
                 PREF_BTN_LOCK_VISIBLE, PREF_BTN_PLAYMODE_VISIBLE,
                 PREF_BTN_PLAYLIST_VISIBLE, PREF_BTN_SPEED_VISIBLE,
-                null,  // 倍速外圈无显隐，仅颜色
+                PREF_BTN_SPEED_STROKE_VISIBLE,  // 倍速外圈有无
                 PREF_BTN_SUBTITLE_TOGGLE_VISIBLE, PREF_BTN_SUBTITLE_VISIBLE,
                 PREF_BTN_SUBTLIST_VISIBLE, PREF_BTN_ROTATE_VISIBLE,
                 PREF_BTN_SEEK_VISIBLE, PREF_BTN_PLAYPAUSE_VISIBLE,
