@@ -1108,8 +1108,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void openPlayer(Uri uri) {
+        ArrayList<String> uris = new ArrayList<>();
+        uris.add(uri.toString());
         Intent intent = new Intent(this, PlayerActivity.class);
         intent.putExtra(PlayerActivity.EXTRA_VIDEO_URI, uri.toString());
+        intent.putStringArrayListExtra(PlayerActivity.EXTRA_PLAYLIST_URIS, uris);
+        intent.putExtra(PlayerActivity.EXTRA_PLAYLIST_INDEX, 0);
         startActivity(intent);
     }
 

@@ -282,7 +282,7 @@
                 <SeekBar android:id="@+id/sbSeekAlpha" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="90" android:progressTint="@color/colorAccent" android:thumbTint="@color/colorAccent" android:layout_marginBottom="6dp" />
 
                 <TextView android:id="@+id/tvSeekOffsetLabel" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/textSecondary" android:textSize="13sp" android:paddingTop="4dp" android:paddingBottom="2dp" />
-                <SeekBar android:id="@+id/sbSeekOffset" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="300" android:progressTint="@color/colorAccent" android:thumbTint="@color/colorAccent" android:layout_marginBottom="6dp" />
+                <SeekBar android:id="@+id/sbSeekOffset" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="1000" android:progressTint="@color/colorAccent" android:thumbTint="@color/colorAccent" android:layout_marginBottom="6dp" />
             </LinearLayout>
 
             <!-- ── 切换按钮（可折叠） ── -->
@@ -300,7 +300,7 @@
                 <SeekBar android:id="@+id/sbSkipAlpha" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="90" android:progressTint="@color/colorAccent" android:thumbTint="@color/colorAccent" android:layout_marginBottom="6dp" />
 
                 <TextView android:id="@+id/tvSkipOffsetLabel" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/textSecondary" android:textSize="13sp" android:paddingTop="4dp" android:paddingBottom="2dp" />
-                <SeekBar android:id="@+id/sbSkipOffset" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="300" android:progressTint="@color/colorAccent" android:thumbTint="@color/colorAccent" android:layout_marginBottom="6dp" />
+                <SeekBar android:id="@+id/sbSkipOffset" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="1000" android:progressTint="@color/colorAccent" android:thumbTint="@color/colorAccent" android:layout_marginBottom="6dp" />
             </LinearLayout>
 
             <!-- ── 暂停按钮（可折叠） ── -->

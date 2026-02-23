@@ -257,6 +257,13 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
         playlistIndex = getIntent().getIntExtra(EXTRA_PLAYLIST_INDEX, 0);
         playlistId    = getIntent().getStringExtra(EXTRA_PLAYLIST_ID);
 
+        // 单文件打开时也构建 1 项播放列表，使切换按钮和手势切换可用（边界时提示）
+        if (playlistUris == null && uriStr != null) {
+            playlistUris = new ArrayList<>();
+            playlistUris.add(uriStr);
+            playlistIndex = 0;
+        }
+
         if (savedInstanceState != null) {
             savedPosition = savedInstanceState.getLong("position", 0);
             int savedMode = savedInstanceState.getInt("play_mode", 0);
@@ -426,6 +433,23 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
     private void applyPlayerSettings() {
         SharedPreferences prefs = getSharedPreferences(SettingsActivity.PREFS_NAME, MODE_PRIVATE);
 
+        // ── 竖屏/横屏手势方向（需在设置变更后重新应用） ─────────────────────────────
+        if (gestureHandler != null) {
+            boolean landscape = getResources().getConfiguration().orientation
+                    == Configuration.ORIENTATION_LANDSCAPE;
+            gestureHandler.setLandscape(landscape);
+            String portraitPref  = prefs.getString(SettingsActivity.PREF_PORTRAIT_SWIPE, "VERTICAL");
+            String landscapePref = prefs.getString(SettingsActivity.PREF_LANDSCAPE_SWIPE, "HORIZONTAL");
+            gestureHandler.setPortraitSwipeDirection(
+                    "HORIZONTAL".equals(portraitPref)
+                            ? GestureHandler.SwipeDirection.HORIZONTAL
+                            : GestureHandler.SwipeDirection.VERTICAL);
+            gestureHandler.setLandscapeSwipeDirection(
+                    "VERTICAL".equals(landscapePref)
+                            ? GestureHandler.SwipeDirection.VERTICAL
+                            : GestureHandler.SwipeDirection.HORIZONTAL);
+        }
+
         // ── Seek buttons ──────────────────────────────────────────────────
         int seekIconSizeDp = prefs.getInt(SettingsActivity.PREF_SEEK_ICON_SIZE,
                 SettingsActivity.DEFAULT_SEEK_ICON_SIZE);
@@ -448,12 +472,18 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
         btnRewind.setImageAlpha(alphaVal);
         btnForward.setImageAlpha(alphaVal);
 
-        // ── Seek button vertical offset (positive = move up) ──
+        // ── Seek/Skip 按钮独立垂直偏移（positive = 上移），两行互不影响，用 post 延迟到布局完成后执行
         int seekOffsetDp = prefs.getInt(SettingsActivity.PREF_SEEK_OFFSET_Y,
                 SettingsActivity.DEFAULT_SEEK_OFFSET_Y);
+        int skipOffsetDp = prefs.getInt(SettingsActivity.PREF_SKIP_BTN_OFFSET_Y,
+                SettingsActivity.DEFAULT_SKIP_BTN_OFFSET_Y);
+        View centerContainer = findViewById(R.id.centerControlsContainer);
         View seekRow = findViewById(R.id.seekRow);
-        if (seekRow != null) {
-            seekRow.setTranslationY(-dpToPx(seekOffsetDp));
+        View skipRow = findViewById(R.id.skipRow);
+        if (centerContainer != null && seekRow != null && skipRow != null) {
+            final int seekOff = seekOffsetDp;
+            final int skipOff = skipOffsetDp;
+            centerContainer.post(() -> applyCenterOffset(seekRow, skipRow, seekOff, skipOff));
         }
 
         // ── SeekBar appearance ────────────────────────────────────────────
@@ -556,14 +586,6 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
         if (btnSkipPrev != null) btnSkipPrev.setAlpha(alphaF);
         if (btnSkipNext != null) btnSkipNext.setAlpha(alphaF);
 
-        // ── Skip button vertical offset (positive = move up) ──
-        int skipOffsetDp = prefs.getInt(SettingsActivity.PREF_SKIP_BTN_OFFSET_Y,
-                SettingsActivity.DEFAULT_SKIP_BTN_OFFSET_Y);
-        View skipRow = findViewById(R.id.skipRow);
-        if (skipRow != null) {
-            skipRow.setTranslationY(-dpToPx(skipOffsetDp));
-        }
-
         // ── Play/Pause button size / alpha / offset ──
         int ppSizeDp = prefs.getInt(SettingsActivity.PREF_PLAYPAUSE_BTN_SIZE,
                 SettingsActivity.DEFAULT_PLAYPAUSE_BTN_SIZE);
@@ -589,6 +611,49 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
         // ── 播放列表面板方向（若面板已打开则实时更新，便于透明设置页预览）──
         if (isPanelVisible && playlistPanel != null) {
             applyPlaylistPanelLayout();
+        }
+    }
+
+    /**
+     * 独立设置 seekRow 和 skipRow 的垂直位置，两行互不影响。
+     * 以屏幕中心为基准：offset 正值=上移，负值=下移。
+     */
+    private void applyCenterOffset(View seekRow, View skipRow, int seekOffsetDp, int skipOffsetDp) {
+        ViewGroup parent = (ViewGroup) seekRow.getParent();
+        if (parent == null) return;
+        int parentH = parent.getHeight();
+        if (parentH <= 0) return;
+        int seekH = seekRow.getHeight();
+        int skipH = skipRow.getHeight();
+        if (seekH <= 0 || skipH <= 0) {
+            seekRow.measure(View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+                    View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+            skipRow.measure(View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+                    View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+            seekH = seekRow.getMeasuredHeight();
+            skipH = skipRow.getMeasuredHeight();
+        }
+        if (seekH <= 0) seekH = dpToPx(72);
+        if (skipH <= 0) skipH = dpToPx(48);
+        int gapPx = dpToPx(4);
+        int seekOffPx = dpToPx(seekOffsetDp);
+        int skipOffPx = dpToPx(skipOffsetDp);
+
+        int centerY = parentH / 2;
+        int seekTop = centerY - seekH / 2 - seekOffPx;
+        int skipTop = centerY - seekH / 2 + seekH + gapPx - skipOffPx;
+
+        if (seekRow.getLayoutParams() instanceof FrameLayout.LayoutParams) {
+            FrameLayout.LayoutParams slp = (FrameLayout.LayoutParams) seekRow.getLayoutParams();
+            slp.topMargin = seekTop;
+            slp.gravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL;
+            seekRow.setLayoutParams(slp);
+        }
+        if (skipRow.getLayoutParams() instanceof FrameLayout.LayoutParams) {
+            FrameLayout.LayoutParams sklp = (FrameLayout.LayoutParams) skipRow.getLayoutParams();
+            sklp.topMargin = skipTop;
+            sklp.gravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL;
+            skipRow.setLayoutParams(sklp);
         }
     }
 

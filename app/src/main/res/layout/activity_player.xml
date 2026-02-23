@@ -3,7 +3,9 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/black">
+    android:background="@android:color/black"
+    android:clipChildren="false"
+    android:clipToPadding="false">
 
     <!-- Video surface — ExoPlayer renders here -->
     <androidx.media3.ui.PlayerView
@@ -78,7 +80,9 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/overlayBackground"
-        android:visibility="visible">
+        android:visibility="visible"
+        android:clipChildren="false"
+        android:clipToPadding="false">
 
         <!-- Top bar: lock | play-mode | space | speed | playlist-panel | subtitle | subtitle-list | rotate -->
         <LinearLayout
@@ -197,93 +201,7 @@
                 android:contentDescription="@string/settings_title" />
         </LinearLayout>
 
-        <!-- Centre controls: two rows stacked vertically -->
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:orientation="vertical"
-            android:gravity="center_horizontal">
-
-            <!-- Row 1: rewind | play/pause | forward -->
-            <LinearLayout
-                android:id="@+id/seekRow"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
-
-                <ImageButton
-                    android:id="@+id/btnRewind"
-                    android:layout_width="64dp"
-                    android:layout_height="64dp"
-                    android:src="@drawable/ic_rewind"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:tint="@color/controlTint"
-                    android:contentDescription="@string/btn_rewind"
-                    android:scaleType="fitCenter"
-                    android:padding="10dp" />
-
-                <ImageButton
-                    android:id="@+id/btnPlayPause"
-                    android:layout_width="72dp"
-                    android:layout_height="72dp"
-                    android:src="@drawable/ic_play"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:tint="@color/controlTint"
-                    android:contentDescription="@string/btn_play"
-                    android:padding="8dp"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginEnd="16dp" />
-
-                <ImageButton
-                    android:id="@+id/btnForward"
-                    android:layout_width="64dp"
-                    android:layout_height="64dp"
-                    android:src="@drawable/ic_forward"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:tint="@color/controlTint"
-                    android:contentDescription="@string/btn_forward"
-                    android:scaleType="fitCenter"
-                    android:padding="10dp" />
-            </LinearLayout>
-
-            <!-- Row 2: skip-prev | skip-next (separate from seek buttons) -->
-            <LinearLayout
-                android:id="@+id/skipRow"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_marginTop="4dp">
-
-                <ImageButton
-                    android:id="@+id/btnSkipPrev"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:src="@drawable/ic_skip_prev"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:tint="@color/controlTint"
-                    android:contentDescription="@string/btn_skip_prev"
-                    android:scaleType="fitCenter"
-                    android:padding="10dp"
-                    android:layout_marginEnd="24dp" />
-
-                <ImageButton
-                    android:id="@+id/btnSkipNext"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:src="@drawable/ic_skip_next"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:tint="@color/controlTint"
-                    android:contentDescription="@string/btn_skip_next"
-                    android:scaleType="fitCenter"
-                    android:padding="10dp"
-                    android:layout_marginStart="24dp" />
-            </LinearLayout>
-        </LinearLayout>
-
-        <!-- Bottom bar: time + seekbar -->
+        <!-- Bottom bar: time + seekbar（置于中央控制区之前，使中央按钮偏移后仍能接收点击） -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -335,6 +253,93 @@
                 android:thumb="@drawable/seekbar_thumb"
                 android:splitTrack="false" />
         </LinearLayout>
+
+        <!-- Centre controls: FrameLayout 使 seekRow/skipRow 独立定位，互不影响 -->
+        <FrameLayout
+            android:id="@+id/centerControlsContainer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipChildren="false"
+            android:clipToPadding="false">
+
+            <!-- Row 1: rewind | play/pause | forward（独立垂直偏移） -->
+            <LinearLayout
+                android:id="@+id/seekRow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top|center_horizontal"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <ImageButton
+                    android:id="@+id/btnRewind"
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:src="@drawable/ic_rewind"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:tint="@color/controlTint"
+                    android:contentDescription="@string/btn_rewind"
+                    android:scaleType="fitCenter"
+                    android:padding="10dp" />
+
+                <ImageButton
+                    android:id="@+id/btnPlayPause"
+                    android:layout_width="72dp"
+                    android:layout_height="72dp"
+                    android:src="@drawable/ic_play"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:tint="@color/controlTint"
+                    android:contentDescription="@string/btn_play"
+                    android:padding="8dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp" />
+
+                <ImageButton
+                    android:id="@+id/btnForward"
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:src="@drawable/ic_forward"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:tint="@color/controlTint"
+                    android:contentDescription="@string/btn_forward"
+                    android:scaleType="fitCenter"
+                    android:padding="10dp" />
+            </LinearLayout>
+
+            <!-- Row 2: skip-prev | skip-next（独立垂直偏移，与 seekRow 互不影响） -->
+            <LinearLayout
+                android:id="@+id/skipRow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top|center_horizontal"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <ImageButton
+                    android:id="@+id/btnSkipPrev"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:src="@drawable/ic_skip_prev"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:tint="@color/controlTint"
+                    android:contentDescription="@string/btn_skip_prev"
+                    android:scaleType="fitCenter"
+                    android:padding="10dp"
+                    android:layout_marginEnd="24dp" />
+
+                <ImageButton
+                    android:id="@+id/btnSkipNext"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:src="@drawable/ic_skip_next"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:tint="@color/controlTint"
+                    android:contentDescription="@string/btn_skip_next"
+                    android:scaleType="fitCenter"
+                    android:padding="10dp"
+                    android:layout_marginStart="24dp" />
+            </LinearLayout>
+        </FrameLayout>
 
     </FrameLayout>
 

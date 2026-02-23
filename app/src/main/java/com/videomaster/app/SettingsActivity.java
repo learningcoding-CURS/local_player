@@ -540,19 +540,19 @@ public class SettingsActivity extends AppCompatActivity {
             }
         });
 
-        // ── 跳转按钮上下偏移 ─────────────────────────────────────────────
+        // ── 跳转按钮上下偏移（±800 dp，覆盖全屏任意位置）─────────────────────────────
         SeekBar sbSeekOffset = findViewById(R.id.sbSeekOffset);
         TextView tvSeekOffsetLabel = findViewById(R.id.tvSeekOffsetLabel);
-        sbSeekOffset.setMax(300); // -150 to +150 dp
-        sbSeekOffset.setProgress(Math.max(0, Math.min(300, savedSeekOffset + 150)));
+        sbSeekOffset.setMax(1600); // -800 to +800 dp，全屏可移
+        sbSeekOffset.setProgress(Math.max(0, Math.min(1600, savedSeekOffset + 800)));
         tvSeekOffsetLabel.setText(getString(R.string.settings_seek_offset, savedSeekOffset));
         sbSeekOffset.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override public void onProgressChanged(SeekBar sb, int p, boolean user) {
-                tvSeekOffsetLabel.setText(getString(R.string.settings_seek_offset, p - 150));
+                tvSeekOffsetLabel.setText(getString(R.string.settings_seek_offset, p - 800));
             }
             @Override public void onStartTrackingTouch(SeekBar sb) {}
             @Override public void onStopTrackingTouch(SeekBar sb) {
-                prefs.edit().putInt(PREF_SEEK_OFFSET_Y, sb.getProgress() - 150).apply();
+                prefs.edit().putInt(PREF_SEEK_OFFSET_Y, sb.getProgress() - 800).apply();
             }
         });
 
@@ -592,15 +592,16 @@ public class SettingsActivity extends AppCompatActivity {
 
             SeekBar sbSkipOffset = findViewById(R.id.sbSkipOffset);
             TextView tvSkipOffsetLabel = findViewById(R.id.tvSkipOffsetLabel);
-            sbSkipOffset.setProgress(Math.max(0, Math.min(300, savedSkipBtnOffset + 150)));
+            sbSkipOffset.setMax(1600); // -800 to +800 dp，全屏可移
+            sbSkipOffset.setProgress(Math.max(0, Math.min(1600, savedSkipBtnOffset + 800)));
             tvSkipOffsetLabel.setText(getString(R.string.settings_skip_btn_offset, savedSkipBtnOffset));
             sbSkipOffset.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                 @Override public void onProgressChanged(SeekBar sb, int p, boolean user) {
-                    tvSkipOffsetLabel.setText(getString(R.string.settings_skip_btn_offset, p - 150));
+                    tvSkipOffsetLabel.setText(getString(R.string.settings_skip_btn_offset, p - 800));
                 }
                 @Override public void onStartTrackingTouch(SeekBar sb) {}
                 @Override public void onStopTrackingTouch(SeekBar sb) {
-                    prefs.edit().putInt(PREF_SKIP_BTN_OFFSET_Y, sb.getProgress() - 150).apply();
+                    prefs.edit().putInt(PREF_SKIP_BTN_OFFSET_Y, sb.getProgress() - 800).apply();
                 }
             });
         }
