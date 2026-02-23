@@ -585,6 +585,43 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
 
         // ── Button order in top/center bar ────────────────────────────────
         applyButtonOrder(prefs);
+
+        // ── 播放列表面板方向（若面板已打开则实时更新，便于透明设置页预览）──
+        if (isPanelVisible && playlistPanel != null) {
+            applyPlaylistPanelLayout();
+        }
+    }
+
+    /** 根据当前方向设置播放列表面板的布局（位置、尺寸、关闭按钮朝向） */
+    private void applyPlaylistPanelLayout() {
+        if (playlistPanel == null || playlistUris == null || playlistUris.isEmpty()) return;
+        String dir = getPanelDirection();
+        int sidePx  = (int) (260 * density());
+        int blockPx = (int) (300 * density());
+        FrameLayout.LayoutParams lp;
+        switch (dir) {
+            case SettingsActivity.PANEL_DIR_LEFT:
+                lp = new FrameLayout.LayoutParams(sidePx, ViewGroup.LayoutParams.MATCH_PARENT, Gravity.START);
+                break;
+            case SettingsActivity.PANEL_DIR_TOP:
+                lp = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, blockPx, Gravity.TOP);
+                break;
+            case SettingsActivity.PANEL_DIR_BOTTOM:
+                lp = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, blockPx, Gravity.BOTTOM);
+                break;
+            default:
+                lp = new FrameLayout.LayoutParams(sidePx, ViewGroup.LayoutParams.MATCH_PARENT, Gravity.END);
+                break;
+        }
+        playlistPanel.setLayoutParams(lp);
+        switch (dir) {
+            case SettingsActivity.PANEL_DIR_LEFT:   btnClosePanel.setRotation(180); break;
+            case SettingsActivity.PANEL_DIR_TOP:   btnClosePanel.setRotation(270); break;
+            case SettingsActivity.PANEL_DIR_BOTTOM: btnClosePanel.setRotation(90);  break;
+            default:                               btnClosePanel.setRotation(0);   break;
+        }
+        playlistPanel.setTranslationX(0);
+        playlistPanel.setTranslationY(0);
     }
 
     /**
@@ -985,45 +1022,12 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
     private void openPlaylistPanel() {
         if (playlistUris == null || playlistUris.isEmpty()) return;
 
+        applyPlaylistPanelLayout();
         String dir = getPanelDirection();
-        int sidePx   = (int) (260 * density()); // width for LEFT/RIGHT panels
-        int blockPx  = (int) (300 * density()); // height for TOP/BOTTOM panels
+        int sidePx  = (int) (260 * density());
+        int blockPx = (int) (300 * density());
 
-        // Set LayoutParams to position the panel on the correct edge
-        FrameLayout.LayoutParams lp;
-        switch (dir) {
-            case SettingsActivity.PANEL_DIR_LEFT:
-                lp = new FrameLayout.LayoutParams(sidePx, ViewGroup.LayoutParams.MATCH_PARENT,
-                        Gravity.START);
-                break;
-            case SettingsActivity.PANEL_DIR_TOP:
-                lp = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, blockPx,
-                        Gravity.TOP);
-                break;
-            case SettingsActivity.PANEL_DIR_BOTTOM:
-                lp = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, blockPx,
-                        Gravity.BOTTOM);
-                break;
-            default: // RIGHT
-                lp = new FrameLayout.LayoutParams(sidePx, ViewGroup.LayoutParams.MATCH_PARENT,
-                        Gravity.END);
-                break;
-        }
-        playlistPanel.setLayoutParams(lp);
-
-        // Rotate close button arrow to point in the close direction
-        switch (dir) {
-            case SettingsActivity.PANEL_DIR_LEFT:   btnClosePanel.setRotation(180); break;
-            case SettingsActivity.PANEL_DIR_TOP:    btnClosePanel.setRotation(270); break;
-            case SettingsActivity.PANEL_DIR_BOTTOM: btnClosePanel.setRotation(90);  break;
-            default:                                 btnClosePanel.setRotation(0);   break;
-        }
-
-        // Reset any leftover translation from previous open/close
-        playlistPanel.setTranslationX(0);
-        playlistPanel.setTranslationY(0);
-
-        // Animate in from the correct edge using fixed pixel values (avoids getWidth()=0 when GONE)
+        // Animate in from the correct edge
         switch (dir) {
             case SettingsActivity.PANEL_DIR_LEFT:
                 playlistPanel.setTranslationX(-sidePx);

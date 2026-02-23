@@ -36,6 +36,11 @@ public class SettingsActivity extends AppCompatActivity {
     public static final String PREF_PORTRAIT_SWIPE   = "portrait_swipe";
     public static final String PREF_LANDSCAPE_SWIPE  = "landscape_swipe";
     public static final String PREF_VIEW_MODE        = "view_mode";
+    public static final String PREF_GRID_SPAN_COUNT  = "grid_span_count";  // deprecated, migrated to PREF_GRID_CELL_WIDTH_DP
+    public static final String PREF_GRID_CELL_WIDTH_DP     = "grid_cell_width_dp";  // deprecated, migrated to per-tab
+    public static final String PREF_GRID_CELL_WIDTH_LIBRARY = "grid_cell_width_library";   // 媒体库
+    public static final String PREF_GRID_CELL_WIDTH_BUILTIN = "grid_cell_width_builtin";   // 内置媒体
+    public static final String PREF_GRID_CELL_WIDTH_PLAYLIST= "grid_cell_width_playlist";  // 我的列表
     public static final String PREF_SUBTITLE_SIZE    = "subtitle_size";
     public static final String PREF_SUBTITLE_LINE_SP = "subtitle_line_spacing";
 
@@ -123,6 +128,12 @@ public class SettingsActivity extends AppCompatActivity {
     public static final String VIEW_MODE_GRID = "GRID";
     public static final String VIEW_MODE_LIST = "LIST";
 
+    public static final int DEFAULT_GRID_SPAN_COUNT = 2;
+    /** 方格目标宽度（dp），用于计算列数。值越小方格越小、列数越多。 */
+    public static final int DEFAULT_GRID_CELL_WIDTH_DP = 140;
+    public static final int MIN_GRID_CELL_WIDTH_DP   = 80;
+    public static final int MAX_GRID_CELL_WIDTH_DP   = 220;
+
     public static final float DEFAULT_SUBTITLE_SIZE    = 18f;
     public static final float DEFAULT_SUBTITLE_LINE_SP = 1.2f;
 
@@ -141,6 +152,13 @@ public class SettingsActivity extends AppCompatActivity {
     // Home shortcut buttons (top row on main page)
     public static final String PREF_HOME_SHORTCUT_ORDER   = "home_shortcut_order";
     public static final String DEFAULT_HOME_SHORTCUT_ORDER = "library,stats,toggle_view,settings";
+
+    /** 将旧的列数偏好迁移为方格宽度（dp）。2列≈180dp，3列≈120dp，4列≈90dp */
+    private static int migrateGridSpanToCellWidth(int span) {
+        if (span <= 2) return 180;
+        if (span == 3) return 120;
+        return 90;
+    }
 
     // Available button color options
     private static final String[] COLOR_VALUES = {"white","accent","orange","cyan","green","yellow"};
@@ -205,6 +223,19 @@ public class SettingsActivity extends AppCompatActivity {
         String savedPanelDirPortrait  = prefs.getString(PREF_PANEL_DIR_PORTRAIT,  PANEL_DIR_RIGHT);
         String savedPanelDirLandscape = prefs.getString(PREF_PANEL_DIR_LANDSCAPE, PANEL_DIR_RIGHT);
         String savedViewMode  = prefs.getString(PREF_VIEW_MODE, VIEW_MODE_GRID);
+        int    savedGridSpan  = prefs.getInt(PREF_GRID_SPAN_COUNT, DEFAULT_GRID_SPAN_COUNT);
+        int    legacyWidth    = prefs.getInt(PREF_GRID_CELL_WIDTH_DP, -1);
+        if (legacyWidth < 0) legacyWidth = migrateGridSpanToCellWidth(savedGridSpan);
+        legacyWidth = Math.max(MIN_GRID_CELL_WIDTH_DP, Math.min(MAX_GRID_CELL_WIDTH_DP, legacyWidth));
+        int savedGridLibrary  = prefs.getInt(PREF_GRID_CELL_WIDTH_LIBRARY, -1);
+        int savedGridBuiltin   = prefs.getInt(PREF_GRID_CELL_WIDTH_BUILTIN, -1);
+        int savedGridPlaylist  = prefs.getInt(PREF_GRID_CELL_WIDTH_PLAYLIST, -1);
+        if (savedGridLibrary < 0) { savedGridLibrary = legacyWidth; prefs.edit().putInt(PREF_GRID_CELL_WIDTH_LIBRARY, savedGridLibrary).apply(); }
+        if (savedGridBuiltin < 0) { savedGridBuiltin  = legacyWidth; prefs.edit().putInt(PREF_GRID_CELL_WIDTH_BUILTIN, savedGridBuiltin).apply(); }
+        if (savedGridPlaylist < 0) { savedGridPlaylist = legacyWidth; prefs.edit().putInt(PREF_GRID_CELL_WIDTH_PLAYLIST, savedGridPlaylist).apply(); }
+        savedGridLibrary  = Math.max(MIN_GRID_CELL_WIDTH_DP, Math.min(MAX_GRID_CELL_WIDTH_DP, savedGridLibrary));
+        savedGridBuiltin  = Math.max(MIN_GRID_CELL_WIDTH_DP, Math.min(MAX_GRID_CELL_WIDTH_DP, savedGridBuiltin));
+        savedGridPlaylist  = Math.max(MIN_GRID_CELL_WIDTH_DP, Math.min(MAX_GRID_CELL_WIDTH_DP, savedGridPlaylist));
         float  savedSubSize   = prefs.getFloat(PREF_SUBTITLE_SIZE, DEFAULT_SUBTITLE_SIZE);
         float  savedLineSp    = prefs.getFloat(PREF_SUBTITLE_LINE_SP, DEFAULT_SUBTITLE_LINE_SP);
         int    savedSeekIconSize   = prefs.getInt(PREF_SEEK_ICON_SIZE,         DEFAULT_SEEK_ICON_SIZE);
@@ -328,6 +359,14 @@ public class SettingsActivity extends AppCompatActivity {
         ((RadioGroup) findViewById(R.id.rgViewMode)).setOnCheckedChangeListener((g, id) ->
                 prefs.edit().putString(PREF_VIEW_MODE,
                         id == R.id.rbViewGrid ? VIEW_MODE_GRID : VIEW_MODE_LIST).apply());
+
+        // ── 方格大小（媒体库 / 内置媒体 / 我的列表 分别调节）────────────────────
+        setupGridCellSeekBar(R.id.sbGridCellWidthLibrary, R.id.tvGridCellWidthLibrary,
+                PREF_GRID_CELL_WIDTH_LIBRARY, savedGridLibrary, R.string.settings_grid_width_library);
+        setupGridCellSeekBar(R.id.sbGridCellWidthBuiltin, R.id.tvGridCellWidthBuiltin,
+                PREF_GRID_CELL_WIDTH_BUILTIN, savedGridBuiltin, R.string.settings_grid_width_builtin);
+        setupGridCellSeekBar(R.id.sbGridCellWidthPlaylist, R.id.tvGridCellWidthPlaylist,
+                PREF_GRID_CELL_WIDTH_PLAYLIST, savedGridPlaylist, R.string.settings_grid_width_playlist);
 
         // ── Portrait swipe ────────────────────────────────────────────────────
         RadioButton rbPortraitV = findViewById(R.id.rbPortraitVertical);
@@ -1329,6 +1368,26 @@ public class SettingsActivity extends AppCompatActivity {
         if (toolbar != null && toolbar.getParent() instanceof View) {
             ((View) toolbar.getParent()).setBackgroundColor(toolbarWithAlpha);
         }
+    }
+
+    private void setupGridCellSeekBar(int seekBarId, int labelId, String prefKey,
+                                      int savedVal, int labelFormatResId) {
+        SeekBar sb = findViewById(seekBarId);
+        TextView tv = findViewById(labelId);
+        sb.setMax(MAX_GRID_CELL_WIDTH_DP - MIN_GRID_CELL_WIDTH_DP);
+        sb.setProgress(savedVal - MIN_GRID_CELL_WIDTH_DP);
+        tv.setText(getString(labelFormatResId, savedVal));
+        sb.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override public void onProgressChanged(SeekBar s, int p, boolean user) {
+                int val = MIN_GRID_CELL_WIDTH_DP + p;
+                tv.setText(getString(labelFormatResId, val));
+            }
+            @Override public void onStartTrackingTouch(SeekBar s) {}
+            @Override public void onStopTrackingTouch(SeekBar s) {
+                int val = MIN_GRID_CELL_WIDTH_DP + s.getProgress();
+                prefs.edit().putInt(prefKey, val).apply();
+            }
+        });
     }
 
     private void setupPanelDirGroup(RadioButton[] buttons, String[] values,

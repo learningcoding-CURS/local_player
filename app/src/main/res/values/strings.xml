@@ -116,6 +116,11 @@
     <string name="settings_view_mode">列表显示模式</string>
     <string name="settings_view_grid">方块视图（网格）</string>
     <string name="settings_view_list">传统列表</string>
+    <string name="settings_grid_size">方格大小（每个格子宽度）</string>
+    <string name="settings_grid_cell_width">方格宽度：%d dp（越小格子越多）</string>
+    <string name="settings_grid_width_library">媒体库：%d dp</string>
+    <string name="settings_grid_width_builtin">内置媒体：%d dp</string>
+    <string name="settings_grid_width_playlist">我的列表：%d dp</string>
     <string name="swipe_vertical">上下滑动</string>
     <string name="swipe_horizontal">左右滑动</string>
     <string name="swipe_vertical_desc">上下滑动（右侧，不需要长按）</string>
