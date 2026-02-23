@@ -90,6 +90,7 @@ public class SettingsActivity extends AppCompatActivity {
     public static final String PREF_BTN_SUBTITLE_TOGGLE_VISIBLE = "btn_subtitle_toggle_visible";
     public static final String PREF_BTN_SUBTLIST_VISIBLE        = "btn_subtlist_visible";
     public static final String PREF_BTN_ROTATE_VISIBLE          = "btn_rotate_visible";
+    public static final String PREF_BTN_SPEED_VISIBLE          = "btn_speed_visible";
 
     // Skip buttons (prev/next video)
     public static final String PREF_BTN_SKIP_VISIBLE         = "btn_skip_visible";
@@ -109,6 +110,7 @@ public class SettingsActivity extends AppCompatActivity {
     public static final String PREF_BTN_SUBTITLE_TOGGLE_COLOR= "btn_subtitle_toggle_color";
     public static final String PREF_BTN_SUBTLIST_COLOR       = "btn_subtlist_color";
     public static final String PREF_BTN_ROTATE_COLOR         = "btn_rotate_color";
+    public static final String PREF_BTN_SPEED_COLOR           = "btn_speed_color";
     public static final String PREF_BTN_SEEK_VISIBLE          = "btn_seek_visible";
     public static final String PREF_BTN_SEEK_COLOR           = "btn_seek_color";
     public static final String PREF_BTN_PLAYER_SETTINGS_VISIBLE = "btn_player_settings_visible";
@@ -133,7 +135,7 @@ public class SettingsActivity extends AppCompatActivity {
 
     // Default button orders
     public static final String DEFAULT_TOP_BTN_ORDER =
-            "lock,play-mode,playlist-panel,subtitle-toggle,subtitle,subtitle-list,rotate,settings";
+            "lock,play-mode,playlist-panel,speed,subtitle-toggle,subtitle,subtitle-list,rotate,settings";
     public static final String DEFAULT_CENTER_BTN_ORDER = "rewind,play-pause,forward";
 
     public static final String DEFAULT_BTN_COLOR         = "white";
@@ -823,26 +825,29 @@ public class SettingsActivity extends AppCompatActivity {
         LinearLayout controlsContainer = findViewById(R.id.playerControlsContainer);
         ctrlPrefsVis   = new String[]{
                 PREF_BTN_LOCK_VISIBLE, PREF_BTN_PLAYMODE_VISIBLE,
-                PREF_BTN_PLAYLIST_VISIBLE, PREF_BTN_SUBTITLE_TOGGLE_VISIBLE,
-                PREF_BTN_SUBTITLE_VISIBLE, PREF_BTN_SUBTLIST_VISIBLE,
-                PREF_BTN_ROTATE_VISIBLE, PREF_BTN_SEEK_VISIBLE, PREF_BTN_PLAYPAUSE_VISIBLE,
+                PREF_BTN_PLAYLIST_VISIBLE, PREF_BTN_SPEED_VISIBLE,
+                PREF_BTN_SUBTITLE_TOGGLE_VISIBLE, PREF_BTN_SUBTITLE_VISIBLE,
+                PREF_BTN_SUBTLIST_VISIBLE, PREF_BTN_ROTATE_VISIBLE,
+                PREF_BTN_SEEK_VISIBLE, PREF_BTN_PLAYPAUSE_VISIBLE,
                 PREF_BTN_SKIP_VISIBLE, PREF_BTN_PLAYER_SETTINGS_VISIBLE };
         ctrlPrefsColor = new String[]{
                 PREF_BTN_LOCK_COLOR, PREF_BTN_PLAYMODE_COLOR,
-                PREF_BTN_PLAYLIST_COLOR, PREF_BTN_SUBTITLE_TOGGLE_COLOR,
-                PREF_BTN_SUBTITLE_COLOR, PREF_BTN_SUBTLIST_COLOR,
-                PREF_BTN_ROTATE_COLOR, PREF_BTN_SEEK_COLOR, PREF_BTN_PLAYPAUSE_COLOR,
+                PREF_BTN_PLAYLIST_COLOR, PREF_BTN_SPEED_COLOR,
+                PREF_BTN_SUBTITLE_TOGGLE_COLOR, PREF_BTN_SUBTITLE_COLOR,
+                PREF_BTN_SUBTLIST_COLOR, PREF_BTN_ROTATE_COLOR,
+                PREF_BTN_SEEK_COLOR, PREF_BTN_PLAYPAUSE_COLOR,
                 PREF_BTN_SKIP_COLOR, PREF_BTN_PLAYER_SETTINGS_COLOR };
         String[] ctrlDefColor   = {
                 DEFAULT_BTN_COLOR, DEFAULT_BTN_COLOR,
                 DEFAULT_PLAYLIST_BTN_COLOR, DEFAULT_BTN_COLOR,
                 DEFAULT_BTN_COLOR, DEFAULT_BTN_COLOR,
                 DEFAULT_BTN_COLOR, DEFAULT_BTN_COLOR, DEFAULT_BTN_COLOR,
-                DEFAULT_BTN_COLOR, DEFAULT_BTN_COLOR };
+                DEFAULT_BTN_COLOR, DEFAULT_BTN_COLOR, DEFAULT_BTN_COLOR };
         String[] ctrlLabels     = {
                 getString(R.string.settings_ctrl_lock),
                 getString(R.string.settings_ctrl_playmode),
                 getString(R.string.settings_ctrl_playlist),
+                getString(R.string.settings_ctrl_speed),
                 getString(R.string.settings_ctrl_subtitle_toggle),
                 getString(R.string.settings_ctrl_subtitle),
                 getString(R.string.settings_ctrl_subtlist),
@@ -1406,6 +1411,7 @@ public class SettingsActivity extends AppCompatActivity {
                 getString(R.string.settings_ctrl_lock),
                 getString(R.string.settings_ctrl_playmode),
                 getString(R.string.settings_ctrl_playlist),
+                getString(R.string.settings_ctrl_speed),
                 getString(R.string.settings_ctrl_subtitle_toggle),
                 getString(R.string.settings_ctrl_subtitle),
                 getString(R.string.settings_ctrl_subtlist),

@@ -545,6 +545,10 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
                 SettingsActivity.PREF_BTN_PLAYER_SETTINGS_VISIBLE,
                 SettingsActivity.PREF_BTN_PLAYER_SETTINGS_COLOR,
                 SettingsActivity.DEFAULT_BTN_COLOR, prefs);
+        applySpeedButtonSettings(tvSpeed,
+                SettingsActivity.PREF_BTN_SPEED_VISIBLE,
+                SettingsActivity.PREF_BTN_SPEED_COLOR,
+                SettingsActivity.DEFAULT_BTN_COLOR, prefs);
         applyButtonSettings(btnRewind,
                 SettingsActivity.PREF_BTN_SEEK_VISIBLE,
                 SettingsActivity.PREF_BTN_SEEK_COLOR,
@@ -722,6 +726,11 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
             topOrder = topOrder + ",settings";
             prefs.edit().putString(SettingsActivity.PREF_TOP_BTN_ORDER, topOrder).apply();
         }
+        if (!topOrder.contains("speed")) {
+            topOrder = topOrder.replace("playlist-panel,", "playlist-panel,speed,");
+            if (!topOrder.contains("speed")) topOrder = topOrder + ",speed";
+            prefs.edit().putString(SettingsActivity.PREF_TOP_BTN_ORDER, topOrder).apply();
+        }
         String centerOrder = prefs.getString(SettingsActivity.PREF_CENTER_BTN_ORDER,
                 SettingsActivity.DEFAULT_CENTER_BTN_ORDER);
 
@@ -745,13 +754,14 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
             topBtnMap.put("lock",           btnLock);
             topBtnMap.put("play-mode",      btnPlayMode);
             topBtnMap.put("playlist-panel", btnPlaylistPanel);
+            if (tvSpeed != null) topBtnMap.put("speed", tvSpeed);
             topBtnMap.put("subtitle-toggle", btnSubtitleToggle);
             topBtnMap.put("subtitle",       btnSubtitle);
             topBtnMap.put("subtitle-list",  btnSubtitleList);
             topBtnMap.put("rotate",         btnRotate);
             topBtnMap.put("settings",       btnPlayerSettings);
 
-            // Remove all top-bar buttons from the layout (keep spacer and tvSpeed)
+            // Remove all top-bar buttons from the layout (keep spacer)
             for (View v : topBtnMap.values()) {
                 if (v != null) topBar.removeView(v);
             }
@@ -776,7 +786,7 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
                     topBar.addView(btn, insertAt);
                     if (spacerIdx >= 0) spacerIdx++;
                 } else {
-                    // Right group: append after spacer and tvSpeed
+                    // Right group: append after spacer
                     topBar.addView(btn);
                 }
             }
@@ -847,6 +857,17 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
         if (btn == null) return;
         String color = prefs.getString(colorPrefKey, defaultColor);
         btn.setImageTintList(android.content.res.ColorStateList.valueOf(resolveButtonColor(color)));
+    }
+
+    /** Applies visibility and text color to the speed TextView from SharedPreferences. */
+    private void applySpeedButtonSettings(TextView tv, String visiblePrefKey,
+                                          String colorPrefKey, String defaultColor,
+                                          SharedPreferences prefs) {
+        if (tv == null) return;
+        boolean visible = prefs.getBoolean(visiblePrefKey, true);
+        tv.setVisibility(visible ? View.VISIBLE : View.GONE);
+        String color = prefs.getString(colorPrefKey, defaultColor);
+        tv.setTextColor(resolveButtonColor(color));
     }
 
     private int resolveButtonColor(String color) {
@@ -1036,7 +1057,7 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
         if (btnSubtitleToggle != null) {
             btnSubtitleToggle.setOnClickListener(v -> toggleSubtitleTextOnly());
         }
-        tvSpeed.setOnClickListener(v -> showSpeedMenu());
+        if (tvSpeed != null) tvSpeed.setOnClickListener(v -> showSpeedMenu());
         btnLock.setOnClickListener(v -> lockScreen());
         btnUnlock.setOnClickListener(v -> unlockScreen());
 

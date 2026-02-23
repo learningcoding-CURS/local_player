@@ -202,6 +202,7 @@
     <string name="settings_ctrl_playpause">播放/暂停按钮</string>
     <string name="settings_ctrl_skip">切换按钮</string>
     <string name="settings_ctrl_player_settings">设置按钮</string>
+    <string name="settings_ctrl_speed">倍速按钮</string>
     <string name="settings_skip_btn_size">切换按钮大小：%ddp</string>
     <string name="settings_skip_btn_alpha">切换按钮透明度：%d%%</string>
     <string name="settings_skip_btn_offset">切换按钮上下偏移：%ddp</string>
