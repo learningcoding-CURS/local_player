@@ -77,6 +77,10 @@ public class MainActivity extends AppCompatActivity {
     private VideoAdapter  playlistItemAdapter;
     private MediaList     currentOpenList;
 
+    // MediaList thumbnail picker
+    private String pendingCustomThumbListId = null;
+    private static final String PLAYLIST_THUMB_PREFS = "playlist_thumbnails";
+
     // Tab containers
     private View          tabLibrary;
     private View          tabBuiltin;
@@ -129,6 +133,17 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
 
+    // Launcher for picking a thumbnail image for a MediaList (playlist)
+    private final ActivityResultLauncher<Intent> playlistThumbPickerLauncher =
+            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+                if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null
+                        && pendingCustomThumbListId != null) {
+                    Uri imageUri = result.getData().getData();
+                    if (imageUri != null) savePlaylistThumbnail(pendingCustomThumbListId, imageUri);
+                    pendingCustomThumbListId = null;
+                }
+            });
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -173,7 +188,7 @@ public class MainActivity extends AppCompatActivity {
         fabAddToPlaylist.setOnClickListener(v -> pickMediaForPlaylist());
 
         setupPlaylistAdapter();
-        recyclerPlaylists.setLayoutManager(new LinearLayoutManager(this));
+        recyclerPlaylists.setLayoutManager(new GridLayoutManager(this, 2));
         recyclerPlaylists.setAdapter(playlistAdapter);
 
         applyViewMode();
@@ -457,9 +472,11 @@ public class MainActivity extends AppCompatActivity {
                 openPlaylistDetail(list);
             }
             @Override public void onItemLongClick(MediaList list) {
-                showPlaylistOptions(list);
+                showPlaylistListOptions(list);
             }
         });
+        // Always use square grid layout for the playlist list
+        playlistAdapter.setViewMode(PlaylistAdapter.ViewMode.GRID);
     }
 
     private void refreshPlaylistList() {
@@ -467,6 +484,7 @@ public class MainActivity extends AppCompatActivity {
         allLists.addAll(mediaListManager.getLists());
         if (playlistAdapter == null) {
             setupPlaylistAdapter();
+            recyclerPlaylists.setLayoutManager(new GridLayoutManager(this, 2));
             recyclerPlaylists.setAdapter(playlistAdapter);
         } else {
             playlistAdapter.notifyDataSetChanged();
@@ -546,18 +564,63 @@ public class MainActivity extends AppCompatActivity {
         recyclerPlaylistItems.setVisibility(uris.isEmpty() ? View.GONE : View.VISIBLE);
     }
 
-    private void showPlaylistOptions(MediaList list) {
+    /** Long-press options for a MediaList item in the playlist list view (NOT inside a list). */
+    private void showPlaylistListOptions(MediaList list) {
         String[] opts = {
+                getString(R.string.playlist_thumb_set),
+                getString(R.string.playlist_thumb_clear),
                 getString(R.string.playlist_rename),
                 getString(R.string.playlist_delete)
         };
         new AlertDialog.Builder(this, R.style.DarkDialog)
                 .setTitle(list.getName())
                 .setItems(opts, (d, which) -> {
-                    if (which == 0) showCreatePlaylistDialog(list);
+                    if (which == 0) pickPlaylistThumbnail(list.getId());
+                    else if (which == 1) clearPlaylistThumbnail(list.getId());
+                    else if (which == 2) showCreatePlaylistDialog(list);
                     else confirmDeletePlaylist(list);
                 })
                 .show();
+    }
+
+    private void pickPlaylistThumbnail(String listId) {
+        pendingCustomThumbListId = listId;
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("image/*");
+        playlistThumbPickerLauncher.launch(intent);
+    }
+
+    private void clearPlaylistThumbnail(String listId) {
+        getSharedPreferences(PLAYLIST_THUMB_PREFS, MODE_PRIVATE)
+                .edit().remove(listId).apply();
+        refreshPlaylistList();
+        Toast.makeText(this, R.string.custom_thumb_clear, Toast.LENGTH_SHORT).show();
+    }
+
+    private void savePlaylistThumbnail(String listId, Uri imageUri) {
+        try {
+            java.io.File thumbDir = new java.io.File(getFilesDir(), "playlist_thumbs");
+            if (!thumbDir.exists()) thumbDir.mkdirs();
+            String hash = String.valueOf(Math.abs(listId.hashCode()));
+            java.io.File destFile = new java.io.File(thumbDir, hash + ".jpg");
+
+            try (java.io.InputStream in = getContentResolver().openInputStream(imageUri);
+                 java.io.FileOutputStream out = new java.io.FileOutputStream(destFile)) {
+                if (in == null) return;
+                android.graphics.Bitmap bmp = android.graphics.BitmapFactory.decodeStream(in);
+                if (bmp != null) {
+                    bmp.compress(android.graphics.Bitmap.CompressFormat.JPEG, 90, out);
+                }
+            }
+            getSharedPreferences(PLAYLIST_THUMB_PREFS, MODE_PRIVATE)
+                    .edit().putString(listId, destFile.getAbsolutePath()).apply();
+
+            refreshPlaylistList();
+            Toast.makeText(this, R.string.playlist_thumb_saved, Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            Toast.makeText(this, R.string.playlist_thumb_failed, Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void showCreatePlaylistDialog(MediaList existing) {

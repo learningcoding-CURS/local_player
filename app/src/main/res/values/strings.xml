@@ -163,4 +163,19 @@
     <string name="btn_rotate">旋转屏幕</string>
     <string name="btn_subtitle">字幕选项</string>
     <string name="btn_speed">速度选择</string>
+    <string name="btn_subtitle_toggle">字幕显示/隐藏</string>
+    <string name="subtitle_shown">字幕已显示</string>
+    <string name="subtitle_hidden">字幕已隐藏</string>
+
+    <!-- Settings: button order -->
+    <string name="settings_section_btn_order">播放控件位置与排序</string>
+    <string name="settings_btn_order_top">顶栏按钮排序（点击 ↑↓ 调整顺序）</string>
+    <string name="settings_btn_order_center">中央按钮排序</string>
+    <string name="settings_ctrl_subtitle_toggle">字幕显隐按钮</string>
+
+    <!-- Playlist thumbnail -->
+    <string name="playlist_thumb_set">设置列表封面</string>
+    <string name="playlist_thumb_clear">清除列表封面</string>
+    <string name="playlist_thumb_saved">封面已更新</string>
+    <string name="playlist_thumb_failed">封面设置失败</string>
 </resources>

@@ -141,6 +141,17 @@
                 android:contentDescription="@string/btn_playlist_panel"
                 android:layout_marginEnd="4dp" />
 
+            <!-- Subtitle text visibility toggle (only hides/shows subtitle text, keeps list open) -->
+            <ImageButton
+                android:id="@+id/btnSubtitleToggle"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/ic_subtitle_toggle"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:tint="@color/controlTint"
+                android:contentDescription="@string/btn_subtitle_toggle"
+                android:layout_marginEnd="4dp" />
+
             <!-- Subtitle import/export menu -->
             <ImageButton
                 android:id="@+id/btnSubtitle"

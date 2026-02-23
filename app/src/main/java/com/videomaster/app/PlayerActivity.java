@@ -104,6 +104,7 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
     private ImageButton   btnRewind;
     private ImageButton   btnForward;
     private ImageButton   btnSubtitle;
+    private ImageButton   btnSubtitleToggle;
     private ImageButton   btnRotate;
     private ImageButton   btnLock;
     private ImageButton   btnUnlock;
@@ -131,6 +132,9 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
     private TextView      btnToggleTimestamps;
     private SubtitleListAdapter subtitleListAdapter;
     private boolean       isSubtitlePanelVisible = false;
+
+    // Subtitle text visibility toggle
+    private boolean       isSubtitleTextVisible  = true;
 
     // Subtitle library
     private SubtitleLibraryManager subtitleLibraryManager;
@@ -255,6 +259,20 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
         if (gestureHandler != null) gestureHandler.setLandscape(landscape);
     }
 
+    /**
+     * Feed ALL touch events to the gesture handler at the Activity level.
+     * This guarantees swipe-to-switch-media works even when the controls overlay
+     * is sitting on top of playerView and may intercept touch events first.
+     */
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        if (!isLocked && gestureHandler != null && ev != null) {
+            float windowW = getWindow().getDecorView().getWidth();
+            gestureHandler.feedSwipeEvent(ev, windowW);
+        }
+        return super.dispatchTouchEvent(ev);
+    }
+
     @Override
     public void onBackPressed() {
         if (isSubtitlePanelVisible) {
@@ -305,6 +323,7 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
         btnRewind           = findViewById(R.id.btnRewind);
         btnForward          = findViewById(R.id.btnForward);
         btnSubtitle         = findViewById(R.id.btnSubtitle);
+        btnSubtitleToggle   = findViewById(R.id.btnSubtitleToggle);
         btnRotate           = findViewById(R.id.btnRotate);
         btnLock             = findViewById(R.id.btnLock);
         btnUnlock           = findViewById(R.id.btnUnlock);
@@ -386,6 +405,10 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
                 SettingsActivity.PREF_BTN_SUBTITLE_VISIBLE,
                 SettingsActivity.PREF_BTN_SUBTITLE_COLOR,
                 SettingsActivity.DEFAULT_BTN_COLOR, prefs);
+        applyButtonSettings(btnSubtitleToggle,
+                SettingsActivity.PREF_BTN_SUBTITLE_TOGGLE_VISIBLE,
+                SettingsActivity.PREF_BTN_SUBTITLE_TOGGLE_COLOR,
+                SettingsActivity.DEFAULT_BTN_COLOR, prefs);
         applyButtonSettings(btnSubtitleList,
                 SettingsActivity.PREF_BTN_SUBTLIST_VISIBLE,
                 SettingsActivity.PREF_BTN_SUBTLIST_COLOR,
@@ -403,6 +426,106 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
         applyButtonColor(btnPlayPause,
                 SettingsActivity.PREF_BTN_PLAYPAUSE_COLOR,
                 SettingsActivity.DEFAULT_BTN_COLOR, prefs);
+
+        // ── Button order in top/center bar ────────────────────────────────
+        applyButtonOrder(prefs);
+    }
+
+    /**
+     * Re-orders buttons in the top bar and center bar according to saved order preferences.
+     * Preserves the flex spacer (the invisible weight view) in the middle of the top bar.
+     */
+    private void applyButtonOrder(SharedPreferences prefs) {
+        String topOrder    = prefs.getString(SettingsActivity.PREF_TOP_BTN_ORDER,
+                SettingsActivity.DEFAULT_TOP_BTN_ORDER);
+        String centerOrder = prefs.getString(SettingsActivity.PREF_CENTER_BTN_ORDER,
+                SettingsActivity.DEFAULT_CENTER_BTN_ORDER);
+
+        // Top bar: find the LinearLayout with id topBar
+        android.widget.LinearLayout topBar = findViewById(R.id.topBar);
+        if (topBar != null) {
+            // Find the flex spacer (the View with weight=1, width=0)
+            View flexSpacer = null;
+            for (int i = 0; i < topBar.getChildCount(); i++) {
+                View v = topBar.getChildAt(i);
+                if (v.getId() == View.NO_ID
+                        && v.getLayoutParams() instanceof android.widget.LinearLayout.LayoutParams) {
+                    android.widget.LinearLayout.LayoutParams lp =
+                            (android.widget.LinearLayout.LayoutParams) v.getLayoutParams();
+                    if (lp.weight > 0) { flexSpacer = v; break; }
+                }
+            }
+
+            // Map button IDs to views
+            java.util.LinkedHashMap<String, View> topBtnMap = new java.util.LinkedHashMap<>();
+            topBtnMap.put("lock",           btnLock);
+            topBtnMap.put("play-mode",      btnPlayMode);
+            topBtnMap.put("playlist-panel", btnPlaylistPanel);
+            topBtnMap.put("subtitle-toggle", btnSubtitleToggle);
+            topBtnMap.put("subtitle",       btnSubtitle);
+            topBtnMap.put("subtitle-list",  btnSubtitleList);
+            topBtnMap.put("rotate",         btnRotate);
+
+            // Remove all top-bar buttons from the layout (keep spacer and tvSpeed)
+            for (View v : topBtnMap.values()) {
+                if (v != null) topBar.removeView(v);
+            }
+
+            // Re-add in saved order: left-group first (before spacer), right-group after
+            // We split at the spacer: buttons before it are "left", buttons after are "right"
+            // For simplicity, reorder ALL buttons keeping spacer in place.
+            // Strategy: insert buttons before spacer if they're in the first half, else after.
+            String[] ids = topOrder.split(",");
+            int half = ids.length / 2;
+
+            // Find spacer index after removals
+            int spacerIdx = flexSpacer != null ? topBar.indexOfChild(flexSpacer) : -1;
+
+            for (int i = 0; i < ids.length; i++) {
+                String id = ids[i].trim();
+                View btn = topBtnMap.get(id);
+                if (btn == null) continue;
+                if (i < half) {
+                    // Left group: insert before spacer
+                    int insertAt = spacerIdx >= 0 ? spacerIdx : 0;
+                    topBar.addView(btn, insertAt);
+                    if (spacerIdx >= 0) spacerIdx++;
+                } else {
+                    // Right group: append after spacer and tvSpeed
+                    topBar.addView(btn);
+                }
+            }
+        }
+
+        // Center bar: reorder rewind / play-pause / forward
+        android.widget.LinearLayout centerBar = null;
+        // Find center LinearLayout (contains btnRewind, btnPlayPause, btnForward)
+        android.widget.FrameLayout overlay = controlsOverlay;
+        if (overlay != null) {
+            for (int i = 0; i < overlay.getChildCount(); i++) {
+                View v = overlay.getChildAt(i);
+                if (v instanceof android.widget.LinearLayout) {
+                    android.widget.LinearLayout ll = (android.widget.LinearLayout) v;
+                    if (ll.indexOfChild(btnPlayPause) >= 0) { centerBar = ll; break; }
+                }
+            }
+        }
+        if (centerBar != null) {
+            java.util.LinkedHashMap<String, View> centerBtnMap = new java.util.LinkedHashMap<>();
+            centerBtnMap.put("rewind",      btnRewind);
+            centerBtnMap.put("play-pause",  btnPlayPause);
+            centerBtnMap.put("forward",     btnForward);
+
+            for (View v : centerBtnMap.values()) {
+                if (v != null) centerBar.removeView(v);
+            }
+
+            String[] cIds = centerOrder.split(",");
+            for (String cId : cIds) {
+                View btn = centerBtnMap.get(cId.trim());
+                if (btn != null) centerBar.addView(btn);
+            }
+        }
     }
 
     /**
@@ -587,6 +710,9 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
 
         btnRotate.setOnClickListener(v -> toggleOrientation());
         btnSubtitle.setOnClickListener(v -> handleSubtitleButtonClick());
+        if (btnSubtitleToggle != null) {
+            btnSubtitleToggle.setOnClickListener(v -> toggleSubtitleTextOnly());
+        }
         tvSpeed.setOnClickListener(v -> showSpeedMenu());
         btnLock.setOnClickListener(v -> lockScreen());
         btnUnlock.setOnClickListener(v -> unlockScreen());
@@ -1171,6 +1297,24 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
     }
 
     private final Runnable subtitleSingleClickRunnable = this::showSubtitleImportMenu;
+
+    /**
+     * Toggles subtitle text visibility only.
+     * Does NOT close or affect the subtitle list panel — the list panel stays open.
+     * Uses isSubtitleTextVisible state so the subtitle resumes exactly where it was.
+     */
+    private void toggleSubtitleTextOnly() {
+        isSubtitleTextVisible = !isSubtitleTextVisible;
+        subtitleView.setVisibility(isSubtitleTextVisible ? View.VISIBLE : View.GONE);
+        if (btnSubtitleToggle != null) {
+            btnSubtitleToggle.setImageResource(
+                    isSubtitleTextVisible ? R.drawable.ic_subtitle_toggle : R.drawable.ic_subtitle_off);
+        }
+        Toast.makeText(this,
+                isSubtitleTextVisible ? R.string.subtitle_shown : R.string.subtitle_hidden,
+                Toast.LENGTH_SHORT).show();
+        scheduleHideControls();
+    }
 
     private void clearSubtitle() {
         subtitleManager.clearSubtitles();
