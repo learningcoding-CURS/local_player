@@ -43,7 +43,10 @@ drawable ic_rewind
 drawable ic_rotate
 drawable ic_speed
 drawable ic_subtitle
+drawable seekbar_progress
+drawable seekbar_thumb
 drawable selector_panel_item
+id action_settings
 id appBarLayout
 id bottomNav
 id brightnessBar
@@ -57,7 +60,6 @@ id btnPlayPause
 id btnPlaylistPanel
 id btnRewind
 id btnRotate
-id btnSpeed
 id btnSubtitle
 id btnUnlock
 id contentFrame
@@ -111,6 +113,7 @@ layout item_player_playlist
 layout item_playlist
 layout item_video
 menu bottom_nav_menu
+menu menu_main
 mipmap ic_launcher
 mipmap ic_launcher_round
 string app_name
@@ -167,6 +170,13 @@ string playlist_start
 string playlist_title
 string screen_locked
 string screen_unlocked
+string settings_applied
+string settings_default_tab
+string settings_landscape_swipe
+string settings_portrait_swipe
+string settings_save
+string settings_tab_order
+string settings_title
 string shuffle_end
 string speed
 string subtitle
@@ -180,6 +190,8 @@ string subtitle_import
 string subtitle_load_failed
 string subtitle_loaded
 string subtitle_none_to_export
+string swipe_horizontal
+string swipe_vertical
 string tab_builtin
 string tab_library
 string tab_playlist

@@ -96,7 +96,6 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
     private ImageButton   btnForward;
     private ImageButton   btnSubtitle;
     private ImageButton   btnRotate;
-    private ImageButton   btnSpeed;
     private ImageButton   btnLock;
     private ImageButton   btnUnlock;
     private ImageButton   btnAddToPlaylist;
@@ -259,7 +258,6 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
         btnForward          = findViewById(R.id.btnForward);
         btnSubtitle         = findViewById(R.id.btnSubtitle);
         btnRotate           = findViewById(R.id.btnRotate);
-        btnSpeed            = findViewById(R.id.btnSpeed);
         btnLock             = findViewById(R.id.btnLock);
         btnUnlock           = findViewById(R.id.btnUnlock);
         btnAddToPlaylist    = findViewById(R.id.btnAddToPlaylist);
@@ -297,6 +295,11 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
     private void setupGestures() {
         boolean landscape = getResources().getConfiguration().orientation
                 == Configuration.ORIENTATION_LANDSCAPE;
+
+        android.content.SharedPreferences prefs =
+                getSharedPreferences("app_settings", MODE_PRIVATE);
+        String portraitPref  = prefs.getString("portrait_swipe",  "VERTICAL");
+        String landscapePref = prefs.getString("landscape_swipe", "HORIZONTAL");
 
         gestureHandler = new GestureHandler(this, new GestureHandler.GestureListener() {
 
@@ -343,6 +346,14 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
         });
 
         gestureHandler.setLandscape(landscape);
+        gestureHandler.setPortraitSwipeDirection(
+                "HORIZONTAL".equals(portraitPref)
+                        ? GestureHandler.SwipeDirection.HORIZONTAL
+                        : GestureHandler.SwipeDirection.VERTICAL);
+        gestureHandler.setLandscapeSwipeDirection(
+                "VERTICAL".equals(landscapePref)
+                        ? GestureHandler.SwipeDirection.VERTICAL
+                        : GestureHandler.SwipeDirection.HORIZONTAL);
         playerView.setOnTouchListener(gestureHandler);
     }
 
@@ -364,7 +375,7 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
 
         btnRotate.setOnClickListener(v -> toggleOrientation());
         btnSubtitle.setOnClickListener(v -> showSubtitleMenu());
-        btnSpeed.setOnClickListener(v -> showSpeedMenu());
+        tvSpeed.setOnClickListener(v -> showSpeedMenu());
         btnLock.setOnClickListener(v -> lockScreen());
         btnUnlock.setOnClickListener(v -> unlockScreen());
         btnAddToPlaylist.setOnClickListener(v -> showAddToPlaylistMenu());
@@ -832,20 +843,20 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
     // ── Speed menu ─────────────────────────────────────────────────────────
 
     private void showSpeedMenu() {
-        float[] speeds    = playerManager.getSpeedProvider().getAvailableSpeeds();
-        String[] labels   = new String[speeds.length];
-        int currentIdx    = 0;
+        float[] speeds  = playerManager.getSpeedProvider().getAvailableSpeeds();
+        String[] labels = new String[speeds.length];
+        int currentIdx  = 0;
         for (int i = 0; i < speeds.length; i++) {
             labels[i] = speeds[i] == 1.0f ? "1×" : speeds[i] + "×";
             if (Math.abs(speeds[i] - playerManager.getCurrentSpeed()) < 0.01f) currentIdx = i;
         }
-        final int[] selected = {currentIdx};
+        // Tap any speed option → apply immediately and dismiss (no confirm button needed)
         new AlertDialog.Builder(this, R.style.DarkDialog)
                 .setTitle(R.string.speed)
-                .setSingleChoiceItems(labels, currentIdx, (dialog, which) -> selected[0] = which)
-                .setPositiveButton(R.string.confirm, (dialog, which) -> {
-                    playerManager.setSpeed(speeds[selected[0]]);
+                .setSingleChoiceItems(labels, currentIdx, (dialog, which) -> {
+                    playerManager.setSpeed(speeds[which]);
                     scheduleHideControls();
+                    dialog.dismiss();
                 })
                 .setNegativeButton(R.string.cancel, null)
                 .show();

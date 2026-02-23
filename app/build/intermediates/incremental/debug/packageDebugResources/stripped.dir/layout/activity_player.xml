@@ -49,11 +49,11 @@
         android:indeterminateTint="@color/colorAccent"
         android:visibility="gone" />
 
-    <!-- ─── Brightness indicator (left edge, compact & translucent) ─── -->
+    <!-- ─── Brightness indicator (left edge, compact & translucent, no icon) ─── -->
     <LinearLayout
         android:id="@+id/brightnessIndicator"
         android:layout_width="36dp"
-        android:layout_height="160dp"
+        android:layout_height="120dp"
         android:layout_gravity="center_vertical|start"
         android:layout_marginStart="8dp"
         android:orientation="vertical"
@@ -62,21 +62,13 @@
         android:padding="6dp"
         android:visibility="gone">
 
-        <ImageView
-            android:layout_width="16dp"
-            android:layout_height="16dp"
-            android:src="@drawable/ic_brightness"
-            android:tint="@color/textPrimary"
-            android:alpha="0.9" />
-
-        <!-- Vertical progress bar (rotated) -->
+        <!-- Vertical progress bar (rotated), icon removed -->
         <ProgressBar
             android:id="@+id/brightnessBar"
             style="@android:style/Widget.ProgressBar.Horizontal"
             android:layout_width="6dp"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:layout_marginTop="6dp"
             android:layout_marginBottom="4dp"
             android:progressTint="@color/colorAccentLight"
             android:progressBackgroundTint="#33FFFFFF"
@@ -160,25 +152,18 @@
                 android:layout_height="0dp"
                 android:layout_weight="1" />
 
-            <!-- Current speed badge -->
+            <!-- Speed badge + selector merged into one clickable TextView -->
             <TextView
                 android:id="@+id/tvSpeed"
                 style="@style/SpeedBadge"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="1×"
-                android:layout_marginEnd="8dp" />
-
-            <!-- Speed selector -->
-            <ImageButton
-                android:id="@+id/btnSpeed"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:src="@drawable/ic_speed"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:tint="@color/controlTint"
-                android:contentDescription="@string/btn_speed"
-                android:layout_marginEnd="4dp" />
+                android:layout_marginEnd="8dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:contentDescription="@string/btn_speed" />
 
             <!-- Subtitle -->
             <ImageButton
@@ -285,15 +270,15 @@
                     android:fontFamily="monospace" />
             </LinearLayout>
 
-            <!-- SeekBar (max=1000 for 0.1% granularity) -->
+            <!-- SeekBar (max=1000 for 0.1% granularity) — thick track + larger thumb -->
             <SeekBar
                 android:id="@+id/seekBar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:max="1000"
-                android:progressTint="@color/seekbarProgress"
-                android:thumbTint="@color/seekbarThumb"
-                android:progressBackgroundTint="@color/seekbarBackground" />
+                android:progressDrawable="@drawable/seekbar_progress"
+                android:thumb="@drawable/seekbar_thumb"
+                android:splitTrack="false" />
         </LinearLayout>
 
     </FrameLayout>

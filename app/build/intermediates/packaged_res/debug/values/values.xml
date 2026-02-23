@@ -71,6 +71,13 @@
     <string name="playlist_title">我的播放列表</string>
     <string name="screen_locked">屏幕已锁定，点击锁图标解锁</string>
     <string name="screen_unlocked">屏幕已解锁</string>
+    <string name="settings_applied">设置已保存，手势设置下次打开播放器时生效</string>
+    <string name="settings_default_tab">默认主界面</string>
+    <string name="settings_landscape_swipe">横屏切换手势</string>
+    <string name="settings_portrait_swipe">竖屏切换手势</string>
+    <string name="settings_save">保存</string>
+    <string name="settings_tab_order">标签顺序（点击 ↑↓ 调整）</string>
+    <string name="settings_title">设置</string>
     <string name="shuffle_end">乱序播放完毕</string>
     <string name="speed">播放速度</string>
     <string name="subtitle">字幕</string>
@@ -84,6 +91,8 @@
     <string name="subtitle_load_failed">字幕加载失败，请检查文件格式</string>
     <string name="subtitle_loaded">字幕加载成功 (%d 条)</string>
     <string name="subtitle_none_to_export">当前没有可导出的字幕</string>
+    <string name="swipe_horizontal">左右滑动</string>
+    <string name="swipe_vertical">上下滑动</string>
     <string name="tab_builtin">内置媒体</string>
     <string name="tab_library">媒体库</string>
     <string name="tab_playlist">我的列表</string>

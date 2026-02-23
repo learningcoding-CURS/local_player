@@ -60,9 +60,6 @@ public final class ActivityPlayerBinding implements ViewBinding {
   public final ImageButton btnRotate;
 
   @NonNull
-  public final ImageButton btnSpeed;
-
-  @NonNull
   public final ImageButton btnSubtitle;
 
   @NonNull
@@ -115,7 +112,7 @@ public final class ActivityPlayerBinding implements ViewBinding {
       @NonNull ImageButton btnClosePanel, @NonNull ImageButton btnForward,
       @NonNull ImageButton btnLock, @NonNull ImageButton btnPlayMode,
       @NonNull ImageButton btnPlayPause, @NonNull ImageButton btnPlaylistPanel,
-      @NonNull ImageButton btnRewind, @NonNull ImageButton btnRotate, @NonNull ImageButton btnSpeed,
+      @NonNull ImageButton btnRewind, @NonNull ImageButton btnRotate,
       @NonNull ImageButton btnSubtitle, @NonNull ImageButton btnUnlock,
       @NonNull FrameLayout controlsOverlay, @NonNull ProgressBar loadingView,
       @NonNull FrameLayout lockOverlay, @NonNull PlayerView playerView,
@@ -135,7 +132,6 @@ public final class ActivityPlayerBinding implements ViewBinding {
     this.btnPlaylistPanel = btnPlaylistPanel;
     this.btnRewind = btnRewind;
     this.btnRotate = btnRotate;
-    this.btnSpeed = btnSpeed;
     this.btnSubtitle = btnSubtitle;
     this.btnUnlock = btnUnlock;
     this.controlsOverlay = controlsOverlay;
@@ -247,12 +243,6 @@ public final class ActivityPlayerBinding implements ViewBinding {
         break missingId;
       }
 
-      id = R.id.btnSpeed;
-      ImageButton btnSpeed = ViewBindings.findChildViewById(rootView, id);
-      if (btnSpeed == null) {
-        break missingId;
-      }
-
       id = R.id.btnSubtitle;
       ImageButton btnSubtitle = ViewBindings.findChildViewById(rootView, id);
       if (btnSubtitle == null) {
@@ -351,7 +341,7 @@ public final class ActivityPlayerBinding implements ViewBinding {
 
       return new ActivityPlayerBinding((FrameLayout) rootView, brightnessBar, brightnessIndicator,
           btnAddToPlaylist, btnClosePanel, btnForward, btnLock, btnPlayMode, btnPlayPause,
-          btnPlaylistPanel, btnRewind, btnRotate, btnSpeed, btnSubtitle, btnUnlock, controlsOverlay,
+          btnPlaylistPanel, btnRewind, btnRotate, btnSubtitle, btnUnlock, controlsOverlay,
           loadingView, lockOverlay, playerView, playlistPanel, rvPlaylistPanel, seekBar,
           subtitleView, topBar, tvBrightnessValue, tvCurrentTime, tvDuration, tvLongPressHint,
           tvSpeed);

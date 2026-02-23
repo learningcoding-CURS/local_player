@@ -82,6 +82,17 @@
     <string name="hint_swipe_portrait">上划/下划切换</string>
     <string name="hint_swipe_landscape">左划/右划切换</string>
 
+    <!-- Settings dialog -->
+    <string name="settings_title">设置</string>
+    <string name="settings_save">保存</string>
+    <string name="settings_default_tab">默认主界面</string>
+    <string name="settings_tab_order">标签顺序（点击 ↑↓ 调整）</string>
+    <string name="settings_portrait_swipe">竖屏切换手势</string>
+    <string name="settings_landscape_swipe">横屏切换手势</string>
+    <string name="swipe_vertical">上下滑动</string>
+    <string name="swipe_horizontal">左右滑动</string>
+    <string name="settings_applied">设置已保存，手势设置下次打开播放器时生效</string>
+
     <!-- Accessibility -->
     <string name="btn_play">播放</string>
     <string name="btn_pause">暂停</string>
