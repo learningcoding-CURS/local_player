@@ -15,7 +15,6 @@ import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -27,6 +26,7 @@ import androidx.media3.ui.PlayerView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.videomaster.app.SettingsActivity;
 import com.videomaster.app.interfaces.IPlayerEventListener;
 import com.videomaster.app.player.GestureHandler;
 import com.videomaster.app.player.PlayMode;
@@ -109,7 +109,6 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
 
     // Brightness indicator
     private View          brightnessIndicator;
-    private ProgressBar   brightnessBar;
     private TextView      tvBrightnessValue;
 
     // In-player playlist panel
@@ -279,7 +278,6 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
         loadingView         = findViewById(R.id.loadingView);
 
         brightnessIndicator = findViewById(R.id.brightnessIndicator);
-        brightnessBar       = findViewById(R.id.brightnessBar);
         tvBrightnessValue   = findViewById(R.id.tvBrightnessValue);
 
         playlistPanel       = findViewById(R.id.playlistPanel);
@@ -302,10 +300,15 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
         playerView.setPlayer(playerManager.getExoPlayer());
         playerView.setUseController(false);
 
-        // Detect initial orientation
-        boolean landscape = getResources().getConfiguration().orientation
-                == Configuration.ORIENTATION_LANDSCAPE;
-        // gestureHandler not yet created — handled in setupGestures()
+        // Apply saved subtitle settings
+        android.content.SharedPreferences prefs =
+                getSharedPreferences("app_settings", MODE_PRIVATE);
+        float subSize  = prefs.getFloat(SettingsActivity.PREF_SUBTITLE_SIZE,
+                SettingsActivity.DEFAULT_SUBTITLE_SIZE);
+        float lineSp   = prefs.getFloat(SettingsActivity.PREF_SUBTITLE_LINE_SP,
+                SettingsActivity.DEFAULT_SUBTITLE_LINE_SP);
+        subtitleView.setTextSizeSp(subSize);
+        subtitleView.setLineSpacingMultiplier(lineSp);
     }
 
     private void setupGestures() {
@@ -498,12 +501,12 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
         java.util.List<SubtitleEntry> subs = subtitleManager.getCurrentSubtitles();
         if (subs.isEmpty()) return;
 
-        // Build or rebuild adapter
+        // Build or rebuild adapter — panel stays open after click
         subtitleListAdapter = new SubtitleListAdapter(subs,
                 entry -> {
                     playerManager.seekTo(entry.getStartTimeMs());
                     subtitleManager.onSeek();
-                    closeSubtitleListPanel();
+                    // Do NOT close panel; just scroll to the clicked entry
                     scheduleHideControls();
                 });
 
@@ -756,7 +759,6 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
         getWindow().setAttributes(lp);
 
         int percent = (int) (current * 100);
-        brightnessBar.setProgress(percent);
         tvBrightnessValue.setText(percent + "%");
 
         brightnessIndicator.setVisibility(View.VISIBLE);
@@ -991,18 +993,16 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
     private void showSubtitleMenu() {
         String[] options = {
                 getString(R.string.subtitle_import),
-                getString(R.string.subtitle_export_srt),
-                getString(R.string.subtitle_export_vtt),
+                getString(R.string.subtitle_export),
                 getString(R.string.subtitle_clear)
         };
         new AlertDialog.Builder(this, R.style.DarkDialog)
                 .setTitle(R.string.subtitle)
                 .setItems(options, (dialog, which) -> {
                     switch (which) {
-                        case 0: pickSubtitleFile();      break;
-                        case 1: startExport("SRT");     break;
-                        case 2: startExport("VTT");     break;
-                        case 3:
+                        case 0: pickSubtitleFile();       break;
+                        case 1: showExportFormatDialog(); break;
+                        case 2:
                             subtitleManager.clearSubtitles();
                             subtitleView.setSubtitle(null);
                             refreshSubtitleListButton();
@@ -1011,6 +1011,18 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
                             break;
                     }
                 })
+                .show();
+    }
+
+    private void showExportFormatDialog() {
+        if (!subtitleManager.hasSubtitles()) {
+            Toast.makeText(this, R.string.subtitle_none_to_export, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        String[] formats = { "SRT", "VTT" };
+        new AlertDialog.Builder(this, R.style.DarkDialog)
+                .setTitle(R.string.subtitle_export)
+                .setItems(formats, (d, which) -> startExport(formats[which]))
                 .show();
     }
 

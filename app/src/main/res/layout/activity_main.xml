@@ -103,6 +103,91 @@
                 android:visibility="gone" />
         </FrameLayout>
 
+        <!-- ── Tab 3: My Playlists (inline) ── -->
+        <FrameLayout
+            android:id="@+id/tabPlaylist"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone">
+
+            <!-- Level 1: Playlist list -->
+            <FrameLayout
+                android:id="@+id/playlistListView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="visible">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerPlaylists"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:padding="8dp"
+                    android:clipToPadding="false" />
+
+                <TextView
+                    android:id="@+id/tvPlaylistEmpty"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="@string/playlist_empty"
+                    android:textColor="@color/textSecondary"
+                    android:textSize="16sp"
+                    android:gravity="center"
+                    android:visibility="gone" />
+
+                <com.google.android.material.floatingactionbutton.FloatingActionButton
+                    android:id="@+id/fabCreatePlaylist"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom|end"
+                    android:layout_margin="20dp"
+                    android:contentDescription="@string/playlist_create"
+                    android:src="@drawable/ic_add"
+                    app:backgroundTint="@color/colorAccent"
+                    app:tint="@color/textPrimary"
+                    app:elevation="6dp" />
+            </FrameLayout>
+
+            <!-- Level 2: Playlist detail (items) -->
+            <FrameLayout
+                android:id="@+id/playlistDetailView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerPlaylistItems"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:padding="8dp"
+                    android:clipToPadding="false" />
+
+                <TextView
+                    android:id="@+id/tvPlaylistDetailEmpty"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="@string/playlist_detail_empty"
+                    android:textColor="@color/textSecondary"
+                    android:textSize="16sp"
+                    android:gravity="center"
+                    android:visibility="gone" />
+
+                <com.google.android.material.floatingactionbutton.FloatingActionButton
+                    android:id="@+id/fabAddToPlaylist"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom|end"
+                    android:layout_margin="20dp"
+                    android:contentDescription="@string/playlist_add_media"
+                    android:src="@drawable/ic_add"
+                    app:backgroundTint="@color/colorAccent"
+                    app:tint="@color/textPrimary"
+                    app:elevation="6dp" />
+            </FrameLayout>
+
+        </FrameLayout>
+
     </FrameLayout>
 
     <!-- Bottom Navigation -->

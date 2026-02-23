@@ -209,6 +209,53 @@
 
             </RadioGroup>
 
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/divider"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="4dp" />
+
+            <!-- ── 字幕大小 ── -->
+            <TextView
+                android:id="@+id/tvSubtitleSizeLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/settings_subtitle_size_default"
+                android:textColor="@color/colorAccentLight"
+                android:textSize="13sp"
+                android:paddingTop="8dp"
+                android:paddingBottom="4dp" />
+
+            <SeekBar
+                android:id="@+id/sbSubtitleSize"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="30"
+                android:progressTint="@color/colorAccent"
+                android:thumbTint="@color/colorAccent"
+                android:layout_marginBottom="8dp" />
+
+            <!-- ── 字幕行间距 ── -->
+            <TextView
+                android:id="@+id/tvSubtitleLineSpacingLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/settings_subtitle_line_spacing_default"
+                android:textColor="@color/colorAccentLight"
+                android:textSize="13sp"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp" />
+
+            <SeekBar
+                android:id="@+id/sbSubtitleLineSpacing"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="20"
+                android:progressTint="@color/colorAccent"
+                android:thumbTint="@color/colorAccent"
+                android:layout_marginBottom="8dp" />
+
             <!-- Bottom spacer -->
             <View
                 android:layout_width="match_parent"

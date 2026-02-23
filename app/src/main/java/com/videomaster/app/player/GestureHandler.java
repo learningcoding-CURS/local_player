@@ -139,8 +139,7 @@ public class GestureHandler implements View.OnTouchListener {
             public boolean onScroll(MotionEvent e1, MotionEvent e2,
                                     float distanceX, float distanceY) {
                 if (lpActive) {
-                    // Long press only activates speed boost; ignore scroll during long press
-                    lpSwiped = true; // suppress onLongPressEnd
+                    lpSwiped = true;
                 } else {
                     handleNormalScroll(e1, e2, distanceX, distanceY);
                 }
@@ -212,7 +211,7 @@ public class GestureHandler implements View.OnTouchListener {
      */
     private void handleNormalScroll(MotionEvent e1, MotionEvent e2,
                                     float distanceX, float distanceY) {
-        if (e1 == null) return;
+        if (e1 == null || e2 == null) return;
 
         float absDX    = Math.abs(distanceX);
         float absDY    = Math.abs(distanceY);

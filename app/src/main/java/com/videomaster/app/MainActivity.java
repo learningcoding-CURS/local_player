@@ -1,10 +1,9 @@
 package com.videomaster.app;
 
-import android.Manifest;
 import android.app.Activity;
+import android.content.ClipData;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -14,21 +13,27 @@ import android.provider.MediaStore;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.videomaster.app.model.MediaList;
 import com.videomaster.app.model.VideoItem;
-import com.videomaster.app.playlist.PlaylistActivity;
+import com.videomaster.app.playlist.MediaListManager;
+import com.videomaster.app.playlist.PlaylistAdapter;
 import com.videomaster.app.ui.VideoAdapter;
 import com.videomaster.app.util.BuiltinMediaProvider;
 import com.videomaster.app.util.PermissionUtils;
@@ -58,14 +63,32 @@ public class MainActivity extends AppCompatActivity {
     private TextView      tvBuiltinEmpty;
     private VideoAdapter  builtinAdapter;
 
+    // Playlist tab views (inline)
+    private View          tabPlaylist;
+    private View          playlistListView;
+    private View          playlistDetailView;
+    private RecyclerView  recyclerPlaylists;
+    private TextView      tvPlaylistEmpty;
+    private FloatingActionButton fabCreatePlaylist;
+    private RecyclerView  recyclerPlaylistItems;
+    private TextView      tvPlaylistDetailEmpty;
+    private FloatingActionButton fabAddToPlaylist;
+    private PlaylistAdapter playlistAdapter;
+    private VideoAdapter  playlistItemAdapter;
+    private MediaList     currentOpenList;
+
     // Tab containers
     private View          tabLibrary;
     private View          tabBuiltin;
 
     private BottomNavigationView bottomNav;
+    private MediaListManager     mediaListManager;
 
     private final List<VideoItem> videoList   = new ArrayList<>();
     private final List<VideoItem> builtinList = new ArrayList<>();
+    private final List<MediaList> allLists    = new ArrayList<>();
+    private final List<VideoItem> currentListItems = new ArrayList<>();
+
     private final ExecutorService executor    = Executors.newSingleThreadExecutor();
     private final Handler         mainHandler = new Handler(Looper.getMainLooper());
 
@@ -80,9 +103,15 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
 
+    private final ActivityResultLauncher<Intent> addToPlaylistLauncher =
+            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+                if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                    processAddToPlaylistResult(result.getData());
+                }
+            });
+
     private final ActivityResultLauncher<Intent> settingsLauncher =
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
-                // Reload settings after returning from SettingsActivity
                 applyTabOrderAndDefault();
                 applyViewMode();
             });
@@ -95,9 +124,12 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        mediaListManager = MediaListManager.getInstance(this);
+
         // Tab containers
         tabLibrary  = findViewById(R.id.tabLibrary);
         tabBuiltin  = findViewById(R.id.tabBuiltin);
+        tabPlaylist = findViewById(R.id.tabPlaylist);
 
         // Library tab
         recyclerView = findViewById(R.id.recyclerView);
@@ -111,8 +143,25 @@ public class MainActivity extends AppCompatActivity {
         // Built-in tab
         recyclerBuiltin = findViewById(R.id.recyclerBuiltin);
         tvBuiltinEmpty  = findViewById(R.id.tvBuiltinEmpty);
-        builtinAdapter  = new VideoAdapter(builtinList, item -> openPlayer(item.getUri()));
+        builtinAdapter  = new VideoAdapter(builtinList, item -> openPlayerWithList(item, builtinList));
         recyclerBuiltin.setAdapter(builtinAdapter);
+
+        // Playlist tab (inline)
+        playlistListView   = findViewById(R.id.playlistListView);
+        playlistDetailView = findViewById(R.id.playlistDetailView);
+        recyclerPlaylists  = findViewById(R.id.recyclerPlaylists);
+        tvPlaylistEmpty    = findViewById(R.id.tvPlaylistEmpty);
+        fabCreatePlaylist  = findViewById(R.id.fabCreatePlaylist);
+        recyclerPlaylistItems = findViewById(R.id.recyclerPlaylistItems);
+        tvPlaylistDetailEmpty = findViewById(R.id.tvPlaylistDetailEmpty);
+        fabAddToPlaylist      = findViewById(R.id.fabAddToPlaylist);
+
+        fabCreatePlaylist.setOnClickListener(v -> showCreatePlaylistDialog(null));
+        fabAddToPlaylist.setOnClickListener(v -> pickMediaForPlaylist());
+
+        setupPlaylistAdapter();
+        recyclerPlaylists.setLayoutManager(new LinearLayoutManager(this));
+        recyclerPlaylists.setAdapter(playlistAdapter);
 
         applyViewMode();
 
@@ -125,8 +174,9 @@ public class MainActivity extends AppCompatActivity {
                 checkPermissionsAndLoad();
                 return true;
             } else if (id == R.id.nav_playlist) {
-                startActivity(new Intent(this, PlaylistActivity.class));
-                return false; // don't visually select until back
+                showTab("playlist");
+                refreshPlaylistList();
+                return true;
             } else if (id == R.id.nav_builtin) {
                 showTab("builtin");
                 loadBuiltinMedia();
@@ -141,8 +191,18 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        // Apply saved tab order and select default tab
         applyTabOrderAndDefault();
+    }
+
+    // ── Back navigation within playlist tab ────────────────────────────────
+
+    @Override
+    public void onBackPressed() {
+        if ("playlist".equals(currentTabId) && playlistDetailView.getVisibility() == View.VISIBLE) {
+            showPlaylistList();
+        } else {
+            super.onBackPressed();
+        }
     }
 
     // ── Toolbar menu ───────────────────────────────────────────────────────
@@ -168,9 +228,6 @@ public class MainActivity extends AppCompatActivity {
 
     // ── Tab management ─────────────────────────────────────────────────────
 
-    /**
-     * Apply the saved tab order to BottomNavigationView, then select the default tab.
-     */
     private void applyTabOrderAndDefault() {
         SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         String orderStr   = prefs.getString(PREF_TAB_ORDER, DEFAULT_TAB_ORDER);
@@ -179,18 +236,13 @@ public class MainActivity extends AppCompatActivity {
         String[] order = orderStr.split(",");
         rebuildBottomNav(order);
 
-        // Select the default tab (fires onItemSelectedListener)
         switch (defaultTab) {
             case "library":  bottomNav.setSelectedItemId(R.id.nav_library);  break;
-            case "playlist": bottomNav.setSelectedItemId(R.id.nav_builtin);  break; // fallback
+            case "playlist": bottomNav.setSelectedItemId(R.id.nav_playlist); break;
             default:         bottomNav.setSelectedItemId(R.id.nav_builtin);  break;
         }
     }
 
-    /**
-     * Rebuild BottomNavigationView menu in the given tab order.
-     * @param order array of tab id strings: "library", "playlist", "builtin"
-     */
     private void rebuildBottomNav(String[] order) {
         Menu menu = bottomNav.getMenu();
         menu.clear();
@@ -214,18 +266,21 @@ public class MainActivity extends AppCompatActivity {
 
     private void showTab(String tabId) {
         currentTabId = tabId;
-        tabLibrary.setVisibility("library".equals(tabId) ? View.VISIBLE : View.GONE);
-        tabBuiltin.setVisibility("builtin".equals(tabId) ? View.VISIBLE : View.GONE);
+        tabLibrary.setVisibility("library".equals(tabId)  ? View.VISIBLE : View.GONE);
+        tabBuiltin.setVisibility("builtin".equals(tabId)  ? View.VISIBLE : View.GONE);
+        tabPlaylist.setVisibility("playlist".equals(tabId) ? View.VISIBLE : View.GONE);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
-        if ("library".equals(tabId)) toolbar.setTitle(R.string.library_title);
-        else if ("builtin".equals(tabId)) toolbar.setTitle(R.string.tab_builtin);
+        if ("library".equals(tabId))  toolbar.setTitle(R.string.library_title);
+        else if ("builtin".equals(tabId))  toolbar.setTitle(R.string.tab_builtin);
+        else if ("playlist".equals(tabId)) toolbar.setTitle(R.string.tab_playlist);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        if ("library".equals(currentTabId)) loadVideos();
+        if ("library".equals(currentTabId))  loadVideos();
+        if ("playlist".equals(currentTabId)) refreshPlaylistList();
     }
 
     // ── View mode (grid / list) ────────────────────────────────────────────
@@ -236,13 +291,20 @@ public class MainActivity extends AppCompatActivity {
         boolean isGrid = SettingsActivity.VIEW_MODE_GRID.equals(mode);
 
         int spanCount = isGrid ? 2 : 1;
-        adapter.setViewMode(isGrid
-                ? VideoAdapter.ViewMode.GRID : VideoAdapter.ViewMode.LIST);
+        adapter.setViewMode(isGrid ? VideoAdapter.ViewMode.GRID : VideoAdapter.ViewMode.LIST);
         recyclerView.setLayoutManager(new GridLayoutManager(this, spanCount));
 
-        builtinAdapter.setViewMode(isGrid
-                ? VideoAdapter.ViewMode.GRID : VideoAdapter.ViewMode.LIST);
+        builtinAdapter.setViewMode(isGrid ? VideoAdapter.ViewMode.GRID : VideoAdapter.ViewMode.LIST);
         recyclerBuiltin.setLayoutManager(new GridLayoutManager(this, spanCount));
+
+        if (playlistItemAdapter != null) {
+            playlistItemAdapter.setViewMode(isGrid ? VideoAdapter.ViewMode.GRID : VideoAdapter.ViewMode.LIST);
+        }
+        if (recyclerPlaylistItems.getLayoutManager() == null || isGrid) {
+            recyclerPlaylistItems.setLayoutManager(new GridLayoutManager(this, spanCount));
+        } else {
+            recyclerPlaylistItems.setLayoutManager(new GridLayoutManager(this, spanCount));
+        }
 
         invalidateOptionsMenu();
     }
@@ -255,6 +317,10 @@ public class MainActivity extends AppCompatActivity {
                 : SettingsActivity.VIEW_MODE_GRID;
         prefs.edit().putString(PREF_VIEW_MODE, next).apply();
         applyViewMode();
+        // Refresh playlist items if open
+        if ("playlist".equals(currentTabId) && playlistDetailView.getVisibility() == View.VISIBLE) {
+            refreshPlaylistDetail(currentOpenList);
+        }
     }
 
     @Override
@@ -268,19 +334,6 @@ public class MainActivity extends AppCompatActivity {
             toggleItem.setTitle(isGrid ? R.string.settings_view_list : R.string.settings_view_grid);
         }
         return super.onPrepareOptionsMenu(menu);
-    }
-
-    private String getTabLabel(String tabId) {
-        switch (tabId) {
-            case "library":  return getString(R.string.tab_library);
-            case "playlist": return getString(R.string.tab_playlist);
-            case "builtin":  return getString(R.string.tab_builtin);
-            default:         return tabId;
-        }
-    }
-
-    private int dp(int dpVal) {
-        return (int) (dpVal * getResources().getDisplayMetrics().density);
     }
 
     // ── Permissions ────────────────────────────────────────────────────────
@@ -381,6 +434,208 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    // ── Inline Playlist Tab ────────────────────────────────────────────────
+
+    private void setupPlaylistAdapter() {
+        allLists.clear();
+        allLists.addAll(mediaListManager.getLists());
+        playlistAdapter = new PlaylistAdapter(allLists, new PlaylistAdapter.OnItemListener() {
+            @Override public void onItemClick(MediaList list) {
+                openPlaylistDetail(list);
+            }
+            @Override public void onItemLongClick(MediaList list) {
+                showPlaylistOptions(list);
+            }
+        });
+    }
+
+    private void refreshPlaylistList() {
+        allLists.clear();
+        allLists.addAll(mediaListManager.getLists());
+        if (playlistAdapter == null) {
+            setupPlaylistAdapter();
+            recyclerPlaylists.setAdapter(playlistAdapter);
+        } else {
+            playlistAdapter.notifyDataSetChanged();
+        }
+        tvPlaylistEmpty.setVisibility(allLists.isEmpty() ? View.VISIBLE : View.GONE);
+        recyclerPlaylists.setVisibility(allLists.isEmpty() ? View.GONE : View.VISIBLE);
+    }
+
+    private void showPlaylistList() {
+        currentOpenList = null;
+        playlistListView.setVisibility(View.VISIBLE);
+        playlistDetailView.setVisibility(View.GONE);
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        toolbar.setTitle(R.string.tab_playlist);
+        refreshPlaylistList();
+    }
+
+    private void openPlaylistDetail(MediaList list) {
+        currentOpenList = list;
+        playlistListView.setVisibility(View.GONE);
+        playlistDetailView.setVisibility(View.VISIBLE);
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        toolbar.setTitle(list.getName());
+        refreshPlaylistDetail(list);
+    }
+
+    private void refreshPlaylistDetail(MediaList list) {
+        if (list == null) return;
+        List<String> uris = list.getItemUris();
+        currentListItems.clear();
+
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        String mode = prefs.getString(PREF_VIEW_MODE, SettingsActivity.VIEW_MODE_GRID);
+        boolean isGrid = SettingsActivity.VIEW_MODE_GRID.equals(mode);
+        int spanCount = isGrid ? 2 : 1;
+
+        for (String uriStr : uris) {
+            Uri uri = Uri.parse(uriStr);
+            String title = uri.getLastPathSegment();
+            if (title == null) title = uriStr;
+            try { title = java.net.URLDecoder.decode(title, "UTF-8"); } catch (Exception ignored) {}
+            // Detect mime type from extension for thumbnail loading
+            String lower = title.toLowerCase();
+            String mime = null;
+            if (lower.endsWith(".mp3") || lower.endsWith(".aac") || lower.endsWith(".flac")
+                    || lower.endsWith(".wav") || lower.endsWith(".ogg") || lower.endsWith(".m4a")
+                    || lower.endsWith(".opus") || lower.endsWith(".wma")) {
+                mime = "audio/";
+            }
+            currentListItems.add(new VideoItem(title, uri, 0, 0, mime, 0));
+        }
+
+        playlistItemAdapter = new VideoAdapter(currentListItems, item -> {
+            int idx = currentListItems.indexOf(item);
+            if (idx < 0) return;
+            ArrayList<String> uriStrs = new ArrayList<>();
+            for (VideoItem vi : currentListItems) uriStrs.add(vi.getUri().toString());
+            Intent intent = new Intent(this, PlayerActivity.class);
+            intent.putExtra(PlayerActivity.EXTRA_VIDEO_URI, uriStrs.get(idx));
+            intent.putStringArrayListExtra(PlayerActivity.EXTRA_PLAYLIST_URIS, uriStrs);
+            intent.putExtra(PlayerActivity.EXTRA_PLAYLIST_INDEX, idx);
+            intent.putExtra(PlayerActivity.EXTRA_PLAYLIST_ID, list.getId());
+            startActivity(intent);
+        });
+        playlistItemAdapter.setViewMode(isGrid ? VideoAdapter.ViewMode.GRID : VideoAdapter.ViewMode.LIST);
+        recyclerPlaylistItems.setLayoutManager(new GridLayoutManager(this, spanCount));
+        recyclerPlaylistItems.setAdapter(playlistItemAdapter);
+
+        tvPlaylistDetailEmpty.setVisibility(uris.isEmpty() ? View.VISIBLE : View.GONE);
+        recyclerPlaylistItems.setVisibility(uris.isEmpty() ? View.GONE : View.VISIBLE);
+    }
+
+    private void showPlaylistOptions(MediaList list) {
+        String[] opts = {
+                getString(R.string.playlist_rename),
+                getString(R.string.playlist_delete)
+        };
+        new AlertDialog.Builder(this, R.style.DarkDialog)
+                .setTitle(list.getName())
+                .setItems(opts, (d, which) -> {
+                    if (which == 0) showCreatePlaylistDialog(list);
+                    else confirmDeletePlaylist(list);
+                })
+                .show();
+    }
+
+    private void showCreatePlaylistDialog(MediaList existing) {
+        EditText etName     = new EditText(this);
+        EditText etCategory = new EditText(this);
+        etName.setHint(R.string.playlist_name_hint);
+        etCategory.setHint(R.string.playlist_category_hint);
+        etName.setTextColor(getResources().getColor(R.color.textPrimary, null));
+        etCategory.setTextColor(getResources().getColor(R.color.textPrimary, null));
+        int pad = dp(16);
+
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(pad, pad / 2, pad, pad / 2);
+        layout.addView(etName);
+        layout.addView(etCategory);
+
+        if (existing != null) {
+            etName.setText(existing.getName());
+            etCategory.setText(existing.getCategory());
+        }
+
+        int titleRes = existing == null ? R.string.playlist_create : R.string.playlist_rename;
+        new AlertDialog.Builder(this, R.style.DarkDialog)
+                .setTitle(titleRes)
+                .setView(layout)
+                .setPositiveButton(R.string.confirm, (d, w) -> {
+                    String name = etName.getText().toString().trim();
+                    String cat  = etCategory.getText().toString().trim();
+                    if (name.isEmpty()) {
+                        Toast.makeText(this, R.string.playlist_name_empty, Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    if (existing == null) {
+                        mediaListManager.createList(name, cat);
+                    } else {
+                        mediaListManager.renameList(existing.getId(), name, cat);
+                    }
+                    refreshPlaylistList();
+                })
+                .setNegativeButton(R.string.cancel, null)
+                .show();
+    }
+
+    private void confirmDeletePlaylist(MediaList list) {
+        new AlertDialog.Builder(this, R.style.DarkDialog)
+                .setTitle(R.string.playlist_delete)
+                .setMessage(getString(R.string.playlist_delete_confirm, list.getName()))
+                .setPositiveButton(R.string.confirm, (d, w) -> {
+                    mediaListManager.deleteList(list.getId());
+                    refreshPlaylistList();
+                })
+                .setNegativeButton(R.string.cancel, null)
+                .show();
+    }
+
+    private void pickMediaForPlaylist() {
+        if (currentOpenList == null) return;
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("*/*");
+        intent.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{"video/*", "audio/*"});
+        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION
+                | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+        addToPlaylistLauncher.launch(intent);
+    }
+
+    private void processAddToPlaylistResult(Intent data) {
+        if (currentOpenList == null) return;
+        List<Uri> uris = new ArrayList<>();
+        ClipData clipData = data.getClipData();
+        if (clipData != null) {
+            for (int i = 0; i < clipData.getItemCount(); i++) {
+                Uri u = clipData.getItemAt(i).getUri();
+                if (u != null) uris.add(u);
+            }
+        } else if (data.getData() != null) {
+            uris.add(data.getData());
+        }
+        int count = 0;
+        for (Uri uri : uris) {
+            try {
+                getContentResolver().takePersistableUriPermission(
+                        uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            } catch (Exception ignored) {}
+            mediaListManager.addItemToList(currentOpenList.getId(), uri.toString());
+            count++;
+        }
+        if (count > 0) {
+            String msg = count == 1
+                    ? getString(R.string.playlist_add_media)
+                    : getString(R.string.playlist_added_count, count);
+            Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+            refreshPlaylistDetail(currentOpenList);
+        }
+    }
+
     // ── Navigation ─────────────────────────────────────────────────────────
 
     private void pickVideoFile() {
@@ -397,5 +652,29 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, PlayerActivity.class);
         intent.putExtra(PlayerActivity.EXTRA_VIDEO_URI, uri.toString());
         startActivity(intent);
+    }
+
+    private void openPlayerWithList(VideoItem item, List<VideoItem> list) {
+        int idx = list.indexOf(item);
+        ArrayList<String> uris = new ArrayList<>();
+        for (VideoItem vi : list) uris.add(vi.getUri().toString());
+        Intent intent = new Intent(this, PlayerActivity.class);
+        intent.putExtra(PlayerActivity.EXTRA_VIDEO_URI, item.getUri().toString());
+        intent.putStringArrayListExtra(PlayerActivity.EXTRA_PLAYLIST_URIS, uris);
+        intent.putExtra(PlayerActivity.EXTRA_PLAYLIST_INDEX, Math.max(0, idx));
+        startActivity(intent);
+    }
+
+    private int dp(int dpVal) {
+        return (int) (dpVal * getResources().getDisplayMetrics().density);
+    }
+
+    private String getTabLabel(String tabId) {
+        switch (tabId) {
+            case "library":  return getString(R.string.tab_library);
+            case "playlist": return getString(R.string.tab_playlist);
+            case "builtin":  return getString(R.string.tab_builtin);
+            default:         return tabId;
+        }
     }
 }

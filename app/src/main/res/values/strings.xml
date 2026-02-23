@@ -10,7 +10,7 @@
     <string name="no_videos">暂无视频/音频\n点击右下角按钮导入</string>
     <string name="open_video">打开媒体</string>
     <string name="permission_denied">需要存储权限才能读取媒体文件</string>
-    <string name="builtin_empty">暂无内置媒体\n请在 assets/builtin_media/ 目录放置文件并更新 index.json</string>
+    <string name="builtin_empty">暂无内置媒体\n请在 assets/builtin_media/ 目录放置音视频文件</string>
 
     <!-- Player -->
     <string name="error_no_video">无法找到媒体文件</string>
@@ -46,6 +46,7 @@
     <!-- Subtitle -->
     <string name="subtitle">字幕</string>
     <string name="subtitle_import">导入字幕 (SRT / ASS / VTT)</string>
+    <string name="subtitle_export">导出字幕</string>
     <string name="subtitle_export_srt">导出为 SRT</string>
     <string name="subtitle_export_vtt">导出为 VTT</string>
     <string name="subtitle_clear">清除字幕</string>
@@ -96,6 +97,10 @@
     <string name="swipe_horizontal">左右滑动</string>
     <string name="swipe_vertical_desc">上下滑动（右侧，不需要长按）</string>
     <string name="swipe_horizontal_desc">左右滑动</string>
+    <string name="settings_subtitle_size">字幕大小：%d sp</string>
+    <string name="settings_subtitle_size_default">字幕大小：18 sp</string>
+    <string name="settings_subtitle_line_spacing">字幕行间距：%s</string>
+    <string name="settings_subtitle_line_spacing_default">字幕行间距：1.2</string>
     <string name="settings_applied">设置已保存</string>
 
     <!-- Subtitle list panel -->

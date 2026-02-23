@@ -32,6 +32,8 @@ public class SubtitleView extends View {
     private final float     paddingV;
     private final float     cornerRadius;
 
+    private float        lineSpacingMultiplier = 1.2f;
+
     private String       subtitleText;
     private StaticLayout staticLayout;
 
@@ -93,7 +95,7 @@ public class SubtitleView extends View {
         staticLayout = StaticLayout.Builder
                 .obtain(subtitleText, 0, subtitleText.length(), textPaint, availWidth)
                 .setAlignment(Layout.Alignment.ALIGN_CENTER)
-                .setLineSpacing(0f, 1.1f)
+                .setLineSpacing(0f, lineSpacingMultiplier)
                 .setIncludePad(false)
                 .build();
         requestLayout();
@@ -130,6 +132,12 @@ public class SubtitleView extends View {
         textPaint.setTextSize(TypedValue.applyDimension(
                 TypedValue.COMPLEX_UNIT_SP, sp,
                 getContext().getResources().getDisplayMetrics()));
+        if (subtitleText != null) buildLayout();
+    }
+
+    /** Changes the line-spacing multiplier within a subtitle block. Default 1.2. */
+    public void setLineSpacingMultiplier(float multiplier) {
+        this.lineSpacingMultiplier = multiplier;
         if (subtitleText != null) buildLayout();
     }
 }

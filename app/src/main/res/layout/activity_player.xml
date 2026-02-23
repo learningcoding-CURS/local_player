@@ -49,31 +49,18 @@
         android:indeterminateTint="@color/colorAccent"
         android:visibility="gone" />
 
-    <!-- ─── Brightness indicator (left edge, compact & translucent, no icon) ─── -->
+    <!-- ─── Brightness indicator (left edge, compact & translucent, no icon, no bar) ─── -->
     <LinearLayout
         android:id="@+id/brightnessIndicator"
-        android:layout_width="36dp"
-        android:layout_height="120dp"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:layout_gravity="center_vertical|start"
         android:layout_marginStart="8dp"
         android:orientation="vertical"
         android:gravity="center"
-        android:background="#66000000"
-        android:padding="6dp"
+        android:background="#88000000"
+        android:padding="4dp"
         android:visibility="gone">
-
-        <!-- Vertical progress bar (rotated), icon removed -->
-        <ProgressBar
-            android:id="@+id/brightnessBar"
-            style="@android:style/Widget.ProgressBar.Horizontal"
-            android:layout_width="6dp"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:layout_marginBottom="4dp"
-            android:progressTint="@color/colorAccentLight"
-            android:progressBackgroundTint="#33FFFFFF"
-            android:max="100"
-            android:rotation="270" />
 
         <TextView
             android:id="@+id/tvBrightnessValue"
@@ -81,8 +68,8 @@
             android:layout_height="wrap_content"
             android:text="50%"
             android:textColor="@color/textPrimary"
-            android:textSize="9sp"
-            android:alpha="0.8" />
+            android:textSize="11sp"
+            android:gravity="center" />
     </LinearLayout>
 
     <!-- ─────────────────── CONTROLS OVERLAY ─────────────────── -->
@@ -345,11 +332,11 @@
             android:paddingBottom="8dp" />
     </LinearLayout>
 
-    <!-- ─── Subtitle List Panel (slides up from bottom) ─── -->
+    <!-- ─── Subtitle List Panel (full screen) ─── -->
     <LinearLayout
         android:id="@+id/subtitleListPanel"
         android:layout_width="match_parent"
-        android:layout_height="350dp"
+        android:layout_height="match_parent"
         android:layout_gravity="bottom"
         android:orientation="vertical"
         android:background="#EE0D0D0D"

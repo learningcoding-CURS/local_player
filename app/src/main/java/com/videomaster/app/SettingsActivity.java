@@ -7,6 +7,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -21,15 +22,20 @@ import androidx.appcompat.widget.Toolbar;
  */
 public class SettingsActivity extends AppCompatActivity {
 
-    public static final String PREFS_NAME           = "app_settings";
-    public static final String PREF_DEFAULT_TAB     = "default_tab";
-    public static final String PREF_TAB_ORDER       = "tab_order";
-    public static final String PREF_PORTRAIT_SWIPE  = "portrait_swipe";
-    public static final String PREF_LANDSCAPE_SWIPE = "landscape_swipe";
-    public static final String PREF_VIEW_MODE       = "view_mode";
+    public static final String PREFS_NAME            = "app_settings";
+    public static final String PREF_DEFAULT_TAB      = "default_tab";
+    public static final String PREF_TAB_ORDER        = "tab_order";
+    public static final String PREF_PORTRAIT_SWIPE   = "portrait_swipe";
+    public static final String PREF_LANDSCAPE_SWIPE  = "landscape_swipe";
+    public static final String PREF_VIEW_MODE        = "view_mode";
+    public static final String PREF_SUBTITLE_SIZE    = "subtitle_size";
+    public static final String PREF_SUBTITLE_LINE_SP = "subtitle_line_spacing";
 
     public static final String VIEW_MODE_GRID = "GRID";
     public static final String VIEW_MODE_LIST = "LIST";
+
+    public static final float DEFAULT_SUBTITLE_SIZE    = 18f;
+    public static final float DEFAULT_SUBTITLE_LINE_SP = 1.2f;
 
     static final String DEFAULT_TAB_ORDER = "builtin,library,playlist";
 
@@ -50,6 +56,8 @@ public class SettingsActivity extends AppCompatActivity {
         String savedPortrait  = prefs.getString(PREF_PORTRAIT_SWIPE, "VERTICAL");
         String savedLandscape = prefs.getString(PREF_LANDSCAPE_SWIPE, "HORIZONTAL");
         String savedViewMode  = prefs.getString(PREF_VIEW_MODE, VIEW_MODE_GRID);
+        float  savedSubSize   = prefs.getFloat(PREF_SUBTITLE_SIZE, DEFAULT_SUBTITLE_SIZE);
+        float  savedLineSp    = prefs.getFloat(PREF_SUBTITLE_LINE_SP, DEFAULT_SUBTITLE_LINE_SP);
 
         tabOrder = savedOrderStr.split(",");
 
@@ -89,6 +97,41 @@ public class SettingsActivity extends AppCompatActivity {
         rbLandH.setChecked("HORIZONTAL".equals(savedLandscape));
         rbLandV.setChecked("VERTICAL".equals(savedLandscape));
 
+        // ── 字幕大小 ───────────────────────────────────────────────────────────
+        SeekBar sbSubSize = findViewById(R.id.sbSubtitleSize);
+        TextView tvSubSizeLabel = findViewById(R.id.tvSubtitleSizeLabel);
+        // SeekBar range 0-30 → actual size 10-40 sp
+        sbSubSize.setMax(30);
+        int initSubSizeProgress = Math.round(savedSubSize - 10f);
+        sbSubSize.setProgress(Math.max(0, Math.min(30, initSubSizeProgress)));
+        tvSubSizeLabel.setText(getString(R.string.settings_subtitle_size, (int) savedSubSize));
+        sbSubSize.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override public void onProgressChanged(SeekBar sb, int p, boolean user) {
+                tvSubSizeLabel.setText(getString(R.string.settings_subtitle_size, p + 10));
+            }
+            @Override public void onStartTrackingTouch(SeekBar sb) {}
+            @Override public void onStopTrackingTouch(SeekBar sb) {}
+        });
+
+        // ── 字幕行间距 ─────────────────────────────────────────────────────────
+        SeekBar sbLineSp = findViewById(R.id.sbSubtitleLineSpacing);
+        TextView tvLineSpLabel = findViewById(R.id.tvSubtitleLineSpacingLabel);
+        // SeekBar range 0-20 → multiplier 1.0-3.0 (step 0.1)
+        sbLineSp.setMax(20);
+        int initLineSpProgress = Math.round((savedLineSp - 1.0f) * 10f);
+        sbLineSp.setProgress(Math.max(0, Math.min(20, initLineSpProgress)));
+        tvLineSpLabel.setText(getString(R.string.settings_subtitle_line_spacing,
+                String.format("%.1f", savedLineSp)));
+        sbLineSp.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override public void onProgressChanged(SeekBar sb, int p, boolean user) {
+                float val = 1.0f + p * 0.1f;
+                tvLineSpLabel.setText(getString(R.string.settings_subtitle_line_spacing,
+                        String.format("%.1f", val)));
+            }
+            @Override public void onStartTrackingTouch(SeekBar sb) {}
+            @Override public void onStopTrackingTouch(SeekBar sb) {}
+        });
+
         // ── Save button ───────────────────────────────────────────────────────
         Button btnSave = findViewById(R.id.btnSaveSettings);
         btnSave.setOnClickListener(v -> {
@@ -118,12 +161,18 @@ public class SettingsActivity extends AppCompatActivity {
                 orderSb.append(tabOrder[i].trim());
             }
 
+            // Subtitle size
+            float newSubSize = sbSubSize.getProgress() + 10f;
+            float newLineSp  = 1.0f + sbLineSp.getProgress() * 0.1f;
+
             prefs.edit()
                     .putString(PREF_DEFAULT_TAB, newDefault)
                     .putString(PREF_TAB_ORDER, orderSb.toString())
                     .putString(PREF_VIEW_MODE, newViewMode)
                     .putString(PREF_PORTRAIT_SWIPE, newPortrait)
                     .putString(PREF_LANDSCAPE_SWIPE, newLandscape)
+                    .putFloat(PREF_SUBTITLE_SIZE, newSubSize)
+                    .putFloat(PREF_SUBTITLE_LINE_SP, newLineSp)
                     .apply();
 
             Toast.makeText(this, R.string.settings_applied, Toast.LENGTH_SHORT).show();

@@ -1,4 +1,0 @@
-com.videomaster.app.test.app-androidTest-0 E:\local_lib\coding\video\app\build\generated\res\resValues\androidTest\debug
-com.videomaster.app.test.app-mergeDebugAndroidTestResources-1 E:\local_lib\coding\video\app\build\intermediates\incremental\debugAndroidTest\mergeDebugAndroidTestResources\merged.dir
-com.videomaster.app.test.app-mergeDebugAndroidTestResources-2 E:\local_lib\coding\video\app\build\intermediates\incremental\debugAndroidTest\mergeDebugAndroidTestResources\stripped.dir
-com.videomaster.app.test.app-merged_res-3 E:\local_lib\coding\video\app\build\intermediates\merged_res\debugAndroidTest
