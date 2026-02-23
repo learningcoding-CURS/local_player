@@ -542,6 +542,32 @@
                 android:thumbTint="@color/colorAccent"
                 android:layout_marginBottom="8dp" />
 
+            <!-- ── 字幕默认显示 ── -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="8dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/settings_subtitle_default_visible"
+                    android:textColor="@color/textPrimary"
+                    android:textSize="14sp" />
+
+                <Switch
+                    android:id="@+id/swSubtitleDefaultVisible"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:thumbTint="@color/colorAccent"
+                    android:trackTint="@color/colorAccentLight" />
+
+            </LinearLayout>
+
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
@@ -570,14 +596,16 @@
                 android:layout_width="match_parent"
                 android:layout_height="24dp" />
 
-            <!-- Save button -->
+            <!-- Restore button (settings auto-save; this button reverts to pre-entry state) -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnSaveSettings"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
-                android:text="@string/settings_save"
+                android:text="@string/settings_restore"
                 android:textColor="@color/textPrimary"
-                app:backgroundTint="@color/colorAccent" />
+                app:backgroundTint="@color/bgSurface"
+                app:strokeColor="@color/colorAccent"
+                app:strokeWidth="1dp" />
 
         </LinearLayout>
     </ScrollView>

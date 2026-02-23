@@ -209,6 +209,9 @@ public class MainActivity extends AppCompatActivity {
                 showTab("builtin");
                 loadBuiltinMedia();
                 return true;
+            } else if (id == R.id.nav_stats) {
+                startActivity(new Intent(this, com.videomaster.app.stats.StatsActivity.class));
+                return false; // keep current tab highlighted
             }
             return false;
         });

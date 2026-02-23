@@ -18,10 +18,10 @@ import android.view.View;
  *   setPortraitSwipeDirection(SwipeDirection)   – default VERTICAL
  *   setLandscapeSwipeDirection(SwipeDirection)  – default HORIZONTAL
  *
- * Portrait VERTICAL mode:
- *   Left side vertical scroll   → adjust brightness (up = brighter)
- *   Right side DOWN swipe       → next media
- *   Right side UP   swipe       → previous media
+ * Portrait VERTICAL mode (default):
+ *   Any side DOWN swipe         → next media
+ *   Any side UP   swipe         → previous media
+ *   Left side small vertical    → adjust brightness (before threshold)
  *
  * Portrait HORIZONTAL mode:
  *   Left side vertical scroll   → adjust brightness
@@ -34,9 +34,9 @@ import android.view.View;
  *   RIGHT swipe                 → previous media
  *
  * Landscape VERTICAL mode:
- *   Left side vertical scroll   → adjust brightness
- *   Right side DOWN swipe       → next media
- *   Right side UP   swipe       → previous media
+ *   Any side DOWN swipe         → next media
+ *   Any side UP   swipe         → previous media
+ *   Left side small vertical    → adjust brightness (before threshold)
  *
  * Long press (no movement) always activates 2.5× speed boost regardless of orientation.
  */
@@ -274,6 +274,15 @@ public class GestureHandler implements View.OnTouchListener {
      * Detects and fires a media-switch swipe event.
      * Uses the shared {@code swipeConsumed} flag so it fires at most once per gesture
      * regardless of which path (view-level or activity-level) calls it first.
+     *
+     * HORIZONTAL mode: left/right swipe anywhere on screen → media switch.
+     *   Left-side vertical scroll is reserved for brightness (early return).
+     *
+     * VERTICAL mode: up/down swipe on EITHER side → media switch.
+     *   No side restriction; brightness still works for small movements on the left
+     *   side (handled separately by handleBrightnessScroll via GestureDetector).
+     *   Once the swipe threshold is crossed, swipeConsumed = true which stops
+     *   further brightness events in the same gesture.
      */
     private void detectSwipe(float currentX, float currentY,
                               float startX, float startY, float width) {
@@ -285,19 +294,20 @@ public class GestureHandler implements View.OnTouchListener {
         float absDY   = Math.abs(totalDy);
         boolean isLeft = startX < width / 2f;
 
-        // Left-side vertical movement → brightness (skip swipe check)
-        if (absDY > absDX && isLeft) return;
-
         SwipeDirection dir = isLandscape ? landscapeSwipe : portraitSwipe;
 
         if (dir == SwipeDirection.HORIZONTAL) {
+            // In HORIZONTAL mode, left-side vertical scroll is brightness-only.
+            if (absDY > absDX && isLeft) return;
             if (absDX > absDY && absDX > switchThresholdPx) {
                 swipeConsumed = true;
                 listener.onSwipeMedia(totalDx < 0); // left = next, right = previous
             }
         } else {
-            // VERTICAL — right side only (left is reserved for brightness)
-            if (!isLeft && absDY > absDX && absDY > switchThresholdPx) {
+            // VERTICAL mode — up/down swipe works on the full screen width.
+            // (Brightness still fires via GestureDetector on small left-side movements,
+            //  but once this threshold is crossed swipeConsumed prevents further brightness.)
+            if (absDY > absDX && absDY > switchThresholdPx) {
                 swipeConsumed = true;
                 listener.onSwipeMedia(totalDy > 0); // down = next, up = previous
             }
@@ -307,9 +317,10 @@ public class GestureHandler implements View.OnTouchListener {
     /**
      * Handles left-side vertical scroll for brightness adjustment.
      * Called from GestureDetector.onScroll where distanceX/Y are per-event deltas.
+     * Skipped once a media-switch swipe has been committed (swipeConsumed = true).
      */
     private void handleBrightnessScroll(float distanceX, float distanceY) {
-        if (listener == null) return;
+        if (listener == null || swipeConsumed) return;
         float absDX  = Math.abs(distanceX);
         float absDY  = Math.abs(distanceY);
         boolean isLeft = touchStartX < viewWidth / 2f;

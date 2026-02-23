@@ -19,6 +19,9 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Full-screen Settings Activity.
  * Covers: default home tab, tab order, list display mode (grid/list),
@@ -45,6 +48,8 @@ public class SettingsActivity extends AppCompatActivity {
     public static final String PREF_SEEKBAR_PROGRESS_ALPHA = "seekbar_progress_alpha";
     // Subtitle panel
     public static final String PREF_SUBTITLE_PANEL_ALPHA   = "subtitle_panel_alpha";
+    // Subtitle text default visibility (whether subtitle text is shown when player starts)
+    public static final String PREF_SUBTITLE_DEFAULT_VISIBLE = "subtitle_default_visible";
 
     // Playlist panel slide-in direction
     public static final String PREF_PANEL_DIR_PORTRAIT  = "panel_dir_portrait";
@@ -114,6 +119,14 @@ public class SettingsActivity extends AppCompatActivity {
     // Tracks currently selected color per control row (index = control index)
     private String[] selectedColors;
 
+    // SharedPreferences instance (instance field so all methods can access it)
+    private SharedPreferences prefs;
+    // Snapshot of preferences as they were when settings was opened (for Restore)
+    private Map<String, Object> originalPrefs;
+    // Control-to-pref mappings needed across methods
+    private String[] ctrlPrefsColor;
+    private String[] ctrlPrefsVis;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -123,7 +136,9 @@ public class SettingsActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        // Snapshot the state on entry — used by the Restore button
+        originalPrefs = new HashMap<>(prefs.getAll());
         String savedOrderStr  = prefs.getString(PREF_TAB_ORDER, DEFAULT_TAB_ORDER);
         String savedDefault   = prefs.getString(PREF_DEFAULT_TAB, "builtin");
         String savedPortrait  = prefs.getString(PREF_PORTRAIT_SWIPE, "VERTICAL");
@@ -139,6 +154,7 @@ public class SettingsActivity extends AppCompatActivity {
         int    savedSeekbarHeight  = prefs.getInt(PREF_SEEKBAR_HEIGHT,         DEFAULT_SEEKBAR_HEIGHT);
         int    savedProgAlpha      = prefs.getInt(PREF_SEEKBAR_PROGRESS_ALPHA, DEFAULT_SEEKBAR_PROGRESS_ALPHA);
         int    savedPanelAlpha     = prefs.getInt(PREF_SUBTITLE_PANEL_ALPHA,   DEFAULT_SUBTITLE_PANEL_ALPHA);
+        boolean savedSubDefaultVisible = prefs.getBoolean(PREF_SUBTITLE_DEFAULT_VISIBLE, true);
 
         tabOrder       = savedOrderStr.split(",");
         topBtnOrder    = prefs.getString(PREF_TOP_BTN_ORDER, DEFAULT_TOP_BTN_ORDER).split(",");
@@ -157,6 +173,15 @@ public class SettingsActivity extends AppCompatActivity {
             rb.setChecked(tabValues[i].equals(savedDefault));
             rgDefault.addView(rb);
         }
+        rgDefault.setOnCheckedChangeListener((group, checkedId) -> {
+            for (int i = 0; i < tabValues.length; i++) {
+                RadioButton rb = (RadioButton) group.getChildAt(i);
+                if (rb != null && rb.isChecked()) {
+                    prefs.edit().putString(PREF_DEFAULT_TAB, tabValues[i]).apply();
+                    break;
+                }
+            }
+        });
 
         // ── Tab order ─────────────────────────────────────────────────────────
         LinearLayout tabOrderContainer = findViewById(R.id.tabOrderContainer);
@@ -167,18 +192,27 @@ public class SettingsActivity extends AppCompatActivity {
         RadioButton rbList = findViewById(R.id.rbViewList);
         rbGrid.setChecked(VIEW_MODE_GRID.equals(savedViewMode));
         rbList.setChecked(VIEW_MODE_LIST.equals(savedViewMode));
+        ((RadioGroup) findViewById(R.id.rgViewMode)).setOnCheckedChangeListener((g, id) ->
+                prefs.edit().putString(PREF_VIEW_MODE,
+                        id == R.id.rbViewGrid ? VIEW_MODE_GRID : VIEW_MODE_LIST).apply());
 
         // ── Portrait swipe ────────────────────────────────────────────────────
         RadioButton rbPortraitV = findViewById(R.id.rbPortraitVertical);
         RadioButton rbPortraitH = findViewById(R.id.rbPortraitHorizontal);
         rbPortraitV.setChecked("VERTICAL".equals(savedPortrait));
         rbPortraitH.setChecked("HORIZONTAL".equals(savedPortrait));
+        ((RadioGroup) findViewById(R.id.rgPortraitSwipe)).setOnCheckedChangeListener((g, id) ->
+                prefs.edit().putString(PREF_PORTRAIT_SWIPE,
+                        id == R.id.rbPortraitHorizontal ? "HORIZONTAL" : "VERTICAL").apply());
 
         // ── Landscape swipe ───────────────────────────────────────────────────
         RadioButton rbLandH = findViewById(R.id.rbLandscapeHorizontal);
         RadioButton rbLandV = findViewById(R.id.rbLandscapeVertical);
         rbLandH.setChecked("HORIZONTAL".equals(savedLandscape));
         rbLandV.setChecked("VERTICAL".equals(savedLandscape));
+        ((RadioGroup) findViewById(R.id.rgLandscapeSwipe)).setOnCheckedChangeListener((g, id) ->
+                prefs.edit().putString(PREF_LANDSCAPE_SWIPE,
+                        id == R.id.rbLandscapeVertical ? "VERTICAL" : "HORIZONTAL").apply());
 
         // ── 播放列表面板方向（竖屏） ────────────────────────────────────────────
         RadioButton rbPanelPortraitTop    = findViewById(R.id.rbPanelDirPortraitTop);
@@ -189,6 +223,10 @@ public class SettingsActivity extends AppCompatActivity {
         rbPanelPortraitBottom.setChecked(PANEL_DIR_BOTTOM.equals(savedPanelDirPortrait));
         rbPanelPortraitLeft.setChecked(PANEL_DIR_LEFT.equals(savedPanelDirPortrait));
         rbPanelPortraitRight.setChecked(PANEL_DIR_RIGHT.equals(savedPanelDirPortrait));
+        rbPanelPortraitTop.setOnCheckedChangeListener((b, c) -> { if (c) prefs.edit().putString(PREF_PANEL_DIR_PORTRAIT, PANEL_DIR_TOP).apply(); });
+        rbPanelPortraitBottom.setOnCheckedChangeListener((b, c) -> { if (c) prefs.edit().putString(PREF_PANEL_DIR_PORTRAIT, PANEL_DIR_BOTTOM).apply(); });
+        rbPanelPortraitLeft.setOnCheckedChangeListener((b, c) -> { if (c) prefs.edit().putString(PREF_PANEL_DIR_PORTRAIT, PANEL_DIR_LEFT).apply(); });
+        rbPanelPortraitRight.setOnCheckedChangeListener((b, c) -> { if (c) prefs.edit().putString(PREF_PANEL_DIR_PORTRAIT, PANEL_DIR_RIGHT).apply(); });
 
         // ── 播放列表面板方向（横屏） ────────────────────────────────────────────
         RadioButton rbPanelLandTop    = findViewById(R.id.rbPanelDirLandscapeTop);
@@ -199,6 +237,10 @@ public class SettingsActivity extends AppCompatActivity {
         rbPanelLandBottom.setChecked(PANEL_DIR_BOTTOM.equals(savedPanelDirLandscape));
         rbPanelLandLeft.setChecked(PANEL_DIR_LEFT.equals(savedPanelDirLandscape));
         rbPanelLandRight.setChecked(PANEL_DIR_RIGHT.equals(savedPanelDirLandscape));
+        rbPanelLandTop.setOnCheckedChangeListener((b, c) -> { if (c) prefs.edit().putString(PREF_PANEL_DIR_LANDSCAPE, PANEL_DIR_TOP).apply(); });
+        rbPanelLandBottom.setOnCheckedChangeListener((b, c) -> { if (c) prefs.edit().putString(PREF_PANEL_DIR_LANDSCAPE, PANEL_DIR_BOTTOM).apply(); });
+        rbPanelLandLeft.setOnCheckedChangeListener((b, c) -> { if (c) prefs.edit().putString(PREF_PANEL_DIR_LANDSCAPE, PANEL_DIR_LEFT).apply(); });
+        rbPanelLandRight.setOnCheckedChangeListener((b, c) -> { if (c) prefs.edit().putString(PREF_PANEL_DIR_LANDSCAPE, PANEL_DIR_RIGHT).apply(); });
 
         // ── 字幕大小 ───────────────────────────────────────────────────────────
         SeekBar sbSubSize = findViewById(R.id.sbSubtitleSize);
@@ -212,7 +254,9 @@ public class SettingsActivity extends AppCompatActivity {
                 tvSubSizeLabel.setText(getString(R.string.settings_subtitle_size, p + 10));
             }
             @Override public void onStartTrackingTouch(SeekBar sb) {}
-            @Override public void onStopTrackingTouch(SeekBar sb) {}
+            @Override public void onStopTrackingTouch(SeekBar sb) {
+                prefs.edit().putFloat(PREF_SUBTITLE_SIZE, sb.getProgress() + 10f).apply();
+            }
         });
 
         // ── 字幕行间距 ─────────────────────────────────────────────────────────
@@ -230,7 +274,9 @@ public class SettingsActivity extends AppCompatActivity {
                         String.format("%.1f", val)));
             }
             @Override public void onStartTrackingTouch(SeekBar sb) {}
-            @Override public void onStopTrackingTouch(SeekBar sb) {}
+            @Override public void onStopTrackingTouch(SeekBar sb) {
+                prefs.edit().putFloat(PREF_SUBTITLE_LINE_SP, 1.0f + sb.getProgress() * 0.1f).apply();
+            }
         });
 
         // ── 跳转按钮大小 ──────────────────────────────────────────────────────
@@ -244,7 +290,9 @@ public class SettingsActivity extends AppCompatActivity {
                 tvSeekIconSizeLabel.setText(getString(R.string.settings_seek_icon_size, p + 32));
             }
             @Override public void onStartTrackingTouch(SeekBar sb) {}
-            @Override public void onStopTrackingTouch(SeekBar sb) {}
+            @Override public void onStopTrackingTouch(SeekBar sb) {
+                prefs.edit().putInt(PREF_SEEK_ICON_SIZE, sb.getProgress() + 32).apply();
+            }
         });
 
         // ── 跳转时长 ───────────────────────────────────────────────────────
@@ -258,7 +306,9 @@ public class SettingsActivity extends AppCompatActivity {
                 tvSeekSecondsLabel.setText(getString(R.string.settings_seek_seconds, p + 1));
             }
             @Override public void onStartTrackingTouch(SeekBar sb) {}
-            @Override public void onStopTrackingTouch(SeekBar sb) {}
+            @Override public void onStopTrackingTouch(SeekBar sb) {
+                prefs.edit().putInt(PREF_SEEK_SECONDS, sb.getProgress() + 1).apply();
+            }
         });
 
         // ── 跳转按钮透明度 ────────────────────────────────────────────────
@@ -272,7 +322,9 @@ public class SettingsActivity extends AppCompatActivity {
                 tvSeekAlphaLabel.setText(getString(R.string.settings_seek_alpha, p + 10));
             }
             @Override public void onStartTrackingTouch(SeekBar sb) {}
-            @Override public void onStopTrackingTouch(SeekBar sb) {}
+            @Override public void onStopTrackingTouch(SeekBar sb) {
+                prefs.edit().putInt(PREF_SEEK_ALPHA, sb.getProgress() + 10).apply();
+            }
         });
 
         // ── 进度条粗细 ────────────────────────────────────────────────────
@@ -286,7 +338,9 @@ public class SettingsActivity extends AppCompatActivity {
                 tvSeekbarHeightLabel.setText(getString(R.string.settings_seekbar_height, p + 4));
             }
             @Override public void onStartTrackingTouch(SeekBar sb) {}
-            @Override public void onStopTrackingTouch(SeekBar sb) {}
+            @Override public void onStopTrackingTouch(SeekBar sb) {
+                prefs.edit().putInt(PREF_SEEKBAR_HEIGHT, sb.getProgress() + 4).apply();
+            }
         });
 
         // ── 进度条已播放透明度 ─────────────────────────────────────────────
@@ -300,7 +354,9 @@ public class SettingsActivity extends AppCompatActivity {
                 tvProgAlphaLabel.setText(getString(R.string.settings_seekbar_progress_alpha, p + 10));
             }
             @Override public void onStartTrackingTouch(SeekBar sb) {}
-            @Override public void onStopTrackingTouch(SeekBar sb) {}
+            @Override public void onStopTrackingTouch(SeekBar sb) {
+                prefs.edit().putInt(PREF_SEEKBAR_PROGRESS_ALPHA, sb.getProgress() + 10).apply();
+            }
         });
 
         // ── 字幕面板背景透明度 ─────────────────────────────────────────────
@@ -314,17 +370,27 @@ public class SettingsActivity extends AppCompatActivity {
                 tvPanelAlphaLabel.setText(getString(R.string.settings_subtitle_panel_alpha, p));
             }
             @Override public void onStartTrackingTouch(SeekBar sb) {}
-            @Override public void onStopTrackingTouch(SeekBar sb) {}
+            @Override public void onStopTrackingTouch(SeekBar sb) {
+                prefs.edit().putInt(PREF_SUBTITLE_PANEL_ALPHA, sb.getProgress()).apply();
+            }
         });
+
+        // ── 字幕默认显示 ──────────────────────────────────────────────────────
+        Switch swSubDefaultVisible = findViewById(R.id.swSubtitleDefaultVisible);
+        if (swSubDefaultVisible != null) {
+            swSubDefaultVisible.setChecked(savedSubDefaultVisible);
+            swSubDefaultVisible.setOnCheckedChangeListener((b, checked) ->
+                    prefs.edit().putBoolean(PREF_SUBTITLE_DEFAULT_VISIBLE, checked).apply());
+        }
 
         // ── 播放控件 visibility + color (popup color picker) ─────────────────
         LinearLayout controlsContainer = findViewById(R.id.playerControlsContainer);
-        String[] ctrlPrefsVis   = {
+        ctrlPrefsVis   = new String[]{
                 PREF_BTN_LOCK_VISIBLE, PREF_BTN_PLAYMODE_VISIBLE,
                 PREF_BTN_PLAYLIST_VISIBLE, PREF_BTN_SUBTITLE_TOGGLE_VISIBLE,
                 PREF_BTN_SUBTITLE_VISIBLE, PREF_BTN_SUBTLIST_VISIBLE,
                 PREF_BTN_ROTATE_VISIBLE, null, null };
-        String[] ctrlPrefsColor = {
+        ctrlPrefsColor = new String[]{
                 PREF_BTN_LOCK_COLOR, PREF_BTN_PLAYMODE_COLOR,
                 PREF_BTN_PLAYLIST_COLOR, PREF_BTN_SUBTITLE_TOGGLE_COLOR,
                 PREF_BTN_SUBTITLE_COLOR, PREF_BTN_SUBTLIST_COLOR,
@@ -393,6 +459,9 @@ public class SettingsActivity extends AppCompatActivity {
             if (ctrlPrefsVis[i] != null) {
                 Switch sw = new Switch(this);
                 sw.setChecked(prefs.getBoolean(ctrlPrefsVis[i], true));
+                final String visPref = ctrlPrefsVis[i];
+                sw.setOnCheckedChangeListener((b, checked) ->
+                        prefs.edit().putBoolean(visPref, checked).apply());
                 ctrlSwitches[i] = sw;
                 topLine.addView(sw);
             }
@@ -419,116 +488,83 @@ public class SettingsActivity extends AppCompatActivity {
         LinearLayout centerBtnOrderContainer = getOrCreateBtnOrderContainer("centerBtnOrderContainer");
         refreshBtnOrderRows(centerBtnOrderContainer, centerBtnOrder, getCenterBtnLabels());
 
-        // ── Save button ───────────────────────────────────────────────────────
-        Button btnSave = findViewById(R.id.btnSaveSettings);
-        btnSave.setOnClickListener(v -> {
-            // Default tab
-            String newDefault = savedDefault;
-            for (int i = 0; i < tabValues.length; i++) {
-                RadioButton rb = (RadioButton) rgDefault.getChildAt(i);
-                if (rb != null && rb.isChecked()) {
-                    newDefault = tabValues[i];
-                    break;
-                }
-            }
+        // ── Restore button (settings auto-save; button reverts to pre-entry state) ─
+        Button btnRestore = findViewById(R.id.btnSaveSettings);
+        btnRestore.setOnClickListener(v -> confirmRestore());
+    }
 
-            // View mode
-            String newViewMode = rbGrid.isChecked() ? VIEW_MODE_GRID : VIEW_MODE_LIST;
-
-            // Portrait swipe
-            String newPortrait = rbPortraitH.isChecked() ? "HORIZONTAL" : "VERTICAL";
-
-            // Landscape swipe
-            String newLandscape = rbLandV.isChecked() ? "VERTICAL" : "HORIZONTAL";
-
-            // Panel direction (portrait)
-            String newPanelDirPortrait;
-            if (rbPanelPortraitTop.isChecked())         newPanelDirPortrait = PANEL_DIR_TOP;
-            else if (rbPanelPortraitBottom.isChecked()) newPanelDirPortrait = PANEL_DIR_BOTTOM;
-            else if (rbPanelPortraitLeft.isChecked())   newPanelDirPortrait = PANEL_DIR_LEFT;
-            else                                         newPanelDirPortrait = PANEL_DIR_RIGHT;
-
-            // Panel direction (landscape)
-            String newPanelDirLandscape;
-            if (rbPanelLandTop.isChecked())         newPanelDirLandscape = PANEL_DIR_TOP;
-            else if (rbPanelLandBottom.isChecked()) newPanelDirLandscape = PANEL_DIR_BOTTOM;
-            else if (rbPanelLandLeft.isChecked())   newPanelDirLandscape = PANEL_DIR_LEFT;
-            else                                     newPanelDirLandscape = PANEL_DIR_RIGHT;
-
-            // Tab order
-            StringBuilder orderSb = new StringBuilder();
-            for (int i = 0; i < tabOrder.length; i++) {
-                if (i > 0) orderSb.append(",");
-                orderSb.append(tabOrder[i].trim());
-            }
-
-            // Subtitle size
-            float newSubSize = sbSubSize.getProgress() + 10f;
-            float newLineSp  = 1.0f + sbLineSp.getProgress() * 0.1f;
-
-            // Player controls
-            int newSeekIconSize  = sbSeekIconSize.getProgress() + 32;
-            int newSeekSeconds   = sbSeekSeconds.getProgress() + 1;
-            int newSeekAlpha     = sbSeekAlpha.getProgress() + 10;
-            int newSeekbarHeight = sbSeekbarHeight.getProgress() + 4;
-            int newProgAlpha     = sbProgAlpha.getProgress() + 10;
-            int newPanelAlpha    = sbPanelAlpha.getProgress();
-
-            // Top / center button order
-            StringBuilder topOrderSb = new StringBuilder();
-            for (int i = 0; i < topBtnOrder.length; i++) {
-                if (i > 0) topOrderSb.append(",");
-                topOrderSb.append(topBtnOrder[i].trim());
-            }
-            StringBuilder centerOrderSb = new StringBuilder();
-            for (int i = 0; i < centerBtnOrder.length; i++) {
-                if (i > 0) centerOrderSb.append(",");
-                centerOrderSb.append(centerBtnOrder[i].trim());
-            }
-
-            SharedPreferences.Editor editor = prefs.edit()
-                    .putString(PREF_DEFAULT_TAB, newDefault)
-                    .putString(PREF_TAB_ORDER, orderSb.toString())
-                    .putString(PREF_VIEW_MODE, newViewMode)
-                    .putString(PREF_PORTRAIT_SWIPE, newPortrait)
-                    .putString(PREF_LANDSCAPE_SWIPE, newLandscape)
-                    .putString(PREF_PANEL_DIR_PORTRAIT, newPanelDirPortrait)
-                    .putString(PREF_PANEL_DIR_LANDSCAPE, newPanelDirLandscape)
-                    .putFloat(PREF_SUBTITLE_SIZE, newSubSize)
-                    .putFloat(PREF_SUBTITLE_LINE_SP, newLineSp)
-                    .putInt(PREF_SEEK_ICON_SIZE, newSeekIconSize)
-                    .putInt(PREF_SEEK_SECONDS, newSeekSeconds)
-                    .putInt(PREF_SEEK_ALPHA, newSeekAlpha)
-                    .putInt(PREF_SEEKBAR_HEIGHT, newSeekbarHeight)
-                    .putInt(PREF_SEEKBAR_PROGRESS_ALPHA, newProgAlpha)
-                    .putInt(PREF_SUBTITLE_PANEL_ALPHA, newPanelAlpha)
-                    .putString(PREF_TOP_BTN_ORDER, topOrderSb.toString())
-                    .putString(PREF_CENTER_BTN_ORDER, centerOrderSb.toString());
-
-            // Save button visibility and color settings
-            for (int i = 0; i < ctrlPrefsVis.length; i++) {
-                if (ctrlPrefsVis[i] != null && ctrlSwitches[i] != null) {
-                    editor.putBoolean(ctrlPrefsVis[i], ctrlSwitches[i].isChecked());
-                }
-                if (ctrlPrefsColor[i] != null && selectedColors[i] != null) {
-                    editor.putString(ctrlPrefsColor[i], selectedColors[i]);
-                }
-            }
-            editor.apply();
-
-            Toast.makeText(this, R.string.settings_applied, Toast.LENGTH_SHORT).show();
-            setResult(RESULT_OK);
-            finish();
-        });
+    @Override
+    public void onBackPressed() {
+        setResult(RESULT_OK);
+        super.onBackPressed();
     }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
+            setResult(RESULT_OK);
             finish();
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    // ── Restore snapshot ─────────────────────────────────────────────────────
+
+    private void confirmRestore() {
+        new AlertDialog.Builder(this, R.style.DarkDialog)
+                .setTitle(R.string.settings_restore_title)
+                .setMessage(R.string.settings_restore_message)
+                .setPositiveButton(android.R.string.ok, (d, w) -> restoreSnapshot())
+                .setNegativeButton(R.string.cancel, null)
+                .show();
+    }
+
+    /** Write the entry-snapshot back to SharedPreferences and restart the Activity. */
+    @SuppressWarnings("unchecked")
+    private void restoreSnapshot() {
+        if (originalPrefs == null) return;
+        SharedPreferences.Editor editor = prefs.edit().clear();
+        for (Map.Entry<String, Object> entry : originalPrefs.entrySet()) {
+            Object val = entry.getValue();
+            String key = entry.getKey();
+            if      (val instanceof Boolean) editor.putBoolean(key, (Boolean) val);
+            else if (val instanceof Integer) editor.putInt    (key, (Integer) val);
+            else if (val instanceof Float)   editor.putFloat  (key, (Float)   val);
+            else if (val instanceof Long)    editor.putLong   (key, (Long)    val);
+            else if (val instanceof String)  editor.putString (key, (String)  val);
+        }
+        editor.apply();
+        Toast.makeText(this, R.string.settings_restored, Toast.LENGTH_SHORT).show();
+        recreate();
+    }
+
+    // ── Auto-save helpers ────────────────────────────────────────────────────
+
+    private void saveTabOrder() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < tabOrder.length; i++) {
+            if (i > 0) sb.append(",");
+            sb.append(tabOrder[i].trim());
+        }
+        prefs.edit().putString(PREF_TAB_ORDER, sb.toString()).apply();
+    }
+
+    private void saveBtnOrders() {
+        StringBuilder top = new StringBuilder();
+        for (int i = 0; i < topBtnOrder.length; i++) {
+            if (i > 0) top.append(",");
+            top.append(topBtnOrder[i].trim());
+        }
+        StringBuilder center = new StringBuilder();
+        for (int i = 0; i < centerBtnOrder.length; i++) {
+            if (i > 0) center.append(",");
+            center.append(centerBtnOrder[i].trim());
+        }
+        prefs.edit()
+                .putString(PREF_TOP_BTN_ORDER, top.toString())
+                .putString(PREF_CENTER_BTN_ORDER, center.toString())
+                .apply();
     }
 
     // ── Color picker popup ───────────────────────────────────────────────────
@@ -584,6 +620,9 @@ public class SettingsActivity extends AppCompatActivity {
             colorRow.getChildAt(c).setOnClickListener(v -> {
                 selectedColors[controlIndex] = COLOR_VALUES[ci];
                 updateSwatchColor(swatchView, COLOR_VALUES[ci]);
+                if (ctrlPrefsColor != null && ctrlPrefsColor[controlIndex] != null) {
+                    prefs.edit().putString(ctrlPrefsColor[controlIndex], COLOR_VALUES[ci]).apply();
+                }
                 holder[0].dismiss();
             });
         }
@@ -638,6 +677,7 @@ public class SettingsActivity extends AppCompatActivity {
                     tabOrder[idx - 1] = tabOrder[idx];
                     tabOrder[idx] = tmp;
                     refreshTabOrderRows(container);
+                    saveTabOrder();
                 });
                 row.addView(btnUp);
             }
@@ -652,6 +692,7 @@ public class SettingsActivity extends AppCompatActivity {
                     tabOrder[idx + 1] = tabOrder[idx];
                     tabOrder[idx] = tmp;
                     refreshTabOrderRows(container);
+                    saveTabOrder();
                 });
                 row.addView(btnDown);
             }
@@ -730,6 +771,7 @@ public class SettingsActivity extends AppCompatActivity {
                     order[idx - 1] = order[idx];
                     order[idx] = tmp;
                     refreshBtnOrderRows(container, order, labels);
+                    saveBtnOrders();
                 });
                 row.addView(btnUp);
             }
@@ -744,6 +786,7 @@ public class SettingsActivity extends AppCompatActivity {
                     order[idx + 1] = order[idx];
                     order[idx] = tmp;
                     refreshBtnOrderRows(container, order, labels);
+                    saveBtnOrders();
                 });
                 row.addView(btnDown);
             }

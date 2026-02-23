@@ -34,6 +34,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.videomaster.app.SettingsActivity;
+import com.videomaster.app.stats.PlayStats;
 import com.videomaster.app.subtitle.SubtitleLibraryManager;
 import com.videomaster.app.interfaces.IPlayerEventListener;
 import com.videomaster.app.player.GestureHandler;
@@ -136,6 +137,9 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
     // Subtitle text visibility toggle
     private boolean       isSubtitleTextVisible  = true;
 
+    // Last subtitle entry clicked in the list panel (for toggle play/pause on re-click)
+    private SubtitleEntry lastClickedSubEntry     = null;
+
     // Subtitle library
     private SubtitleLibraryManager subtitleLibraryManager;
 
@@ -159,6 +163,10 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
     private ArrayList<String> playlistUris  = null;
     private int               playlistIndex = 0;
     private String            playlistId    = null;
+
+    // Playback-time tracking (for PlayStats)
+    private long playStatsStartMs    = -1L; // SystemClock.elapsedRealtime() when play resumed
+    private long playStatsAccumMs    = 0L;  // total ms accumulated in this session
 
     // Shuffle state
     private int[] shuffleOrder      = null;
@@ -306,12 +314,32 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
 
     @Override
     protected void onDestroy() {
+        // Finalize any in-progress play segment
+        if (playStatsStartMs >= 0) {
+            playStatsAccumMs += android.os.SystemClock.elapsedRealtime() - playStatsStartMs;
+            playStatsStartMs = -1L;
+        }
+        // Persist to PlayStats
+        if (playStatsAccumMs > 0) {
+            String statsId   = playlistId != null ? playlistId : PlayStats.SINGLE_FILE_ID;
+            String statsName = resolvePlayStatsName();
+            PlayStats.getInstance(this).addTime(statsId, statsName, playStatsAccumMs);
+        }
         super.onDestroy();
         uiHandler.removeCallbacksAndMessages(null);
         if (playerManager != null) {
             playerManager.removeListener(this);
             playerManager.release();
         }
+    }
+
+    /** Resolves a display name for the current playback context (playlist or single file). */
+    private String resolvePlayStatsName() {
+        if (playlistId != null && mediaListManager != null) {
+            com.videomaster.app.model.MediaList list = mediaListManager.getList(playlistId);
+            if (list != null) return list.getName();
+        }
+        return getString(R.string.stats_single_file);
     }
 
     // ── Initialisation ─────────────────────────────────────────────────────
@@ -392,6 +420,17 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
         int panelAlpha = prefs.getInt(SettingsActivity.PREF_SUBTITLE_PANEL_ALPHA,
                 SettingsActivity.DEFAULT_SUBTITLE_PANEL_ALPHA);
         applySubtitlePanelAlpha(panelAlpha);
+
+        // ── Subtitle default visibility ───────────────────────────────────
+        isSubtitleTextVisible = prefs.getBoolean(
+                SettingsActivity.PREF_SUBTITLE_DEFAULT_VISIBLE, true);
+        if (subtitleView != null) {
+            subtitleView.setVisibility(isSubtitleTextVisible ? View.VISIBLE : View.GONE);
+        }
+        if (btnSubtitleToggle != null) {
+            btnSubtitleToggle.setImageResource(
+                    isSubtitleTextVisible ? R.drawable.ic_subtitle_toggle : R.drawable.ic_subtitle_off);
+        }
 
         // ── Player control buttons visibility & color ─────────────────────
         applyButtonSettings(btnLock,
@@ -907,10 +946,18 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
         if (subs.isEmpty()) return;
 
         // Build or rebuild adapter — panel stays open after click
+        lastClickedSubEntry = null;
         subtitleListAdapter = new SubtitleListAdapter(subs,
                 entry -> {
-                    playerManager.seekTo(entry.getStartTimeMs());
-                    subtitleManager.onSeek();
+                    if (entry == lastClickedSubEntry) {
+                        // Re-click the same subtitle → toggle play/pause
+                        playerManager.togglePlayPause();
+                    } else {
+                        // First click or different subtitle → seek to its start time
+                        lastClickedSubEntry = entry;
+                        playerManager.seekTo(entry.getStartTimeMs());
+                        subtitleManager.onSeek();
+                    }
                     scheduleHideControls();
                 });
 
@@ -969,6 +1016,7 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
 
     private void closeSubtitleListPanel() {
         if (!isSubtitlePanelVisible) return;
+        lastClickedSubEntry = null;
         subtitleListPanel.animate()
                 .translationY(subtitleListPanel.getHeight())
                 .setDuration(200)
@@ -1236,6 +1284,8 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
 
     @Override
     public void onPlaybackStarted() {
+        // Mark the moment playback (re)started for time tracking
+        playStatsStartMs = android.os.SystemClock.elapsedRealtime();
         runOnUiThread(() -> {
             btnPlayPause.setImageResource(R.drawable.ic_pause);
             loadingView.setVisibility(View.GONE);
@@ -1244,11 +1294,21 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
 
     @Override
     public void onPlaybackPaused() {
+        // Accumulate time since last play start
+        if (playStatsStartMs >= 0) {
+            playStatsAccumMs += android.os.SystemClock.elapsedRealtime() - playStatsStartMs;
+            playStatsStartMs = -1L;
+        }
         runOnUiThread(() -> btnPlayPause.setImageResource(R.drawable.ic_play));
     }
 
     @Override
     public void onPlaybackCompleted() {
+        // Accumulate any remaining time on natural completion
+        if (playStatsStartMs >= 0) {
+            playStatsAccumMs += android.os.SystemClock.elapsedRealtime() - playStatsStartMs;
+            playStatsStartMs = -1L;
+        }
         runOnUiThread(() -> {
             saveCurrentProgress();
             btnPlayPause.setImageResource(R.drawable.ic_play);

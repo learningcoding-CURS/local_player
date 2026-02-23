@@ -104,10 +104,13 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.ViewHo
         h.tvCount.setText(h.itemView.getContext()
                 .getString(R.string.playlist_item_count, list.size()));
 
-        // Load thumbnail for grid cells
-        if (h.isGrid && h.ivThumb != null) {
+        // Load thumbnail for both grid and list cells
+        if (h.ivThumb != null) {
             h.ivThumb.clearColorFilter();
             h.ivThumb.setImageResource(R.drawable.ic_playlist);
+            h.ivThumb.setColorFilter(
+                    h.itemView.getContext().getResources()
+                            .getColor(R.color.colorAccent, null));
             loadThumbnail(h.itemView.getContext(), list.getId(), h);
         }
 
@@ -160,11 +163,11 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.ViewHo
 
         ViewHolder(@NonNull View v, boolean isGrid) {
             super(v);
-            this.isGrid   = isGrid;
-            tvName        = v.findViewById(R.id.tvPlaylistName);
-            tvCategory    = v.findViewById(R.id.tvPlaylistCategory);
-            tvCount       = v.findViewById(R.id.tvPlaylistCount);
-            ivThumb       = v.findViewById(R.id.ivPlaylistThumb);
+            this.isGrid = isGrid;
+            tvName      = v.findViewById(R.id.tvPlaylistName);
+            tvCategory  = v.findViewById(R.id.tvPlaylistCategory);
+            tvCount     = v.findViewById(R.id.tvPlaylistCount);
+            ivThumb     = v.findViewById(R.id.ivPlaylistThumb);
         }
     }
 }

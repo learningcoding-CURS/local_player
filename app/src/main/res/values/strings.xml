@@ -7,6 +7,14 @@
     <string name="tab_library">媒体库</string>
     <string name="tab_playlist">我的列表</string>
     <string name="tab_builtin">内置媒体</string>
+    <string name="tab_stats">统计</string>
+    <string name="stats_title">播放时长统计</string>
+    <string name="stats_empty">暂无播放记录</string>
+    <string name="stats_summary">共 %1$d 个列表 · 累计 %2$s</string>
+    <string name="stats_clear">清除记录</string>
+    <string name="stats_clear_title">清除统计</string>
+    <string name="stats_clear_message">将删除所有播放时长记录，此操作不可撤销。</string>
+    <string name="stats_single_file">单文件播放</string>
     <string name="no_videos">暂无视频/音频\n点击右下角按钮导入</string>
     <string name="open_video">打开媒体</string>
     <string name="permission_denied">需要存储权限才能读取媒体文件</string>
@@ -86,6 +94,10 @@
     <!-- Settings -->
     <string name="settings_title">设置</string>
     <string name="settings_save">保存并返回</string>
+    <string name="settings_restore">恢复进入前的设置</string>
+    <string name="settings_restore_title">恢复设置</string>
+    <string name="settings_restore_message">将撤销本次打开设置后的所有修改，恢复为进入前的状态。</string>
+    <string name="settings_restored">已恢复为进入前的设置</string>
     <string name="settings_default_tab">默认主界面</string>
     <string name="settings_tab_order">标签顺序（点击 ↑↓ 调整）</string>
     <string name="settings_portrait_swipe">竖屏切换媒体手势</string>
@@ -145,6 +157,7 @@
     <string name="settings_seekbar_height">进度条粗细：%ddp</string>
     <string name="settings_seekbar_progress_alpha">已播放透明度：%d%%</string>
     <string name="settings_subtitle_panel_alpha">字幕面板透明度：%d%%</string>
+    <string name="settings_subtitle_default_visible">字幕默认显示</string>
 
     <!-- Custom thumbnail -->
     <string name="custom_thumb_set">设置自定义缩略图</string>
