@@ -256,6 +256,42 @@ public class SettingsActivity extends AppCompatActivity {
         LinearLayout shortcutOrderContainer = findViewById(R.id.shortcutOrderContainer);
         refreshShortcutOrderRows(shortcutOrderContainer);
 
+        // ── 列表/手势/面板 标签切换 ───────────────────────────────────────────
+        {
+            View sectionViewMode       = findViewById(R.id.sectionViewMode);
+            View sectionPortraitSwipe   = findViewById(R.id.sectionPortraitSwipe);
+            View sectionLandscapeSwipe  = findViewById(R.id.sectionLandscapeSwipe);
+            View sectionPanelPortrait  = findViewById(R.id.sectionPanelPortrait);
+            View sectionPanelLandscape = findViewById(R.id.sectionPanelLandscape);
+
+            TextView tabViewMode       = findViewById(R.id.tabViewMode);
+            TextView tabPortraitSwipe  = findViewById(R.id.tabPortraitSwipe);
+            TextView tabLandscapeSwipe  = findViewById(R.id.tabLandscapeSwipe);
+            TextView tabPanelPortrait  = findViewById(R.id.tabPanelPortrait);
+            TextView tabPanelLandscape = findViewById(R.id.tabPanelLandscape);
+
+            View.OnClickListener generalTabToggle = v -> {
+                View section;
+                if (v == tabViewMode)        section = sectionViewMode;
+                else if (v == tabPortraitSwipe)  section = sectionPortraitSwipe;
+                else if (v == tabLandscapeSwipe) section = sectionLandscapeSwipe;
+                else if (v == tabPanelPortrait)  section = sectionPanelPortrait;
+                else                             section = sectionPanelLandscape;
+
+                boolean wasVisible = section.getVisibility() == View.VISIBLE;
+                section.setVisibility(wasVisible ? View.GONE : View.VISIBLE);
+
+                int activeColor = getResources().getColor(R.color.colorAccent, null);
+                int normalColor = 0x00000000;
+                ((TextView) v).setBackgroundColor(wasVisible ? normalColor : activeColor);
+            };
+            tabViewMode.setOnClickListener(generalTabToggle);
+            tabPortraitSwipe.setOnClickListener(generalTabToggle);
+            tabLandscapeSwipe.setOnClickListener(generalTabToggle);
+            tabPanelPortrait.setOnClickListener(generalTabToggle);
+            tabPanelLandscape.setOnClickListener(generalTabToggle);
+        }
+
         // ── View mode ─────────────────────────────────────────────────────────
         RadioButton rbGrid = findViewById(R.id.rbViewGrid);
         RadioButton rbList = findViewById(R.id.rbViewList);

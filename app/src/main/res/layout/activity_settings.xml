@@ -105,312 +105,71 @@
                 android:layout_marginTop="12dp"
                 android:layout_marginBottom="4dp" />
 
-            <!-- ── 列表显示模式 ── -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/settings_view_mode"
-                android:textColor="@color/colorAccentLight"
-                android:textSize="13sp"
-                android:paddingTop="8dp"
-                android:paddingBottom="4dp" />
-
-            <RadioGroup
-                android:id="@+id/rgViewMode"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <RadioButton
-                    android:id="@+id/rbViewGrid"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:text="@string/settings_view_grid"
-                    android:textColor="@color/textPrimary"
-                    android:paddingStart="4dp"
-                    android:paddingTop="6dp"
-                    android:paddingBottom="6dp" />
-
-                <RadioButton
-                    android:id="@+id/rbViewList"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:text="@string/settings_view_list"
-                    android:textColor="@color/textPrimary"
-                    android:paddingStart="4dp"
-                    android:paddingTop="6dp"
-                    android:paddingBottom="6dp" />
-
-            </RadioGroup>
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/divider"
-                android:layout_marginTop="12dp"
-                android:layout_marginBottom="4dp" />
-
-            <!-- ── 竖屏切换手势 ── -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/settings_portrait_swipe"
-                android:textColor="@color/colorAccentLight"
-                android:textSize="13sp"
-                android:paddingTop="8dp"
-                android:paddingBottom="4dp" />
-
-            <RadioGroup
-                android:id="@+id/rgPortraitSwipe"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <RadioButton
-                    android:id="@+id/rbPortraitVertical"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:text="@string/swipe_vertical_desc"
-                    android:textColor="@color/textPrimary"
-                    android:paddingStart="4dp"
-                    android:paddingTop="6dp"
-                    android:paddingBottom="6dp" />
-
-                <RadioButton
-                    android:id="@+id/rbPortraitHorizontal"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:text="@string/swipe_horizontal_desc"
-                    android:textColor="@color/textPrimary"
-                    android:paddingStart="4dp"
-                    android:paddingTop="6dp"
-                    android:paddingBottom="6dp" />
-
-            </RadioGroup>
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/divider"
-                android:layout_marginTop="12dp"
-                android:layout_marginBottom="4dp" />
-
-            <!-- ── 横屏切换手势 ── -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/settings_landscape_swipe"
-                android:textColor="@color/colorAccentLight"
-                android:textSize="13sp"
-                android:paddingTop="8dp"
-                android:paddingBottom="4dp" />
-
-            <RadioGroup
-                android:id="@+id/rgLandscapeSwipe"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <RadioButton
-                    android:id="@+id/rbLandscapeHorizontal"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:text="@string/swipe_horizontal_desc"
-                    android:textColor="@color/textPrimary"
-                    android:paddingStart="4dp"
-                    android:paddingTop="6dp"
-                    android:paddingBottom="6dp" />
-
-                <RadioButton
-                    android:id="@+id/rbLandscapeVertical"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:text="@string/swipe_vertical_desc"
-                    android:textColor="@color/textPrimary"
-                    android:paddingStart="4dp"
-                    android:paddingTop="6dp"
-                    android:paddingBottom="6dp" />
-
-            </RadioGroup>
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/divider"
-                android:layout_marginTop="12dp"
-                android:layout_marginBottom="4dp" />
-
-            <!-- ── 播放列表面板方向（竖屏） ── -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/settings_panel_dir_portrait"
-                android:textColor="@color/colorAccentLight"
-                android:textSize="13sp"
-                android:paddingTop="8dp"
-                android:paddingBottom="4dp" />
-
+            <!-- ── 列表/手势/面板（可折叠标签切换） ── -->
             <LinearLayout
-                android:id="@+id/rgPanelDirPortrait"
+                android:id="@+id/generalTabRow"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:orientation="horizontal"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp">
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <RadioButton
-                        android:id="@+id/rbPanelDirPortraitTop"
-                        android:layout_width="0dp"
-                        android:layout_weight="1"
-                        android:layout_height="wrap_content"
-                        android:text="@string/panel_dir_top"
-                        android:textColor="@color/textPrimary"
-                        android:paddingStart="4dp"
-                        android:paddingTop="6dp"
-                        android:paddingBottom="6dp" />
-
-                    <RadioButton
-                        android:id="@+id/rbPanelDirPortraitBottom"
-                        android:layout_width="0dp"
-                        android:layout_weight="1"
-                        android:layout_height="wrap_content"
-                        android:text="@string/panel_dir_bottom"
-                        android:textColor="@color/textPrimary"
-                        android:paddingStart="4dp"
-                        android:paddingTop="6dp"
-                        android:paddingBottom="6dp" />
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <RadioButton
-                        android:id="@+id/rbPanelDirPortraitLeft"
-                        android:layout_width="0dp"
-                        android:layout_weight="1"
-                        android:layout_height="wrap_content"
-                        android:text="@string/panel_dir_left"
-                        android:textColor="@color/textPrimary"
-                        android:paddingStart="4dp"
-                        android:paddingTop="6dp"
-                        android:paddingBottom="6dp" />
-
-                    <RadioButton
-                        android:id="@+id/rbPanelDirPortraitRight"
-                        android:layout_width="0dp"
-                        android:layout_weight="1"
-                        android:layout_height="wrap_content"
-                        android:text="@string/panel_dir_right"
-                        android:textColor="@color/textPrimary"
-                        android:paddingStart="4dp"
-                        android:paddingTop="6dp"
-                        android:paddingBottom="6dp" />
-
-                </LinearLayout>
+                <TextView android:id="@+id/tabViewMode" android:layout_width="0dp" android:layout_weight="1" android:layout_height="36dp" android:text="列表模式" android:textColor="@color/textPrimary" android:textSize="12sp" android:gravity="center" android:background="@drawable/bg_speed_badge" android:layout_marginEnd="4dp" />
+                <TextView android:id="@+id/tabPortraitSwipe" android:layout_width="0dp" android:layout_weight="1" android:layout_height="36dp" android:text="竖屏手势" android:textColor="@color/textPrimary" android:textSize="12sp" android:gravity="center" android:background="@drawable/bg_speed_badge" android:layout_marginEnd="4dp" />
+                <TextView android:id="@+id/tabLandscapeSwipe" android:layout_width="0dp" android:layout_weight="1" android:layout_height="36dp" android:text="横屏手势" android:textColor="@color/textPrimary" android:textSize="12sp" android:gravity="center" android:background="@drawable/bg_speed_badge" android:layout_marginEnd="4dp" />
+                <TextView android:id="@+id/tabPanelPortrait" android:layout_width="0dp" android:layout_weight="1" android:layout_height="36dp" android:text="面板竖屏" android:textColor="@color/textPrimary" android:textSize="12sp" android:gravity="center" android:background="@drawable/bg_speed_badge" android:layout_marginEnd="4dp" />
+                <TextView android:id="@+id/tabPanelLandscape" android:layout_width="0dp" android:layout_weight="1" android:layout_height="36dp" android:text="面板横屏" android:textColor="@color/textPrimary" android:textSize="12sp" android:gravity="center" android:background="@drawable/bg_speed_badge" />
 
             </LinearLayout>
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/divider"
-                android:layout_marginTop="12dp"
-                android:layout_marginBottom="4dp" />
-
-            <!-- ── 播放列表面板方向（横屏） ── -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/settings_panel_dir_landscape"
-                android:textColor="@color/colorAccentLight"
-                android:textSize="13sp"
-                android:paddingTop="8dp"
-                android:paddingBottom="4dp" />
-
-            <LinearLayout
-                android:id="@+id/rgPanelDirLandscape"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <RadioButton
-                        android:id="@+id/rbPanelDirLandscapeTop"
-                        android:layout_width="0dp"
-                        android:layout_weight="1"
-                        android:layout_height="wrap_content"
-                        android:text="@string/panel_dir_top"
-                        android:textColor="@color/textPrimary"
-                        android:paddingStart="4dp"
-                        android:paddingTop="6dp"
-                        android:paddingBottom="6dp" />
-
-                    <RadioButton
-                        android:id="@+id/rbPanelDirLandscapeBottom"
-                        android:layout_width="0dp"
-                        android:layout_weight="1"
-                        android:layout_height="wrap_content"
-                        android:text="@string/panel_dir_bottom"
-                        android:textColor="@color/textPrimary"
-                        android:paddingStart="4dp"
-                        android:paddingTop="6dp"
-                        android:paddingBottom="6dp" />
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <RadioButton
-                        android:id="@+id/rbPanelDirLandscapeLeft"
-                        android:layout_width="0dp"
-                        android:layout_weight="1"
-                        android:layout_height="wrap_content"
-                        android:text="@string/panel_dir_left"
-                        android:textColor="@color/textPrimary"
-                        android:paddingStart="4dp"
-                        android:paddingTop="6dp"
-                        android:paddingBottom="6dp" />
-
-                    <RadioButton
-                        android:id="@+id/rbPanelDirLandscapeRight"
-                        android:layout_width="0dp"
-                        android:layout_weight="1"
-                        android:layout_height="wrap_content"
-                        android:text="@string/panel_dir_right"
-                        android:textColor="@color/textPrimary"
-                        android:paddingStart="4dp"
-                        android:paddingTop="6dp"
-                        android:paddingBottom="6dp" />
-
-                </LinearLayout>
-
+            <LinearLayout android:id="@+id/sectionViewMode" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone">
+                <RadioGroup android:id="@+id/rgViewMode" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+                    <RadioButton android:id="@+id/rbViewGrid" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="@string/settings_view_grid" android:textColor="@color/textPrimary" android:paddingStart="4dp" android:paddingTop="6dp" android:paddingBottom="6dp" />
+                    <RadioButton android:id="@+id/rbViewList" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="@string/settings_view_list" android:textColor="@color/textPrimary" android:paddingStart="4dp" android:paddingTop="6dp" android:paddingBottom="6dp" />
+                </RadioGroup>
             </LinearLayout>
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/divider"
-                android:layout_marginTop="12dp"
-                android:layout_marginBottom="4dp" />
+            <LinearLayout android:id="@+id/sectionPortraitSwipe" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone">
+                <RadioGroup android:id="@+id/rgPortraitSwipe" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+                    <RadioButton android:id="@+id/rbPortraitVertical" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="@string/swipe_vertical_desc" android:textColor="@color/textPrimary" android:paddingStart="4dp" android:paddingTop="6dp" android:paddingBottom="6dp" />
+                    <RadioButton android:id="@+id/rbPortraitHorizontal" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="@string/swipe_horizontal_desc" android:textColor="@color/textPrimary" android:paddingStart="4dp" android:paddingTop="6dp" android:paddingBottom="6dp" />
+                </RadioGroup>
+            </LinearLayout>
+
+            <LinearLayout android:id="@+id/sectionLandscapeSwipe" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone">
+                <RadioGroup android:id="@+id/rgLandscapeSwipe" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+                    <RadioButton android:id="@+id/rbLandscapeHorizontal" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="@string/swipe_horizontal_desc" android:textColor="@color/textPrimary" android:paddingStart="4dp" android:paddingTop="6dp" android:paddingBottom="6dp" />
+                    <RadioButton android:id="@+id/rbLandscapeVertical" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="@string/swipe_vertical_desc" android:textColor="@color/textPrimary" android:paddingStart="4dp" android:paddingTop="6dp" android:paddingBottom="6dp" />
+                </RadioGroup>
+            </LinearLayout>
+
+            <LinearLayout android:id="@+id/sectionPanelPortrait" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone">
+                <LinearLayout android:id="@+id/rgPanelDirPortrait" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+                        <RadioButton android:id="@+id/rbPanelDirPortraitTop" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="@string/panel_dir_top" android:textColor="@color/textPrimary" android:paddingStart="4dp" android:paddingTop="6dp" android:paddingBottom="6dp" />
+                        <RadioButton android:id="@+id/rbPanelDirPortraitBottom" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="@string/panel_dir_bottom" android:textColor="@color/textPrimary" android:paddingStart="4dp" android:paddingTop="6dp" android:paddingBottom="6dp" />
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+                        <RadioButton android:id="@+id/rbPanelDirPortraitLeft" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="@string/panel_dir_left" android:textColor="@color/textPrimary" android:paddingStart="4dp" android:paddingTop="6dp" android:paddingBottom="6dp" />
+                        <RadioButton android:id="@+id/rbPanelDirPortraitRight" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="@string/panel_dir_right" android:textColor="@color/textPrimary" android:paddingStart="4dp" android:paddingTop="6dp" android:paddingBottom="6dp" />
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout android:id="@+id/sectionPanelLandscape" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone">
+                <LinearLayout android:id="@+id/rgPanelDirLandscape" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+                        <RadioButton android:id="@+id/rbPanelDirLandscapeTop" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="@string/panel_dir_top" android:textColor="@color/textPrimary" android:paddingStart="4dp" android:paddingTop="6dp" android:paddingBottom="6dp" />
+                        <RadioButton android:id="@+id/rbPanelDirLandscapeBottom" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="@string/panel_dir_bottom" android:textColor="@color/textPrimary" android:paddingStart="4dp" android:paddingTop="6dp" android:paddingBottom="6dp" />
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+                        <RadioButton android:id="@+id/rbPanelDirLandscapeLeft" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="@string/panel_dir_left" android:textColor="@color/textPrimary" android:paddingStart="4dp" android:paddingTop="6dp" android:paddingBottom="6dp" />
+                        <RadioButton android:id="@+id/rbPanelDirLandscapeRight" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="@string/panel_dir_right" android:textColor="@color/textPrimary" android:paddingStart="4dp" android:paddingTop="6dp" android:paddingBottom="6dp" />
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+
+            <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/divider" android:layout_marginTop="4dp" android:layout_marginBottom="4dp" />
 
             <!-- ── 字幕大小 ── -->
             <TextView
