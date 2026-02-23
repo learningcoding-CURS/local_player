@@ -58,11 +58,11 @@
             android:windowSoftInputMode="adjustNothing"
             android:launchMode="singleTop" />
 
-        <!-- Settings -->
+        <!-- Settings（支持竖屏与横屏） -->
         <activity
             android:name=".SettingsActivity"
             android:exported="false"
-            android:screenOrientation="portrait"
+            android:screenOrientation="sensor"
             android:windowSoftInputMode="adjustResize"
             android:theme="@style/Theme.VideoMaster.Translucent"
             android:parentActivityName=".MainActivity" />

@@ -1726,4 +1726,20 @@ SubtitleManager.getInstance().registerParser(new MyCustomParser());
 
 ---
 
-*VideoMaster v16.12 — 纯本地，无联网，完全离线。*
+---
+
+## v16.13 变更记录
+
+### 设置界面支持横竖屏
+
+设置界面由固定竖屏改为跟随设备方向（`screenOrientation="sensor"`），在横屏时也可正常使用，布局随方向自动适配。
+
+### v16.13 修改记录
+
+| 文件 | 修改内容 |
+|------|---------|
+| `AndroidManifest.xml` | SettingsActivity 的 `screenOrientation` 从 `portrait` 改为 `sensor` |
+
+---
+
+*VideoMaster v16.13 — 纯本地，无联网，完全离线。*
