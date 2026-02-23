@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Brand colors -->
+    <color name="colorPrimary">#1A1A2E</color>
+    <color name="colorPrimaryDark">#16213E</color>
+    <color name="colorAccent">#E94560</color>
+    <color name="colorAccentLight">#FF6B81</color>
+
+    <!-- Background palette -->
+    <color name="bgDark">#0F0F1A</color>
+    <color name="bgCard">#1E1E2E</color>
+    <color name="bgSurface">#252540</color>
+
+    <!-- Text -->
+    <color name="textPrimary">#FFFFFF</color>
+    <color name="textSecondary">#B0B0C8</color>
+    <color name="textHint">#6060A0</color>
+
+    <!-- Controls -->
+    <color name="controlTint">#FFFFFF</color>
+    <color name="seekbarThumb">#E94560</color>
+    <color name="seekbarProgress">#E94560</color>
+    <color name="seekbarBackground">#44FFFFFF</color>
+
+    <!-- Overlay -->
+    <color name="overlayBackground">#AA000000</color>
+    <color name="speedBadgeBg">#CC1A1A2E</color>
+
+    <!-- Divider -->
+    <color name="divider">#33FFFFFF</color>
+</resources>

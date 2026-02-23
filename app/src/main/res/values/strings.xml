@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">VideoMaster</string>
+
+    <!-- Main screen -->
+    <string name="library_title">视频库</string>
+    <string name="no_videos">暂无视频\n点击右下角按钮导入</string>
+    <string name="open_video">打开视频</string>
+    <string name="permission_denied">需要存储权限才能读取视频</string>
+
+    <!-- Player -->
+    <string name="error_no_video">无法找到视频文件</string>
+    <string name="error_playback">播放出错</string>
+    <string name="speed">播放速度</string>
+    <string name="confirm">确认</string>
+    <string name="cancel">取消</string>
+    <string name="long_press_speed">2.5× 快进中</string>
+
+    <!-- Subtitle -->
+    <string name="subtitle">字幕</string>
+    <string name="subtitle_import">导入字幕 (SRT / ASS / VTT)</string>
+    <string name="subtitle_export_srt">导出为 SRT</string>
+    <string name="subtitle_export_vtt">导出为 VTT</string>
+    <string name="subtitle_clear">清除字幕</string>
+    <string name="subtitle_cleared">字幕已清除</string>
+    <string name="subtitle_loaded">字幕加载成功 (%d 条)</string>
+    <string name="subtitle_load_failed">字幕加载失败，请检查文件格式</string>
+    <string name="subtitle_none_to_export">当前没有可导出的字幕</string>
+    <string name="subtitle_exported">字幕导出成功</string>
+    <string name="subtitle_export_failed">字幕导出失败</string>
+
+    <!-- Accessibility -->
+    <string name="btn_play">播放</string>
+    <string name="btn_pause">暂停</string>
+    <string name="btn_rewind">后退5秒</string>
+    <string name="btn_forward">前进5秒</string>
+    <string name="btn_rotate">旋转屏幕</string>
+    <string name="btn_subtitle">字幕选项</string>
+    <string name="btn_speed">速度选择</string>
+</resources>

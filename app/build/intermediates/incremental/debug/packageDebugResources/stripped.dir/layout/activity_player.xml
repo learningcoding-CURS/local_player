@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/black">
+
+    <!-- Video surface — ExoPlayer renders here -->
+    <androidx.media3.ui.PlayerView
+        android:id="@+id/playerView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:focusable="true" />
+
+    <!-- Subtitle overlay — sits just above the controls -->
+    <com.videomaster.app.ui.SubtitleView
+        android:id="@+id/subtitleView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="80dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp" />
+
+    <!-- Long-press speed hint -->
+    <TextView
+        android:id="@+id/tvLongPressHint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|center_horizontal"
+        android:layout_marginTop="32dp"
+        android:text="@string/long_press_speed"
+        android:textColor="@color/colorAccentLight"
+        android:textSize="16sp"
+        android:fontFamily="sans-serif-medium"
+        android:background="@drawable/bg_speed_badge"
+        android:paddingStart="14dp"
+        android:paddingEnd="14dp"
+        android:paddingTop="6dp"
+        android:paddingBottom="6dp"
+        android:visibility="gone" />
+
+    <!-- Buffering indicator -->
+    <ProgressBar
+        android:id="@+id/loadingView"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_gravity="center"
+        android:indeterminateTint="@color/colorAccent"
+        android:visibility="gone" />
+
+    <!-- ─────────────────── CONTROLS OVERLAY ─────────────────── -->
+    <FrameLayout
+        android:id="@+id/controlsOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/overlayBackground"
+        android:visibility="visible">
+
+        <!-- Top bar: speed badge + subtitle + rotate buttons -->
+        <LinearLayout
+            android:id="@+id/topBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top"
+            android:orientation="horizontal"
+            android:padding="12dp"
+            android:gravity="end">
+
+            <!-- Current speed badge -->
+            <TextView
+                android:id="@+id/tvSpeed"
+                style="@style/SpeedBadge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="1×"
+                android:layout_marginEnd="8dp" />
+
+            <!-- Speed selector -->
+            <ImageButton
+                android:id="@+id/btnSpeed"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/ic_speed"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:tint="@color/controlTint"
+                android:contentDescription="@string/btn_speed"
+                android:layout_marginEnd="4dp" />
+
+            <!-- Subtitle -->
+            <ImageButton
+                android:id="@+id/btnSubtitle"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/ic_subtitle"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:tint="@color/controlTint"
+                android:contentDescription="@string/btn_subtitle"
+                android:layout_marginEnd="4dp" />
+
+            <!-- Rotate -->
+            <ImageButton
+                android:id="@+id/btnRotate"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/ic_rotate"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:tint="@color/controlTint"
+                android:contentDescription="@string/btn_rotate" />
+        </LinearLayout>
+
+        <!-- Centre playback row: rewind | play/pause | forward -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <ImageButton
+                android:id="@+id/btnRewind"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:src="@drawable/ic_rewind"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:tint="@color/controlTint"
+                android:contentDescription="@string/btn_rewind"
+                android:padding="10dp" />
+
+            <ImageButton
+                android:id="@+id/btnPlayPause"
+                android:layout_width="72dp"
+                android:layout_height="72dp"
+                android:src="@drawable/ic_play"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:tint="@color/controlTint"
+                android:contentDescription="@string/btn_play"
+                android:padding="8dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp" />
+
+            <ImageButton
+                android:id="@+id/btnForward"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:src="@drawable/ic_forward"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:tint="@color/controlTint"
+                android:contentDescription="@string/btn_forward"
+                android:padding="10dp" />
+        </LinearLayout>
+
+        <!-- Bottom bar: time + seekbar -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:orientation="vertical"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="16dp">
+
+            <!-- Time row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingBottom="4dp">
+
+                <TextView
+                    android:id="@+id/tvCurrentTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="00:00"
+                    android:textColor="@color/textPrimary"
+                    android:textSize="13sp"
+                    android:fontFamily="monospace" />
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
+
+                <TextView
+                    android:id="@+id/tvDuration"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="00:00"
+                    android:textColor="@color/textSecondary"
+                    android:textSize="13sp"
+                    android:fontFamily="monospace" />
+            </LinearLayout>
+
+            <!-- SeekBar (max=1000 for 0.1% granularity) -->
+            <SeekBar
+                android:id="@+id/seekBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="1000"
+                android:progressTint="@color/seekbarProgress"
+                android:thumbTint="@color/seekbarThumb"
+                android:progressBackgroundTint="@color/seekbarBackground" />
+        </LinearLayout>
+
+    </FrameLayout>
+
+</FrameLayout>

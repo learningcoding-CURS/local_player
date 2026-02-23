@@ -1,0 +1,14 @@
+[
+    {
+        "merged": "com.videomaster.app-mergeDebugResources-36:/layout/item_video.xml",
+        "source": "com.videomaster.app-main-39:/layout/item_video.xml"
+    },
+    {
+        "merged": "com.videomaster.app-mergeDebugResources-36:/layout/activity_main.xml",
+        "source": "com.videomaster.app-main-39:/layout/activity_main.xml"
+    },
+    {
+        "merged": "com.videomaster.app-mergeDebugResources-36:/layout/activity_player.xml",
+        "source": "com.videomaster.app-main-39:/layout/activity_player.xml"
+    }
+]
