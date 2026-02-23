@@ -83,6 +83,7 @@ public class SettingsActivity extends AppCompatActivity {
     public static final String PREF_BTN_SUBTITLE_TOGGLE_COLOR= "btn_subtitle_toggle_color";
     public static final String PREF_BTN_SUBTLIST_COLOR       = "btn_subtlist_color";
     public static final String PREF_BTN_ROTATE_COLOR         = "btn_rotate_color";
+    public static final String PREF_BTN_SEEK_VISIBLE          = "btn_seek_visible";
     public static final String PREF_BTN_SEEK_COLOR           = "btn_seek_color";
     public static final String PREF_BTN_PLAYPAUSE_COLOR      = "btn_playpause_color";
 
@@ -93,7 +94,7 @@ public class SettingsActivity extends AppCompatActivity {
     // Default button orders
     public static final String DEFAULT_TOP_BTN_ORDER =
             "lock,play-mode,playlist-panel,subtitle-toggle,subtitle,subtitle-list,rotate";
-    public static final String DEFAULT_CENTER_BTN_ORDER = "skip-prev,rewind,play-pause,forward,skip-next";
+    public static final String DEFAULT_CENTER_BTN_ORDER = "rewind,play-pause,forward";
 
     public static final String DEFAULT_BTN_COLOR         = "white";
     public static final String DEFAULT_PLAYLIST_BTN_COLOR = "accent";
@@ -111,7 +112,7 @@ public class SettingsActivity extends AppCompatActivity {
     public static final int DEFAULT_SEEKBAR_PROGRESS_ALPHA = 80;
     public static final int DEFAULT_SUBTITLE_PANEL_ALPHA   = 60;
 
-    static final String DEFAULT_TAB_ORDER = "builtin,library,playlist";
+    static final String DEFAULT_TAB_ORDER = "builtin,library,stats,playlist";
 
     // Available button color options
     private static final String[] COLOR_VALUES = {"white","accent","orange","cyan","green","yellow"};
@@ -146,6 +147,16 @@ public class SettingsActivity extends AppCompatActivity {
         // Snapshot the state on entry — used by the Restore button
         originalPrefs = new HashMap<>(prefs.getAll());
         String savedOrderStr  = prefs.getString(PREF_TAB_ORDER, DEFAULT_TAB_ORDER);
+        // Migration: inject "stats" if missing from saved tab order
+        if (!savedOrderStr.contains("stats")) {
+            int playlistIdx = savedOrderStr.indexOf("playlist");
+            if (playlistIdx > 0) {
+                savedOrderStr = savedOrderStr.substring(0, playlistIdx) + "stats," + savedOrderStr.substring(playlistIdx);
+            } else {
+                savedOrderStr = savedOrderStr + ",stats";
+            }
+            prefs.edit().putString(PREF_TAB_ORDER, savedOrderStr).apply();
+        }
         String savedDefault   = prefs.getString(PREF_DEFAULT_TAB, "builtin");
         String savedPortrait  = prefs.getString(PREF_PORTRAIT_SWIPE, "VERTICAL");
         String savedLandscape = prefs.getString(PREF_LANDSCAPE_SWIPE, "HORIZONTAL");
@@ -395,7 +406,7 @@ public class SettingsActivity extends AppCompatActivity {
                 PREF_BTN_LOCK_VISIBLE, PREF_BTN_PLAYMODE_VISIBLE,
                 PREF_BTN_PLAYLIST_VISIBLE, PREF_BTN_SUBTITLE_TOGGLE_VISIBLE,
                 PREF_BTN_SUBTITLE_VISIBLE, PREF_BTN_SUBTLIST_VISIBLE,
-                PREF_BTN_ROTATE_VISIBLE, null, null, PREF_BTN_SKIP_VISIBLE };
+                PREF_BTN_ROTATE_VISIBLE, PREF_BTN_SEEK_VISIBLE, null, PREF_BTN_SKIP_VISIBLE };
         ctrlPrefsColor = new String[]{
                 PREF_BTN_LOCK_COLOR, PREF_BTN_PLAYMODE_COLOR,
                 PREF_BTN_PLAYLIST_COLOR, PREF_BTN_SUBTITLE_TOGGLE_COLOR,
@@ -881,11 +892,9 @@ public class SettingsActivity extends AppCompatActivity {
 
     private String[] getCenterBtnLabels() {
         return new String[]{
-                getString(R.string.btn_skip_prev),
                 getString(R.string.btn_rewind),
                 getString(R.string.settings_ctrl_playpause),
-                getString(R.string.btn_forward),
-                getString(R.string.btn_skip_next)
+                getString(R.string.btn_forward)
         };
     }
 
@@ -905,6 +914,7 @@ public class SettingsActivity extends AppCompatActivity {
             case "library":  return getString(R.string.tab_library);
             case "playlist": return getString(R.string.tab_playlist);
             case "builtin":  return getString(R.string.tab_builtin);
+            case "stats":    return getString(R.string.tab_stats);
             default:         return tabId;
         }
     }

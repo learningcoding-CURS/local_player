@@ -277,6 +277,7 @@ public class MainActivity extends AppCompatActivity {
     private void rebuildBottomNav(String[] order) {
         Menu menu = bottomNav.getMenu();
         menu.clear();
+        boolean statsAdded = false;
         for (String tabId : order) {
             switch (tabId.trim()) {
                 case "library":
@@ -291,11 +292,18 @@ public class MainActivity extends AppCompatActivity {
                     menu.add(Menu.NONE, R.id.nav_builtin, Menu.NONE, R.string.tab_builtin)
                             .setIcon(R.drawable.ic_builtin);
                     break;
+                case "stats":
+                    menu.add(Menu.NONE, R.id.nav_stats, Menu.NONE, R.string.tab_stats)
+                            .setIcon(R.drawable.ic_stats);
+                    statsAdded = true;
+                    break;
             }
         }
-        // Always append the stats tab at the end (not user-reorderable)
-        menu.add(Menu.NONE, R.id.nav_stats, Menu.NONE, R.string.tab_stats)
-                .setIcon(R.drawable.ic_stats);
+        // Ensure stats is always present even if missing from saved order (migration)
+        if (!statsAdded) {
+            menu.add(Menu.NONE, R.id.nav_stats, Menu.NONE, R.string.tab_stats)
+                    .setIcon(R.drawable.ic_stats);
+        }
     }
 
     private void showTab(String tabId) {
@@ -846,6 +854,7 @@ public class MainActivity extends AppCompatActivity {
             case "library":  return getString(R.string.tab_library);
             case "playlist": return getString(R.string.tab_playlist);
             case "builtin":  return getString(R.string.tab_builtin);
+            case "stats":    return getString(R.string.tab_stats);
             default:         return tabId;
         }
     }

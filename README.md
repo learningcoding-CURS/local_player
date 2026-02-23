@@ -965,4 +965,58 @@ SubtitleManager.getInstance().registerParser(new MyCustomParser());
 
 ---
 
-*VideoMaster v14.0 — 纯本地，无联网，完全离线。*
+## v14.1 变更记录
+
+### 1. 底部导航标签顺序调整
+
+将「统计」标签纳入可排序标签系统（原先固定在末尾），默认顺序调整为：**内置媒体 → 媒体库 → 统计 → 我的列表**，确保统计和媒体库位于我的列表前面。
+
+- 「统计」现在可以和其他标签一起在设置中自由排序
+- 对已有用户的兼容迁移：若保存的标签顺序不含 "stats"，自动插入到 "playlist" 前
+
+| 位置 | 变更 |
+|------|------|
+| `SettingsActivity.java` | `DEFAULT_TAB_ORDER` 改为 `"builtin,library,stats,playlist"`；`getTabLabel()` 新增 stats 分支；加载已保存顺序时自动迁移注入 stats |
+| `MainActivity.java` | `rebuildBottomNav()` 在循环中处理 "stats"（不再固定追加末尾）；`getTabLabel()` 新增 stats 分支 |
+
+---
+
+### 2. 前进/后退按钮可设置显隐
+
+在设置的播放控件区域中，「前进/后退」（快退/快进）按钮新增显示/隐藏开关，与锁屏、播放模式等按钮一致。
+
+| 位置 | 变更 |
+|------|------|
+| `SettingsActivity.java` | 新增 `PREF_BTN_SEEK_VISIBLE` 常量；`ctrlPrefsVis[7]` 从 `null` 改为 `PREF_BTN_SEEK_VISIBLE` |
+| `PlayerActivity.java` | `btnRewind` / `btnForward` 改用 `applyButtonSettings()`（含显隐判断），不再仅调颜色 |
+
+---
+
+### 3. 切换按钮与前进/后退按钮分行显示
+
+播放界面中央控制区改为两行布局：
+- **第一行**：后退 | 播放/暂停 | 前进（原有控件）
+- **第二行**：上一个视频 | 下一个视频（切换按钮，独立一行）
+
+切换按钮不再参与中央控制栏的排序系统，仅保留自身的显隐/大小/颜色设置。
+
+| 位置 | 变更 |
+|------|------|
+| `activity_player.xml` | 中央区域改为 vertical LinearLayout 包裹两行；切换按钮移至独立 `skipRow` |
+| `PlayerActivity.java` | `applyButtonOrder()` 移除 skip-prev/skip-next 相关映射；新增 `findCenterBar()` 递归查找方法适配嵌套布局 |
+| `SettingsActivity.java` | `DEFAULT_CENTER_BTN_ORDER` 回退为 `"rewind,play-pause,forward"`；`getCenterBtnLabels()` 回退为 3 项 |
+
+---
+
+## v14.1 修改记录
+
+| 文件 | 修改内容 |
+|------|---------|
+| `MainActivity.java` | `rebuildBottomNav()` 循环内处理 "stats"；`getTabLabel()` 新增 stats |
+| `SettingsActivity.java` | `DEFAULT_TAB_ORDER` 含 stats；标签迁移逻辑；`PREF_BTN_SEEK_VISIBLE`；`DEFAULT_CENTER_BTN_ORDER` 回退为 3 项；`getCenterBtnLabels()` 回退为 3 项 |
+| `PlayerActivity.java` | 前后退按钮用 `applyButtonSettings` 支持显隐；`findCenterBar()` 递归查找；`applyButtonOrder()` 移除 skip 按钮映射 |
+| `activity_player.xml` | 中央控制区改为两行垂直布局，切换按钮独立一行 |
+
+---
+
+*VideoMaster v14.1 — 纯本地，无联网，完全离线。*

@@ -465,10 +465,12 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
                 SettingsActivity.PREF_BTN_ROTATE_VISIBLE,
                 SettingsActivity.PREF_BTN_ROTATE_COLOR,
                 SettingsActivity.DEFAULT_BTN_COLOR, prefs);
-        applyButtonColor(btnRewind,
+        applyButtonSettings(btnRewind,
+                SettingsActivity.PREF_BTN_SEEK_VISIBLE,
                 SettingsActivity.PREF_BTN_SEEK_COLOR,
                 SettingsActivity.DEFAULT_BTN_COLOR, prefs);
-        applyButtonColor(btnForward,
+        applyButtonSettings(btnForward,
+                SettingsActivity.PREF_BTN_SEEK_VISIBLE,
                 SettingsActivity.PREF_BTN_SEEK_COLOR,
                 SettingsActivity.DEFAULT_BTN_COLOR, prefs);
         applyButtonColor(btnPlayPause,
@@ -569,32 +571,18 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
             }
         }
 
-        // Center bar: reorder skip-prev / rewind / play-pause / forward / skip-next
-        android.widget.LinearLayout centerBar = null;
-        android.widget.FrameLayout overlay = controlsOverlay;
-        if (overlay != null) {
-            for (int i = 0; i < overlay.getChildCount(); i++) {
-                View v = overlay.getChildAt(i);
-                if (v instanceof android.widget.LinearLayout) {
-                    android.widget.LinearLayout ll = (android.widget.LinearLayout) v;
-                    if (ll.indexOfChild(btnPlayPause) >= 0) { centerBar = ll; break; }
-                }
-            }
-        }
-        // Ensure saved order includes skip buttons (migration for existing users)
-        if (!centerOrder.contains("skip-prev")) {
-            centerOrder = "skip-prev," + centerOrder;
-        }
-        if (!centerOrder.contains("skip-next")) {
-            centerOrder = centerOrder + ",skip-next";
-        }
+        // Center bar: reorder rewind / play-pause / forward (skip buttons are in their own row)
+        android.widget.LinearLayout centerBar = findCenterBar(controlsOverlay, btnPlayPause);
+        // Strip any leftover skip-prev/skip-next from saved center order (they're now separate)
+        centerOrder = centerOrder.replace("skip-prev,", "").replace(",skip-prev", "")
+                .replace("skip-prev", "")
+                .replace("skip-next,", "").replace(",skip-next", "")
+                .replace("skip-next", "");
         if (centerBar != null) {
             java.util.LinkedHashMap<String, View> centerBtnMap = new java.util.LinkedHashMap<>();
-            centerBtnMap.put("skip-prev",   btnSkipPrev);
             centerBtnMap.put("rewind",      btnRewind);
             centerBtnMap.put("play-pause",  btnPlayPause);
             centerBtnMap.put("forward",     btnForward);
-            centerBtnMap.put("skip-next",   btnSkipNext);
 
             for (View v : centerBtnMap.values()) {
                 if (v != null) centerBar.removeView(v);
@@ -606,6 +594,21 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
                 if (btn != null) centerBar.addView(btn);
             }
         }
+    }
+
+    /** Recursively find the LinearLayout that directly contains the given button. */
+    private android.widget.LinearLayout findCenterBar(ViewGroup parent, View target) {
+        if (parent == null || target == null) return null;
+        for (int i = 0; i < parent.getChildCount(); i++) {
+            View child = parent.getChildAt(i);
+            if (child instanceof android.widget.LinearLayout) {
+                android.widget.LinearLayout ll = (android.widget.LinearLayout) child;
+                if (ll.indexOfChild(target) >= 0) return ll;
+                android.widget.LinearLayout found = findCenterBar(ll, target);
+                if (found != null) return found;
+            }
+        }
+        return null;
     }
 
     /**
