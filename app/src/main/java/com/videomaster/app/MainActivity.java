@@ -53,7 +53,8 @@ public class MainActivity extends AppCompatActivity {
     private static final String PREF_VIEW_MODE          = SettingsActivity.PREF_VIEW_MODE;
     private static final String PREF_GRID_CELL_WIDTH_LIBRARY  = SettingsActivity.PREF_GRID_CELL_WIDTH_LIBRARY;
     private static final String PREF_GRID_CELL_WIDTH_BUILTIN   = SettingsActivity.PREF_GRID_CELL_WIDTH_BUILTIN;
-    private static final String PREF_GRID_CELL_WIDTH_PLAYLIST = SettingsActivity.PREF_GRID_CELL_WIDTH_PLAYLIST;
+    private static final String PREF_GRID_CELL_WIDTH_PLAYLIST      = SettingsActivity.PREF_GRID_CELL_WIDTH_PLAYLIST;
+    private static final String PREF_GRID_CELL_WIDTH_PLAYLIST_ITEMS = SettingsActivity.PREF_GRID_CELL_WIDTH_PLAYLIST_ITEMS;
     private static final String DEFAULT_TAB_ORDER       = SettingsActivity.DEFAULT_TAB_ORDER;
     private static final String PREF_HOME_SHORTCUT_ORDER   = SettingsActivity.PREF_HOME_SHORTCUT_ORDER;
     private static final String DEFAULT_HOME_SHORTCUT_ORDER = SettingsActivity.DEFAULT_HOME_SHORTCUT_ORDER;
@@ -141,8 +142,12 @@ public class MainActivity extends AppCompatActivity {
     private final SharedPreferences.OnSharedPreferenceChangeListener prefsChangeListener =
             (p, key) -> {
                 if (PREF_VIEW_MODE.equals(key) || PREF_GRID_CELL_WIDTH_LIBRARY.equals(key)
-                        || PREF_GRID_CELL_WIDTH_BUILTIN.equals(key) || PREF_GRID_CELL_WIDTH_PLAYLIST.equals(key)) {
+                        || PREF_GRID_CELL_WIDTH_BUILTIN.equals(key) || PREF_GRID_CELL_WIDTH_PLAYLIST.equals(key)
+                        || PREF_GRID_CELL_WIDTH_PLAYLIST_ITEMS.equals(key)) {
                     runOnUiThread(this::applyViewMode);
+                }
+                if (SettingsActivity.PREF_BUILTIN_VISIBLE.equals(key) || SettingsActivity.PREF_PLAYLIST_VISIBLE.equals(key)) {
+                    runOnUiThread(this::applyTabOrderAndDefault);
                 }
             };
 
@@ -323,25 +328,47 @@ public class MainActivity extends AppCompatActivity {
         }
 
         String[] order = orderStr.split(",");
-        rebuildBottomNav(order);
+        boolean builtinVisible  = prefs.getBoolean(SettingsActivity.PREF_BUILTIN_VISIBLE, true);
+        boolean playlistVisible = prefs.getBoolean(SettingsActivity.PREF_PLAYLIST_VISIBLE, true);
+        rebuildBottomNav(order, builtinVisible, playlistVisible);
         setupToolbarActions(prefs);
 
-        switch (defaultTab) {
+        // 若默认标签被隐藏，则切换到第一个可见标签
+        String effectiveDefault = defaultTab;
+        if ("builtin".equals(defaultTab) && !builtinVisible) effectiveDefault = null;
+        if ("playlist".equals(defaultTab) && !playlistVisible) effectiveDefault = null;
+        if (effectiveDefault == null) {
+            for (String t : order) {
+                String id = t.trim();
+                if ("builtin".equals(id) && builtinVisible) { effectiveDefault = "builtin"; break; }
+                if ("playlist".equals(id) && playlistVisible) { effectiveDefault = "playlist"; break; }
+            }
+        }
+
+        switch (effectiveDefault != null ? effectiveDefault : "") {
             case "library":
                 showTab("library");
                 checkPermissionsAndLoad();
                 highlightToolbarAction("library");
                 break;
             case "playlist": bottomNav.setSelectedItemId(R.id.nav_playlist); break;
-            default:         bottomNav.setSelectedItemId(R.id.nav_builtin);  break;
+            case "builtin":  bottomNav.setSelectedItemId(R.id.nav_builtin);  break;
+            default:
+                if (builtinVisible) bottomNav.setSelectedItemId(R.id.nav_builtin);
+                else if (playlistVisible) bottomNav.setSelectedItemId(R.id.nav_playlist);
+                else { showTab("library"); checkPermissionsAndLoad(); highlightToolbarAction("library"); }
+                break;
         }
     }
 
-    private void rebuildBottomNav(String[] order) {
+    private void rebuildBottomNav(String[] order, boolean builtinVisible, boolean playlistVisible) {
         Menu menu = bottomNav.getMenu();
         menu.clear();
         for (String tabId : order) {
-            switch (tabId.trim()) {
+            String id = tabId.trim();
+            if ("playlist".equals(id) && !playlistVisible) continue;
+            if ("builtin".equals(id) && !builtinVisible) continue;
+            switch (id) {
                 case "playlist":
                     menu.add(Menu.NONE, R.id.nav_playlist, Menu.NONE, R.string.tab_playlist)
                             .setIcon(R.drawable.ic_playlist);
@@ -515,9 +542,10 @@ public class MainActivity extends AppCompatActivity {
         String mode = prefs.getString(PREF_VIEW_MODE, SettingsActivity.VIEW_MODE_GRID);
         boolean isGrid = SettingsActivity.VIEW_MODE_GRID.equals(mode);
 
-        int spanLibrary  = isGrid ? computeGridSpanCount(prefs, PREF_GRID_CELL_WIDTH_LIBRARY) : 1;
-        int spanBuiltin  = isGrid ? computeGridSpanCount(prefs, PREF_GRID_CELL_WIDTH_BUILTIN) : 1;
-        int spanPlaylist = isGrid ? computeGridSpanCount(prefs, PREF_GRID_CELL_WIDTH_PLAYLIST) : 1;
+        int spanLibrary       = isGrid ? computeGridSpanCount(prefs, PREF_GRID_CELL_WIDTH_LIBRARY) : 1;
+        int spanBuiltin       = isGrid ? computeGridSpanCount(prefs, PREF_GRID_CELL_WIDTH_BUILTIN) : 1;
+        int spanPlaylist      = isGrid ? computeGridSpanCount(prefs, PREF_GRID_CELL_WIDTH_PLAYLIST) : 1;
+        int spanPlaylistItems = isGrid ? computeGridSpanCount(prefs, PREF_GRID_CELL_WIDTH_PLAYLIST_ITEMS) : 1;
 
         adapter.setViewMode(isGrid ? VideoAdapter.ViewMode.GRID : VideoAdapter.ViewMode.LIST);
         recyclerView.setLayoutManager(new GridLayoutManager(this, spanLibrary));
@@ -528,7 +556,7 @@ public class MainActivity extends AppCompatActivity {
         if (playlistItemAdapter != null) {
             playlistItemAdapter.setViewMode(isGrid ? VideoAdapter.ViewMode.GRID : VideoAdapter.ViewMode.LIST);
         }
-        recyclerPlaylistItems.setLayoutManager(new GridLayoutManager(this, spanPlaylist));
+        recyclerPlaylistItems.setLayoutManager(new GridLayoutManager(this, spanPlaylistItems));
 
         if (playlistAdapter != null) {
             playlistAdapter.setViewMode(
@@ -855,7 +883,7 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         String mode = prefs.getString(PREF_VIEW_MODE, SettingsActivity.VIEW_MODE_GRID);
         boolean isGrid = SettingsActivity.VIEW_MODE_GRID.equals(mode);
-        int spanCount = isGrid ? computeGridSpanCount(prefs, PREF_GRID_CELL_WIDTH_PLAYLIST) : 1;
+        int spanCount = isGrid ? computeGridSpanCount(prefs, PREF_GRID_CELL_WIDTH_PLAYLIST_ITEMS) : 1;
 
         for (String uriStr : uris) {
             Uri uri = Uri.parse(uriStr);

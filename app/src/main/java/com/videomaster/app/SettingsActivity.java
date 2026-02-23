@@ -33,6 +33,8 @@ public class SettingsActivity extends AppCompatActivity {
     public static final String PREFS_NAME            = "app_settings";
     public static final String PREF_DEFAULT_TAB      = "default_tab";
     public static final String PREF_TAB_ORDER        = "tab_order";
+    public static final String PREF_BUILTIN_VISIBLE  = "builtin_visible";   // 内置媒体 有无
+    public static final String PREF_PLAYLIST_VISIBLE = "playlist_visible";  // 我的列表 有无
     public static final String PREF_PORTRAIT_SWIPE   = "portrait_swipe";
     public static final String PREF_LANDSCAPE_SWIPE  = "landscape_swipe";
     public static final String PREF_VIEW_MODE        = "view_mode";
@@ -40,7 +42,8 @@ public class SettingsActivity extends AppCompatActivity {
     public static final String PREF_GRID_CELL_WIDTH_DP     = "grid_cell_width_dp";  // deprecated, migrated to per-tab
     public static final String PREF_GRID_CELL_WIDTH_LIBRARY = "grid_cell_width_library";   // 媒体库
     public static final String PREF_GRID_CELL_WIDTH_BUILTIN = "grid_cell_width_builtin";   // 内置媒体
-    public static final String PREF_GRID_CELL_WIDTH_PLAYLIST= "grid_cell_width_playlist";  // 我的列表
+    public static final String PREF_GRID_CELL_WIDTH_PLAYLIST     = "grid_cell_width_playlist";      // 我的列表（卡片）
+    public static final String PREF_GRID_CELL_WIDTH_PLAYLIST_ITEMS = "grid_cell_width_playlist_items";  // 列表内音视频（点进文件夹后）
     public static final String PREF_SUBTITLE_SIZE    = "subtitle_size";
     public static final String PREF_SUBTITLE_LINE_SP = "subtitle_line_spacing";
 
@@ -232,10 +235,13 @@ public class SettingsActivity extends AppCompatActivity {
         int savedGridPlaylist  = prefs.getInt(PREF_GRID_CELL_WIDTH_PLAYLIST, -1);
         if (savedGridLibrary < 0) { savedGridLibrary = legacyWidth; prefs.edit().putInt(PREF_GRID_CELL_WIDTH_LIBRARY, savedGridLibrary).apply(); }
         if (savedGridBuiltin < 0) { savedGridBuiltin  = legacyWidth; prefs.edit().putInt(PREF_GRID_CELL_WIDTH_BUILTIN, savedGridBuiltin).apply(); }
+        int savedGridPlaylistItems = prefs.getInt(PREF_GRID_CELL_WIDTH_PLAYLIST_ITEMS, -1);
         if (savedGridPlaylist < 0) { savedGridPlaylist = legacyWidth; prefs.edit().putInt(PREF_GRID_CELL_WIDTH_PLAYLIST, savedGridPlaylist).apply(); }
+        if (savedGridPlaylistItems < 0) { savedGridPlaylistItems = savedGridPlaylist; prefs.edit().putInt(PREF_GRID_CELL_WIDTH_PLAYLIST_ITEMS, savedGridPlaylistItems).apply(); }
         savedGridLibrary  = Math.max(MIN_GRID_CELL_WIDTH_DP, Math.min(MAX_GRID_CELL_WIDTH_DP, savedGridLibrary));
         savedGridBuiltin  = Math.max(MIN_GRID_CELL_WIDTH_DP, Math.min(MAX_GRID_CELL_WIDTH_DP, savedGridBuiltin));
         savedGridPlaylist  = Math.max(MIN_GRID_CELL_WIDTH_DP, Math.min(MAX_GRID_CELL_WIDTH_DP, savedGridPlaylist));
+        savedGridPlaylistItems = Math.max(MIN_GRID_CELL_WIDTH_DP, Math.min(MAX_GRID_CELL_WIDTH_DP, savedGridPlaylistItems));
         float  savedSubSize   = prefs.getFloat(PREF_SUBTITLE_SIZE, DEFAULT_SUBTITLE_SIZE);
         float  savedLineSp    = prefs.getFloat(PREF_SUBTITLE_LINE_SP, DEFAULT_SUBTITLE_LINE_SP);
         int    savedSeekIconSize   = prefs.getInt(PREF_SEEK_ICON_SIZE,         DEFAULT_SEEK_ICON_SIZE);
@@ -307,6 +313,16 @@ public class SettingsActivity extends AppCompatActivity {
             }
         });
 
+        // ── 内置媒体/我的列表 有无 ─────────────────────────────────────────────
+        Switch switchBuiltinVisible  = findViewById(R.id.switchBuiltinVisible);
+        Switch switchPlaylistVisible = findViewById(R.id.switchPlaylistVisible);
+        switchBuiltinVisible.setChecked(prefs.getBoolean(PREF_BUILTIN_VISIBLE, true));
+        switchPlaylistVisible.setChecked(prefs.getBoolean(PREF_PLAYLIST_VISIBLE, true));
+        switchBuiltinVisible.setOnCheckedChangeListener((btn, checked) ->
+                prefs.edit().putBoolean(PREF_BUILTIN_VISIBLE, checked).apply());
+        switchPlaylistVisible.setOnCheckedChangeListener((btn, checked) ->
+                prefs.edit().putBoolean(PREF_PLAYLIST_VISIBLE, checked).apply());
+
         // ── Tab order ─────────────────────────────────────────────────────────
         LinearLayout tabOrderContainer = findViewById(R.id.tabOrderContainer);
         refreshTabOrderRows(tabOrderContainer);
@@ -367,6 +383,8 @@ public class SettingsActivity extends AppCompatActivity {
                 PREF_GRID_CELL_WIDTH_BUILTIN, savedGridBuiltin, R.string.settings_grid_width_builtin);
         setupGridCellSeekBar(R.id.sbGridCellWidthPlaylist, R.id.tvGridCellWidthPlaylist,
                 PREF_GRID_CELL_WIDTH_PLAYLIST, savedGridPlaylist, R.string.settings_grid_width_playlist);
+        setupGridCellSeekBar(R.id.sbGridCellWidthPlaylistItems, R.id.tvGridCellWidthPlaylistItems,
+                PREF_GRID_CELL_WIDTH_PLAYLIST_ITEMS, savedGridPlaylistItems, R.string.settings_grid_width_playlist_items);
 
         // ── Portrait swipe ────────────────────────────────────────────────────
         RadioButton rbPortraitV = findViewById(R.id.rbPortraitVertical);
