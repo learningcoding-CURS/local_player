@@ -39,6 +39,9 @@ public final class ActivityPlayerBinding implements ViewBinding {
   public final ImageButton btnClosePanel;
 
   @NonNull
+  public final ImageButton btnCloseSubtitlePanel;
+
+  @NonNull
   public final ImageButton btnForward;
 
   @NonNull
@@ -63,6 +66,12 @@ public final class ActivityPlayerBinding implements ViewBinding {
   public final ImageButton btnSubtitle;
 
   @NonNull
+  public final ImageButton btnSubtitleList;
+
+  @NonNull
+  public final TextView btnToggleTimestamps;
+
+  @NonNull
   public final ImageButton btnUnlock;
 
   @NonNull
@@ -84,7 +93,13 @@ public final class ActivityPlayerBinding implements ViewBinding {
   public final RecyclerView rvPlaylistPanel;
 
   @NonNull
+  public final RecyclerView rvSubtitleList;
+
+  @NonNull
   public final SeekBar seekBar;
+
+  @NonNull
+  public final LinearLayout subtitleListPanel;
 
   @NonNull
   public final SubtitleView subtitleView;
@@ -107,24 +122,32 @@ public final class ActivityPlayerBinding implements ViewBinding {
   @NonNull
   public final TextView tvSpeed;
 
+  @NonNull
+  public final TextView tvSubtitleListEmpty;
+
   private ActivityPlayerBinding(@NonNull FrameLayout rootView, @NonNull ProgressBar brightnessBar,
       @NonNull LinearLayout brightnessIndicator, @NonNull ImageButton btnAddToPlaylist,
-      @NonNull ImageButton btnClosePanel, @NonNull ImageButton btnForward,
-      @NonNull ImageButton btnLock, @NonNull ImageButton btnPlayMode,
-      @NonNull ImageButton btnPlayPause, @NonNull ImageButton btnPlaylistPanel,
-      @NonNull ImageButton btnRewind, @NonNull ImageButton btnRotate,
-      @NonNull ImageButton btnSubtitle, @NonNull ImageButton btnUnlock,
-      @NonNull FrameLayout controlsOverlay, @NonNull ProgressBar loadingView,
-      @NonNull FrameLayout lockOverlay, @NonNull PlayerView playerView,
-      @NonNull LinearLayout playlistPanel, @NonNull RecyclerView rvPlaylistPanel,
-      @NonNull SeekBar seekBar, @NonNull SubtitleView subtitleView, @NonNull LinearLayout topBar,
+      @NonNull ImageButton btnClosePanel, @NonNull ImageButton btnCloseSubtitlePanel,
+      @NonNull ImageButton btnForward, @NonNull ImageButton btnLock,
+      @NonNull ImageButton btnPlayMode, @NonNull ImageButton btnPlayPause,
+      @NonNull ImageButton btnPlaylistPanel, @NonNull ImageButton btnRewind,
+      @NonNull ImageButton btnRotate, @NonNull ImageButton btnSubtitle,
+      @NonNull ImageButton btnSubtitleList, @NonNull TextView btnToggleTimestamps,
+      @NonNull ImageButton btnUnlock, @NonNull FrameLayout controlsOverlay,
+      @NonNull ProgressBar loadingView, @NonNull FrameLayout lockOverlay,
+      @NonNull PlayerView playerView, @NonNull LinearLayout playlistPanel,
+      @NonNull RecyclerView rvPlaylistPanel, @NonNull RecyclerView rvSubtitleList,
+      @NonNull SeekBar seekBar, @NonNull LinearLayout subtitleListPanel,
+      @NonNull SubtitleView subtitleView, @NonNull LinearLayout topBar,
       @NonNull TextView tvBrightnessValue, @NonNull TextView tvCurrentTime,
-      @NonNull TextView tvDuration, @NonNull TextView tvLongPressHint, @NonNull TextView tvSpeed) {
+      @NonNull TextView tvDuration, @NonNull TextView tvLongPressHint, @NonNull TextView tvSpeed,
+      @NonNull TextView tvSubtitleListEmpty) {
     this.rootView = rootView;
     this.brightnessBar = brightnessBar;
     this.brightnessIndicator = brightnessIndicator;
     this.btnAddToPlaylist = btnAddToPlaylist;
     this.btnClosePanel = btnClosePanel;
+    this.btnCloseSubtitlePanel = btnCloseSubtitlePanel;
     this.btnForward = btnForward;
     this.btnLock = btnLock;
     this.btnPlayMode = btnPlayMode;
@@ -133,6 +156,8 @@ public final class ActivityPlayerBinding implements ViewBinding {
     this.btnRewind = btnRewind;
     this.btnRotate = btnRotate;
     this.btnSubtitle = btnSubtitle;
+    this.btnSubtitleList = btnSubtitleList;
+    this.btnToggleTimestamps = btnToggleTimestamps;
     this.btnUnlock = btnUnlock;
     this.controlsOverlay = controlsOverlay;
     this.loadingView = loadingView;
@@ -140,7 +165,9 @@ public final class ActivityPlayerBinding implements ViewBinding {
     this.playerView = playerView;
     this.playlistPanel = playlistPanel;
     this.rvPlaylistPanel = rvPlaylistPanel;
+    this.rvSubtitleList = rvSubtitleList;
     this.seekBar = seekBar;
+    this.subtitleListPanel = subtitleListPanel;
     this.subtitleView = subtitleView;
     this.topBar = topBar;
     this.tvBrightnessValue = tvBrightnessValue;
@@ -148,6 +175,7 @@ public final class ActivityPlayerBinding implements ViewBinding {
     this.tvDuration = tvDuration;
     this.tvLongPressHint = tvLongPressHint;
     this.tvSpeed = tvSpeed;
+    this.tvSubtitleListEmpty = tvSubtitleListEmpty;
   }
 
   @Override
@@ -201,6 +229,12 @@ public final class ActivityPlayerBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.btnCloseSubtitlePanel;
+      ImageButton btnCloseSubtitlePanel = ViewBindings.findChildViewById(rootView, id);
+      if (btnCloseSubtitlePanel == null) {
+        break missingId;
+      }
+
       id = R.id.btnForward;
       ImageButton btnForward = ViewBindings.findChildViewById(rootView, id);
       if (btnForward == null) {
@@ -249,6 +283,18 @@ public final class ActivityPlayerBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.btnSubtitleList;
+      ImageButton btnSubtitleList = ViewBindings.findChildViewById(rootView, id);
+      if (btnSubtitleList == null) {
+        break missingId;
+      }
+
+      id = R.id.btnToggleTimestamps;
+      TextView btnToggleTimestamps = ViewBindings.findChildViewById(rootView, id);
+      if (btnToggleTimestamps == null) {
+        break missingId;
+      }
+
       id = R.id.btnUnlock;
       ImageButton btnUnlock = ViewBindings.findChildViewById(rootView, id);
       if (btnUnlock == null) {
@@ -291,9 +337,21 @@ public final class ActivityPlayerBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.rvSubtitleList;
+      RecyclerView rvSubtitleList = ViewBindings.findChildViewById(rootView, id);
+      if (rvSubtitleList == null) {
+        break missingId;
+      }
+
       id = R.id.seekBar;
       SeekBar seekBar = ViewBindings.findChildViewById(rootView, id);
       if (seekBar == null) {
+        break missingId;
+      }
+
+      id = R.id.subtitleListPanel;
+      LinearLayout subtitleListPanel = ViewBindings.findChildViewById(rootView, id);
+      if (subtitleListPanel == null) {
         break missingId;
       }
 
@@ -339,12 +397,19 @@ public final class ActivityPlayerBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.tvSubtitleListEmpty;
+      TextView tvSubtitleListEmpty = ViewBindings.findChildViewById(rootView, id);
+      if (tvSubtitleListEmpty == null) {
+        break missingId;
+      }
+
       return new ActivityPlayerBinding((FrameLayout) rootView, brightnessBar, brightnessIndicator,
-          btnAddToPlaylist, btnClosePanel, btnForward, btnLock, btnPlayMode, btnPlayPause,
-          btnPlaylistPanel, btnRewind, btnRotate, btnSubtitle, btnUnlock, controlsOverlay,
-          loadingView, lockOverlay, playerView, playlistPanel, rvPlaylistPanel, seekBar,
-          subtitleView, topBar, tvBrightnessValue, tvCurrentTime, tvDuration, tvLongPressHint,
-          tvSpeed);
+          btnAddToPlaylist, btnClosePanel, btnCloseSubtitlePanel, btnForward, btnLock, btnPlayMode,
+          btnPlayPause, btnPlaylistPanel, btnRewind, btnRotate, btnSubtitle, btnSubtitleList,
+          btnToggleTimestamps, btnUnlock, controlsOverlay, loadingView, lockOverlay, playerView,
+          playlistPanel, rvPlaylistPanel, rvSubtitleList, seekBar, subtitleListPanel, subtitleView,
+          topBar, tvBrightnessValue, tvCurrentTime, tvDuration, tvLongPressHint, tvSpeed,
+          tvSubtitleListEmpty);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

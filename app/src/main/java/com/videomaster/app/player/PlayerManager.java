@@ -10,7 +10,9 @@ import androidx.media3.common.MediaItem;
 import androidx.media3.common.PlaybackException;
 import androidx.media3.common.PlaybackParameters;
 import androidx.media3.common.Player;
+import androidx.media3.exoplayer.DefaultLoadControl;
 import androidx.media3.exoplayer.ExoPlayer;
+import androidx.media3.exoplayer.trackselection.DefaultTrackSelector;
 
 import com.videomaster.app.interfaces.IPlayerEventListener;
 import com.videomaster.app.interfaces.ISpeedProvider;
@@ -29,7 +31,13 @@ import java.util.List;
  */
 public class PlayerManager {
 
-    private static final long POSITION_UPDATE_INTERVAL_MS = 200;
+    private static final long POSITION_UPDATE_INTERVAL_MS = 250;
+
+    // Buffer configuration for smooth playback
+    private static final int MIN_BUFFER_MS                = 15_000;
+    private static final int MAX_BUFFER_MS                = 50_000;
+    private static final int BUFFER_FOR_PLAYBACK_MS       = 1_500;
+    private static final int BUFFER_AFTER_REBUFFER_MS     = 3_000;
 
     private final ExoPlayer                  player;
     private final Handler                    handler;
@@ -52,7 +60,9 @@ public class PlayerManager {
                 long pos      = player.getCurrentPosition();
                 long duration = player.getDuration();
                 notifyPositionChanged(pos, duration < 0 ? 0 : duration);
-                subtitleManager.onSeek();
+                // NOTE: do NOT call subtitleManager.onSeek() here — that resets the search
+                // index on every tick (every 250ms) causing O(n) full scans unnecessarily.
+                // onSeek() must only be called when the user explicitly seeks.
             }
             handler.postDelayed(this, POSITION_UPDATE_INTERVAL_MS);
         }
@@ -66,7 +76,26 @@ public class PlayerManager {
         currentSpeed    = speedProvider.getDefaultSpeed();
         subtitleManager = SubtitleManager.getInstance();
 
-        player = new ExoPlayer.Builder(context).build();
+        // Configure generous buffers to reduce stutter during normal playback
+        DefaultLoadControl loadControl = new DefaultLoadControl.Builder()
+                .setBufferDurationsMs(
+                        MIN_BUFFER_MS,
+                        MAX_BUFFER_MS,
+                        BUFFER_FOR_PLAYBACK_MS,
+                        BUFFER_AFTER_REBUFFER_MS)
+                .build();
+
+        // Prefer higher quality tracks when bandwidth allows
+        DefaultTrackSelector trackSelector = new DefaultTrackSelector(context);
+        trackSelector.setParameters(
+                trackSelector.buildUponParameters()
+                        .setForceHighestSupportedBitrate(false)
+                        .build());
+
+        player = new ExoPlayer.Builder(context)
+                .setLoadControl(loadControl)
+                .setTrackSelector(trackSelector)
+                .build();
         player.addListener(new Player.Listener() {
             @Override
             public void onIsPlayingChanged(boolean isPlaying) {

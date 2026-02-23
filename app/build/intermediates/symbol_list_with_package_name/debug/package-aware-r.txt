@@ -3164,7 +3164,6 @@ drawable exo_styled_controls_subtitle_on
 drawable exo_styled_controls_vr
 drawable ic_add
 drawable ic_arrow_back_black_24
-drawable ic_brightness
 drawable ic_builtin
 drawable ic_clear_black_24
 drawable ic_clock_black_24dp
@@ -3197,6 +3196,9 @@ drawable ic_rotate
 drawable ic_search_black_24
 drawable ic_speed
 drawable ic_subtitle
+drawable ic_subtitle_list
+drawable ic_view_grid
+drawable ic_view_list
 drawable m3_avd_hide_password
 drawable m3_avd_show_password
 drawable m3_bottom_sheet_drag_handle
@@ -3354,6 +3356,7 @@ id action_mode_bar_stub
 id action_mode_close_button
 id action_settings
 id action_text
+id action_toggle_view
 id actions
 id activity_chooser_view_content
 id add
@@ -3390,6 +3393,7 @@ id brightnessBar
 id brightnessIndicator
 id btnAddToPlaylist
 id btnClosePanel
+id btnCloseSubtitlePanel
 id btnForward
 id btnLock
 id btnPlayMode
@@ -3397,7 +3401,10 @@ id btnPlayPause
 id btnPlaylistPanel
 id btnRewind
 id btnRotate
+id btnSaveSettings
 id btnSubtitle
+id btnSubtitleList
+id btnToggleTimestamps
 id btnUnlock
 id buttonPanel
 id cache_measures
@@ -3578,6 +3585,8 @@ id ifRoom
 id ignore
 id ignoreRequest
 id image
+id imgThumbnail
+id imgThumbnailFallback
 id immediateStop
 id included
 id indeterminate
@@ -3729,6 +3738,12 @@ id progress_circular
 id progress_horizontal
 id radio
 id ratio
+id rbLandscapeHorizontal
+id rbLandscapeVertical
+id rbPortraitHorizontal
+id rbPortraitVertical
+id rbViewGrid
+id rbViewList
 id rectangles
 id recyclerBuiltin
 id recyclerItems
@@ -3736,6 +3751,10 @@ id recyclerPlaylists
 id recyclerView
 id report_drawn
 id reverseSawtooth
+id rgDefaultTab
+id rgLandscapeSwipe
+id rgPortraitSwipe
+id rgViewMode
 id right
 id rightToLeft
 id right_icon
@@ -3743,6 +3762,7 @@ id right_side
 id rounded
 id row_index_key
 id rvPlaylistPanel
+id rvSubtitleList
 id save_non_transition_alpha
 id save_overlay_view
 id sawtooth
@@ -3767,6 +3787,7 @@ id seekBar
 id select_dialog_listview
 id selected
 id selection_type
+id settingsRoot
 id sharedValueSet
 id sharedValueUnset
 id shortcut
@@ -3806,12 +3827,14 @@ id stop
 id stretch
 id submenuarrow
 id submit_area
+id subtitleListPanel
 id subtitleView
 id supportScrollUp
 id surface_view
 id tabBuiltin
 id tabLibrary
 id tabMode
+id tabOrderContainer
 id tag_accessibility_actions
 id tag_accessibility_clickable_spans
 id tag_accessibility_heading
@@ -3844,7 +3867,9 @@ id textinput_suffix_text
 id texture_view
 id time
 id title
+id titleDefaultTab
 id titleDividerNoCustom
+id titleTabOrder
 id title_template
 id toggle
 id toolbar
@@ -3876,6 +3901,9 @@ id tvPlaylistCount
 id tvPlaylistName
 id tvSize
 id tvSpeed
+id tvSubtitleListEmpty
+id tvSubtitleText
+id tvSubtitleTime
 id tvTitle
 id unchecked
 id uniform
@@ -4023,6 +4051,7 @@ layout activity_main
 layout activity_player
 layout activity_playlist
 layout activity_playlist_detail
+layout activity_settings
 layout custom_dialog
 layout design_bottom_navigation_item
 layout design_bottom_sheet_dialog
@@ -4052,7 +4081,9 @@ layout exo_track_selection_dialog
 layout item_media_progress
 layout item_player_playlist
 layout item_playlist
+layout item_subtitle_entry
 layout item_video
+layout item_video_list
 layout m3_alert_dialog
 layout m3_alert_dialog_actions
 layout m3_alert_dialog_title
@@ -4178,6 +4209,7 @@ string btn_rewind
 string btn_rotate
 string btn_speed
 string btn_subtitle
+string btn_subtitle_list
 string btn_unlock
 string builtin_empty
 string cancel
@@ -4408,6 +4440,9 @@ string settings_portrait_swipe
 string settings_save
 string settings_tab_order
 string settings_title
+string settings_view_grid
+string settings_view_list
+string settings_view_mode
 string shuffle_end
 string side_sheet_accessibility_pane_title
 string side_sheet_behavior
@@ -4421,11 +4456,18 @@ string subtitle_export_srt
 string subtitle_export_vtt
 string subtitle_exported
 string subtitle_import
+string subtitle_list_empty
+string subtitle_list_hide_time
+string subtitle_list_show_time
+string subtitle_list_title
 string subtitle_load_failed
 string subtitle_loaded
 string subtitle_none_to_export
+string subtitle_show_list
 string swipe_horizontal
+string swipe_horizontal_desc
 string swipe_vertical
+string swipe_vertical_desc
 string tab_builtin
 string tab_library
 string tab_playlist

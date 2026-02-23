@@ -2225,6 +2225,7 @@
     <string name="btn_rotate">旋转屏幕</string>
     <string name="btn_speed">速度选择</string>
     <string name="btn_subtitle">字幕选项</string>
+    <string name="btn_subtitle_list">字幕列表</string>
     <string name="btn_unlock">解锁屏幕</string>
     <string name="builtin_empty">暂无内置媒体\n请在 assets/builtin_media/ 目录放置文件并更新 index.json</string>
     <string name="cancel">取消</string>
@@ -2458,13 +2459,16 @@
   </string>
     <string description="Content description for the X button to clear text [CHAR_LIMIT=NONE]" name="searchview_clear_text_content_description">Clear text</string>
     <string description="Content description for the navigation button to return to the previous screen [CHAR_LIMIT=NONE]" name="searchview_navigation_content_description">Back</string>
-    <string name="settings_applied">设置已保存，手势设置下次打开播放器时生效</string>
+    <string name="settings_applied">设置已保存</string>
     <string name="settings_default_tab">默认主界面</string>
-    <string name="settings_landscape_swipe">横屏切换手势</string>
-    <string name="settings_portrait_swipe">竖屏切换手势</string>
-    <string name="settings_save">保存</string>
+    <string name="settings_landscape_swipe">横屏切换媒体手势</string>
+    <string name="settings_portrait_swipe">竖屏切换媒体手势</string>
+    <string name="settings_save">保存并返回</string>
     <string name="settings_tab_order">标签顺序（点击 ↑↓ 调整）</string>
     <string name="settings_title">设置</string>
+    <string name="settings_view_grid">方块视图（网格）</string>
+    <string name="settings_view_list">传统列表</string>
+    <string name="settings_view_mode">列表显示模式</string>
     <string name="shuffle_end">乱序播放完毕</string>
     <string description="Title of the side sheet&apos;s accessibility pane that is spoken by TalkBack when the side sheet appears on screen. [CHAR_LIMIT=NONE]" name="side_sheet_accessibility_pane_title">Side Sheet</string>
     <string name="side_sheet_behavior" translatable="false">com.google.android.material.sidesheet.SideSheetBehavior</string>
@@ -2478,11 +2482,18 @@
     <string name="subtitle_export_vtt">导出为 VTT</string>
     <string name="subtitle_exported">字幕导出成功</string>
     <string name="subtitle_import">导入字幕 (SRT / ASS / VTT)</string>
+    <string name="subtitle_list_empty">暂无字幕，请先导入字幕文件</string>
+    <string name="subtitle_list_hide_time">隐藏时间</string>
+    <string name="subtitle_list_show_time">显示时间</string>
+    <string name="subtitle_list_title">字幕列表</string>
     <string name="subtitle_load_failed">字幕加载失败，请检查文件格式</string>
     <string name="subtitle_loaded">字幕加载成功 (%d 条)</string>
     <string name="subtitle_none_to_export">当前没有可导出的字幕</string>
+    <string name="subtitle_show_list">展示字幕列表</string>
     <string name="swipe_horizontal">左右滑动</string>
+    <string name="swipe_horizontal_desc">左右滑动</string>
     <string name="swipe_vertical">上下滑动</string>
+    <string name="swipe_vertical_desc">上下滑动（右侧，不需要长按）</string>
     <string name="tab_builtin">内置媒体</string>
     <string name="tab_library">媒体库</string>
     <string name="tab_playlist">我的列表</string>

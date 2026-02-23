@@ -86,6 +86,14 @@
             android:screenOrientation="sensor"
             android:windowSoftInputMode="adjustNothing" />
 
+        <!-- Settings -->
+        <activity
+            android:name="com.videomaster.app.SettingsActivity"
+            android:exported="false"
+            android:parentActivityName="com.videomaster.app.MainActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize" />
+
         <!-- Playlist management -->
         <activity
             android:name="com.videomaster.app.playlist.PlaylistActivity"

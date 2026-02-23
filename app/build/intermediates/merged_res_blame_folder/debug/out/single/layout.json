@@ -1,15 +1,35 @@
 [
     {
-        "merged": "C:\\Users\\JG\\.gradle\\daemon\\8.5\\com.videomaster.app-mergeDebugResources-36:\\layout\\activity_playlist_detail.xml",
-        "source": "C:\\Users\\JG\\.gradle\\daemon\\8.5\\com.videomaster.app-main-39:\\layout\\activity_playlist_detail.xml"
-    },
-    {
         "merged": "C:\\Users\\JG\\.gradle\\daemon\\8.5\\com.videomaster.app-mergeDebugResources-36:\\layout\\item_playlist.xml",
         "source": "C:\\Users\\JG\\.gradle\\daemon\\8.5\\com.videomaster.app-main-39:\\layout\\item_playlist.xml"
     },
     {
         "merged": "C:\\Users\\JG\\.gradle\\daemon\\8.5\\com.videomaster.app-mergeDebugResources-36:\\layout\\item_player_playlist.xml",
         "source": "C:\\Users\\JG\\.gradle\\daemon\\8.5\\com.videomaster.app-main-39:\\layout\\item_player_playlist.xml"
+    },
+    {
+        "merged": "com.videomaster.app-mergeDebugResources-36:/layout/activity_player.xml",
+        "source": "com.videomaster.app-main-39:/layout/activity_player.xml"
+    },
+    {
+        "merged": "C:\\Users\\JG\\.gradle\\daemon\\8.5\\com.videomaster.app-mergeDebugResources-36:\\layout\\activity_player.xml",
+        "source": "C:\\Users\\JG\\.gradle\\daemon\\8.5\\com.videomaster.app-main-39:\\layout\\activity_player.xml"
+    },
+    {
+        "merged": "com.videomaster.app-mergeDebugResources-36:/layout/item_subtitle_entry.xml",
+        "source": "com.videomaster.app-main-39:/layout/item_subtitle_entry.xml"
+    },
+    {
+        "merged": "C:\\Users\\JG\\.gradle\\daemon\\8.5\\com.videomaster.app-mergeDebugResources-36:\\layout\\activity_playlist_detail.xml",
+        "source": "C:\\Users\\JG\\.gradle\\daemon\\8.5\\com.videomaster.app-main-39:\\layout\\activity_playlist_detail.xml"
+    },
+    {
+        "merged": "com.videomaster.app-mergeDebugResources-36:/layout/item_video.xml",
+        "source": "com.videomaster.app-main-39:/layout/item_video.xml"
+    },
+    {
+        "merged": "com.videomaster.app-mergeDebugResources-36:/layout/activity_settings.xml",
+        "source": "com.videomaster.app-main-39:/layout/activity_settings.xml"
     },
     {
         "merged": "C:\\Users\\JG\\.gradle\\daemon\\8.5\\com.videomaster.app-mergeDebugResources-36:\\layout\\activity_main.xml",
@@ -20,16 +40,12 @@
         "source": "C:\\Users\\JG\\.gradle\\daemon\\8.5\\com.videomaster.app-main-39:\\layout\\item_media_progress.xml"
     },
     {
-        "merged": "com.videomaster.app-mergeDebugResources-36:/layout/activity_player.xml",
-        "source": "com.videomaster.app-main-39:/layout/activity_player.xml"
+        "merged": "com.videomaster.app-mergeDebugResources-36:/layout/item_video_list.xml",
+        "source": "com.videomaster.app-main-39:/layout/item_video_list.xml"
     },
     {
         "merged": "C:\\Users\\JG\\.gradle\\daemon\\8.5\\com.videomaster.app-mergeDebugResources-36:\\layout\\activity_playlist.xml",
         "source": "C:\\Users\\JG\\.gradle\\daemon\\8.5\\com.videomaster.app-main-39:\\layout\\activity_playlist.xml"
-    },
-    {
-        "merged": "C:\\Users\\JG\\.gradle\\daemon\\8.5\\com.videomaster.app-mergeDebugResources-36:\\layout\\activity_player.xml",
-        "source": "C:\\Users\\JG\\.gradle\\daemon\\8.5\\com.videomaster.app-main-39:\\layout\\activity_player.xml"
     },
     {
         "merged": "C:\\Users\\JG\\.gradle\\daemon\\8.5\\com.videomaster.app-mergeDebugResources-36:\\layout\\item_video.xml",

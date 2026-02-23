@@ -58,6 +58,14 @@
             android:windowSoftInputMode="adjustNothing"
             android:launchMode="singleTop" />
 
+        <!-- Settings -->
+        <activity
+            android:name=".SettingsActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize"
+            android:parentActivityName=".MainActivity" />
+
         <!-- Playlist management -->
         <activity
             android:name=".playlist.PlaylistActivity"

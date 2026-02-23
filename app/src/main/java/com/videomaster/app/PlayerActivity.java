@@ -35,6 +35,7 @@ import com.videomaster.app.playlist.MediaListManager;
 import com.videomaster.app.subtitle.SubtitleEntry;
 import com.videomaster.app.subtitle.SubtitleManager;
 import com.videomaster.app.ui.PlayerPlaylistAdapter;
+import com.videomaster.app.ui.SubtitleListAdapter;
 import com.videomaster.app.ui.SubtitleView;
 import com.videomaster.app.util.TimeUtils;
 
@@ -115,6 +116,15 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
     private LinearLayout  playlistPanel;
     private RecyclerView  rvPlaylistPanel;
     private PlayerPlaylistAdapter panelAdapter;
+
+    // Subtitle list panel
+    private ImageButton   btnSubtitleList;
+    private LinearLayout  subtitleListPanel;
+    private RecyclerView  rvSubtitleList;
+    private TextView      tvSubtitleListEmpty;
+    private TextView      btnToggleTimestamps;
+    private SubtitleListAdapter subtitleListAdapter;
+    private boolean       isSubtitlePanelVisible = false;
 
     // ── Handlers / runnables ───────────────────────────────────────────────
 
@@ -275,6 +285,12 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
         playlistPanel       = findViewById(R.id.playlistPanel);
         rvPlaylistPanel     = findViewById(R.id.rvPlaylistPanel);
 
+        btnSubtitleList     = findViewById(R.id.btnSubtitleList);
+        subtitleListPanel   = findViewById(R.id.subtitleListPanel);
+        rvSubtitleList      = findViewById(R.id.rvSubtitleList);
+        tvSubtitleListEmpty = findViewById(R.id.tvSubtitleListEmpty);
+        btnToggleTimestamps = findViewById(R.id.btnToggleTimestamps);
+
         enterImmersiveMode();
     }
 
@@ -384,6 +400,12 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
         btnPlaylistPanel.setOnClickListener(v -> togglePlaylistPanel());
         btnClosePanel.setOnClickListener(v -> closePlaylistPanel());
 
+        btnSubtitleList.setOnClickListener(v -> toggleSubtitleListPanel());
+        btnToggleTimestamps.setOnClickListener(v -> toggleSubtitleTimestamps());
+        if (findViewById(R.id.btnCloseSubtitlePanel) != null) {
+            findViewById(R.id.btnCloseSubtitlePanel).setOnClickListener(v -> closeSubtitleListPanel());
+        }
+
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override public void onProgressChanged(SeekBar sb, int progress, boolean fromUser) {
                 if (fromUser) {
@@ -453,6 +475,91 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
                     isPanelVisible = false;
                 })
                 .start();
+    }
+
+    // ── Subtitle list panel ────────────────────────────────────────────────
+
+    /** Called after subtitle is imported; shows the subtitle list button if subtitles are loaded. */
+    private void refreshSubtitleListButton() {
+        boolean has = subtitleManager.hasSubtitles();
+        btnSubtitleList.setVisibility(has ? View.VISIBLE : View.GONE);
+        if (!has && isSubtitlePanelVisible) closeSubtitleListPanel();
+    }
+
+    private void toggleSubtitleListPanel() {
+        if (isSubtitlePanelVisible) {
+            closeSubtitleListPanel();
+        } else {
+            openSubtitleListPanel();
+        }
+    }
+
+    private void openSubtitleListPanel() {
+        java.util.List<SubtitleEntry> subs = subtitleManager.getCurrentSubtitles();
+        if (subs.isEmpty()) return;
+
+        // Build or rebuild adapter
+        subtitleListAdapter = new SubtitleListAdapter(subs,
+                entry -> {
+                    playerManager.seekTo(entry.getStartTimeMs());
+                    subtitleManager.onSeek();
+                    closeSubtitleListPanel();
+                    scheduleHideControls();
+                });
+
+        rvSubtitleList.setLayoutManager(new LinearLayoutManager(this));
+        rvSubtitleList.setAdapter(subtitleListAdapter);
+
+        boolean isEmpty = subs.isEmpty();
+        tvSubtitleListEmpty.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
+        rvSubtitleList.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
+
+        subtitleListPanel.setVisibility(View.VISIBLE);
+        subtitleListPanel.post(() -> {
+            subtitleListPanel.setTranslationY(subtitleListPanel.getHeight());
+            subtitleListPanel.animate().translationY(0).setDuration(250).start();
+        });
+        isSubtitlePanelVisible = true;
+        uiHandler.removeCallbacks(hideControlsRunnable);
+
+        // Scroll to active subtitle
+        scrollToActiveSubtitle(playerManager.getPosition());
+    }
+
+    private void closeSubtitleListPanel() {
+        if (!isSubtitlePanelVisible) return;
+        subtitleListPanel.animate()
+                .translationY(subtitleListPanel.getHeight())
+                .setDuration(200)
+                .withEndAction(() -> {
+                    subtitleListPanel.setVisibility(View.GONE);
+                    isSubtitlePanelVisible = false;
+                })
+                .start();
+    }
+
+    private void toggleSubtitleTimestamps() {
+        if (subtitleListAdapter == null) return;
+        boolean nowShow = !subtitleListAdapter.isShowTimestamps();
+        subtitleListAdapter.setShowTimestamps(nowShow);
+        btnToggleTimestamps.setText(nowShow
+                ? R.string.subtitle_list_hide_time
+                : R.string.subtitle_list_show_time);
+    }
+
+    /** Scrolls the subtitle list panel to the subtitle active at {@code positionMs}. */
+    private void scrollToActiveSubtitle(long positionMs) {
+        if (subtitleListAdapter == null) return;
+        java.util.List<SubtitleEntry> subs = subtitleManager.getCurrentSubtitles();
+        for (int i = 0; i < subs.size(); i++) {
+            SubtitleEntry e = subs.get(i);
+            if (positionMs >= e.getStartTimeMs() && positionMs < e.getEndTimeMs()) {
+                subtitleListAdapter.setActiveIndex(i);
+                rvSubtitleList.scrollToPosition(i);
+                return;
+            }
+        }
+        subtitleListAdapter.setActiveIndex(-1);
     }
 
     // ── Play mode cycling ──────────────────────────────────────────────────
@@ -813,6 +920,23 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
                     seekBar.setProgress(progress);
                 }
             }
+
+            // Update subtitle list highlight when panel is visible
+            if (isSubtitlePanelVisible && subtitleListAdapter != null) {
+                java.util.List<SubtitleEntry> subs = subtitleManager.getCurrentSubtitles();
+                int activeIdx = -1;
+                for (int i = 0; i < subs.size(); i++) {
+                    SubtitleEntry e = subs.get(i);
+                    if (positionMs >= e.getStartTimeMs() && positionMs < e.getEndTimeMs()) {
+                        activeIdx = i;
+                        break;
+                    }
+                }
+                if (activeIdx != subtitleListAdapter.getActiveIndex()) {
+                    subtitleListAdapter.setActiveIndex(activeIdx);
+                    if (activeIdx >= 0) rvSubtitleList.smoothScrollToPosition(activeIdx);
+                }
+            }
         });
     }
 
@@ -881,6 +1005,7 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
                         case 3:
                             subtitleManager.clearSubtitles();
                             subtitleView.setSubtitle(null);
+                            refreshSubtitleListButton();
                             Toast.makeText(this, R.string.subtitle_cleared,
                                     Toast.LENGTH_SHORT).show();
                             break;
@@ -905,6 +1030,7 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
                         subtitleManager.getCurrentSubtitles().size())
                    : getString(R.string.subtitle_load_failed),
                 Toast.LENGTH_SHORT).show();
+        refreshSubtitleListButton();
     }
 
     private void startExport(String format) {

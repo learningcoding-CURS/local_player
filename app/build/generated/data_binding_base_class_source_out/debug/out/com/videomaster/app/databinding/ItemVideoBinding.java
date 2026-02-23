@@ -4,6 +4,7 @@ package com.videomaster.app.databinding;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -20,6 +21,12 @@ public final class ItemVideoBinding implements ViewBinding {
   private final CardView rootView;
 
   @NonNull
+  public final ImageView imgThumbnail;
+
+  @NonNull
+  public final ImageView imgThumbnailFallback;
+
+  @NonNull
   public final TextView tvDuration;
 
   @NonNull
@@ -28,9 +35,12 @@ public final class ItemVideoBinding implements ViewBinding {
   @NonNull
   public final TextView tvTitle;
 
-  private ItemVideoBinding(@NonNull CardView rootView, @NonNull TextView tvDuration,
+  private ItemVideoBinding(@NonNull CardView rootView, @NonNull ImageView imgThumbnail,
+      @NonNull ImageView imgThumbnailFallback, @NonNull TextView tvDuration,
       @NonNull TextView tvSize, @NonNull TextView tvTitle) {
     this.rootView = rootView;
+    this.imgThumbnail = imgThumbnail;
+    this.imgThumbnailFallback = imgThumbnailFallback;
     this.tvDuration = tvDuration;
     this.tvSize = tvSize;
     this.tvTitle = tvTitle;
@@ -63,6 +73,18 @@ public final class ItemVideoBinding implements ViewBinding {
     // This is done to optimize the compiled bytecode for size and performance.
     int id;
     missingId: {
+      id = R.id.imgThumbnail;
+      ImageView imgThumbnail = ViewBindings.findChildViewById(rootView, id);
+      if (imgThumbnail == null) {
+        break missingId;
+      }
+
+      id = R.id.imgThumbnailFallback;
+      ImageView imgThumbnailFallback = ViewBindings.findChildViewById(rootView, id);
+      if (imgThumbnailFallback == null) {
+        break missingId;
+      }
+
       id = R.id.tvDuration;
       TextView tvDuration = ViewBindings.findChildViewById(rootView, id);
       if (tvDuration == null) {
@@ -81,7 +103,8 @@ public final class ItemVideoBinding implements ViewBinding {
         break missingId;
       }
 
-      return new ItemVideoBinding((CardView) rootView, tvDuration, tvSize, tvTitle);
+      return new ItemVideoBinding((CardView) rootView, imgThumbnail, imgThumbnailFallback,
+          tvDuration, tvSize, tvTitle);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));
