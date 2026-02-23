@@ -223,6 +223,34 @@ public class SettingsActivity extends AppCompatActivity {
                 prefs.getString(PREF_TOP_BTN_ORDER, DEFAULT_TOP_BTN_ORDER));
         centerBtnOrder = prefs.getString(PREF_CENTER_BTN_ORDER, DEFAULT_CENTER_BTN_ORDER).split(",");
 
+        // ── 默认主界面/底部标签/工具栏 标签切换 ─────────────────────────────────
+        {
+            View sectionDefaultHome  = findViewById(R.id.sectionDefaultHome);
+            View sectionBottomOrder = findViewById(R.id.sectionBottomOrder);
+            View sectionToolbarOrder = findViewById(R.id.sectionToolbarOrder);
+
+            TextView tabDefaultHome  = findViewById(R.id.tabDefaultHome);
+            TextView tabBottomOrder  = findViewById(R.id.tabBottomOrder);
+            TextView tabToolbarOrder = findViewById(R.id.tabToolbarOrder);
+
+            View.OnClickListener navTabToggle = v -> {
+                View section;
+                if (v == tabDefaultHome)   section = sectionDefaultHome;
+                else if (v == tabBottomOrder)  section = sectionBottomOrder;
+                else                           section = sectionToolbarOrder;
+
+                boolean wasVisible = section.getVisibility() == View.VISIBLE;
+                section.setVisibility(wasVisible ? View.GONE : View.VISIBLE);
+
+                int activeColor = getResources().getColor(R.color.colorAccent, null);
+                int normalColor = 0x00000000;
+                ((TextView) v).setBackgroundColor(wasVisible ? normalColor : activeColor);
+            };
+            tabDefaultHome.setOnClickListener(navTabToggle);
+            tabBottomOrder.setOnClickListener(navTabToggle);
+            tabToolbarOrder.setOnClickListener(navTabToggle);
+        }
+
         // ── Default tab RadioGroup ────────────────────────────────────────────
         RadioGroup rgDefault = findViewById(R.id.rgDefaultTab);
         String[] tabValues = { "builtin", "library", "playlist" };
@@ -604,6 +632,38 @@ public class SettingsActivity extends AppCompatActivity {
             }
         });
 
+        // ── 字幕面板/字幕默认/播放控件/设置页背景 标签切换 ───────────────────────
+        {
+            View sectionSubtitlePanel  = findViewById(R.id.sectionSubtitlePanel);
+            View sectionSubtitleDefault = findViewById(R.id.sectionSubtitleDefault);
+            View sectionPlayerControls  = findViewById(R.id.sectionPlayerControls);
+            View sectionSettingsBg     = findViewById(R.id.sectionSettingsBg);
+
+            TextView tabSubtitlePanel  = findViewById(R.id.tabSubtitlePanel);
+            TextView tabSubtitleDefault = findViewById(R.id.tabSubtitleDefault);
+            TextView tabPlayerControls = findViewById(R.id.tabPlayerControls);
+            TextView tabSettingsBg     = findViewById(R.id.tabSettingsBg);
+
+            View.OnClickListener miscTabToggle = v -> {
+                View section;
+                if (v == tabSubtitlePanel)   section = sectionSubtitlePanel;
+                else if (v == tabSubtitleDefault) section = sectionSubtitleDefault;
+                else if (v == tabPlayerControls)  section = sectionPlayerControls;
+                else                             section = sectionSettingsBg;
+
+                boolean wasVisible = section.getVisibility() == View.VISIBLE;
+                section.setVisibility(wasVisible ? View.GONE : View.VISIBLE);
+
+                int activeColor = getResources().getColor(R.color.colorAccent, null);
+                int normalColor = 0x00000000;
+                ((TextView) v).setBackgroundColor(wasVisible ? normalColor : activeColor);
+            };
+            tabSubtitlePanel.setOnClickListener(miscTabToggle);
+            tabSubtitleDefault.setOnClickListener(miscTabToggle);
+            tabPlayerControls.setOnClickListener(miscTabToggle);
+            tabSettingsBg.setOnClickListener(miscTabToggle);
+        }
+
         // ── 字幕面板背景透明度 ─────────────────────────────────────────────
         SeekBar sbPanelAlpha = findViewById(R.id.sbSubtitlePanelAlpha);
         TextView tvPanelAlphaLabel = findViewById(R.id.tvSubtitlePanelAlphaLabel);
@@ -733,12 +793,31 @@ public class SettingsActivity extends AppCompatActivity {
             }
         }
 
+        // ── 顶栏/中央按钮排序 标签切换 ─────────────────────────────────────────
+        {
+            View sectionTopBtnOrder   = findViewById(R.id.sectionTopBtnOrder);
+            View sectionCenterBtnOrder = findViewById(R.id.sectionCenterBtnOrder);
+            TextView tabTopBtnOrder   = findViewById(R.id.tabTopBtnOrder);
+            TextView tabCenterBtnOrder = findViewById(R.id.tabCenterBtnOrder);
+
+            View.OnClickListener btnOrderTabToggle = v -> {
+                View section = (v == tabTopBtnOrder) ? sectionTopBtnOrder : sectionCenterBtnOrder;
+                boolean wasVisible = section.getVisibility() == View.VISIBLE;
+                section.setVisibility(wasVisible ? View.GONE : View.VISIBLE);
+                int activeColor = getResources().getColor(R.color.colorAccent, null);
+                int normalColor = 0x00000000;
+                ((TextView) v).setBackgroundColor(wasVisible ? normalColor : activeColor);
+            };
+            tabTopBtnOrder.setOnClickListener(btnOrderTabToggle);
+            tabCenterBtnOrder.setOnClickListener(btnOrderTabToggle);
+        }
+
         // ── 顶栏按钮排序 ─────────────────────────────────────────────────────
-        LinearLayout topBtnOrderContainer = getOrCreateBtnOrderContainer("topBtnOrderContainer");
+        LinearLayout topBtnOrderContainer = findViewById(R.id.topBtnOrderContainer);
         refreshBtnOrderRows(topBtnOrderContainer, topBtnOrder, getTopBtnLabels());
 
         // ── 中央按钮排序 ──────────────────────────────────────────────────────
-        LinearLayout centerBtnOrderContainer = getOrCreateBtnOrderContainer("centerBtnOrderContainer");
+        LinearLayout centerBtnOrderContainer = findViewById(R.id.centerBtnOrderContainer);
         refreshBtnOrderRows(centerBtnOrderContainer, centerBtnOrder, getCenterBtnLabels());
 
         // ── 设置页背景透明度 ─────────────────────────────────────────────────
@@ -1120,41 +1199,6 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     // ── Button order rows ────────────────────────────────────────────────────
-
-    private LinearLayout getOrCreateBtnOrderContainer(String tag) {
-        // We embed these containers dynamically in the settings root
-        LinearLayout root = findViewById(R.id.settingsRoot);
-        // Find by tag if already added
-        for (int i = 0; i < root.getChildCount(); i++) {
-            View v = root.getChildAt(i);
-            if (tag.equals(v.getTag())) return (LinearLayout) v;
-        }
-        // Section title
-        TextView title = new TextView(this);
-        title.setText("topBtnOrderContainer".equals(tag)
-                ? getString(R.string.settings_btn_order_top)
-                : getString(R.string.settings_btn_order_center));
-        title.setTextColor(getResources().getColor(R.color.colorAccentLight, null));
-        title.setTextSize(13f);
-        title.setPadding(0, dp(8), 0, dp(4));
-        root.addView(title);
-
-        LinearLayout container = new LinearLayout(this);
-        container.setTag(tag);
-        container.setOrientation(LinearLayout.VERTICAL);
-        root.addView(container);
-
-        // Divider after
-        View div = new View(this);
-        div.setBackgroundColor(getResources().getColor(R.color.divider, null));
-        LinearLayout.LayoutParams divLp = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT, 1);
-        divLp.setMargins(0, dp(12), 0, dp(4));
-        div.setLayoutParams(divLp);
-        root.addView(div);
-
-        return container;
-    }
 
     private void refreshBtnOrderRows(LinearLayout container, String[] order, String[] labels) {
         container.removeAllViews();
