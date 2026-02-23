@@ -311,7 +311,7 @@
                     <TextView android:id="@+id/tvSeekOffsetLabelP" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/textSecondary" android:textSize="13sp" android:paddingTop="4dp" android:paddingBottom="2dp" />
                     <SeekBar android:id="@+id/sbSeekOffsetP" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="1000" android:progressTint="@color/colorAccent" android:thumbTint="@color/colorAccent" android:layout_marginBottom="6dp" />
                     <TextView android:id="@+id/tvSeekSpacingLabelP" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/textSecondary" android:textSize="13sp" android:paddingTop="4dp" android:paddingBottom="2dp" />
-                    <SeekBar android:id="@+id/sbSeekSpacingP" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="80" android:progressTint="@color/colorAccent" android:thumbTint="@color/colorAccent" android:layout_marginBottom="6dp" />
+                    <SeekBar android:id="@+id/sbSeekSpacingP" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="300" android:progressTint="@color/colorAccent" android:thumbTint="@color/colorAccent" android:layout_marginBottom="6dp" />
                 </LinearLayout>
 
                 <LinearLayout android:id="@+id/sectionSeekLandscape" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone">
@@ -322,7 +322,7 @@
                     <TextView android:id="@+id/tvSeekOffsetLabelL" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/textSecondary" android:textSize="13sp" android:paddingTop="4dp" android:paddingBottom="2dp" />
                     <SeekBar android:id="@+id/sbSeekOffsetL" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="1000" android:progressTint="@color/colorAccent" android:thumbTint="@color/colorAccent" android:layout_marginBottom="6dp" />
                     <TextView android:id="@+id/tvSeekSpacingLabelL" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/textSecondary" android:textSize="13sp" android:paddingTop="4dp" android:paddingBottom="2dp" />
-                    <SeekBar android:id="@+id/sbSeekSpacingL" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="80" android:progressTint="@color/colorAccent" android:thumbTint="@color/colorAccent" android:layout_marginBottom="6dp" />
+                    <SeekBar android:id="@+id/sbSeekSpacingL" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="300" android:progressTint="@color/colorAccent" android:thumbTint="@color/colorAccent" android:layout_marginBottom="6dp" />
                 </LinearLayout>
             </LinearLayout>
 
@@ -347,7 +347,7 @@
                     <TextView android:id="@+id/tvSkipOffsetLabelP" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/textSecondary" android:textSize="13sp" android:paddingTop="4dp" android:paddingBottom="2dp" />
                     <SeekBar android:id="@+id/sbSkipOffsetP" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="1000" android:progressTint="@color/colorAccent" android:thumbTint="@color/colorAccent" android:layout_marginBottom="6dp" />
                     <TextView android:id="@+id/tvSkipSpacingLabelP" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/textSecondary" android:textSize="13sp" android:paddingTop="4dp" android:paddingBottom="2dp" />
-                    <SeekBar android:id="@+id/sbSkipSpacingP" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="150" android:progressTint="@color/colorAccent" android:thumbTint="@color/colorAccent" android:layout_marginBottom="6dp" />
+                    <SeekBar android:id="@+id/sbSkipSpacingP" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="400" android:progressTint="@color/colorAccent" android:thumbTint="@color/colorAccent" android:layout_marginBottom="6dp" />
                 </LinearLayout>
 
                 <LinearLayout android:id="@+id/sectionSkipLandscape" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone">
@@ -358,7 +358,7 @@
                     <TextView android:id="@+id/tvSkipOffsetLabelL" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/textSecondary" android:textSize="13sp" android:paddingTop="4dp" android:paddingBottom="2dp" />
                     <SeekBar android:id="@+id/sbSkipOffsetL" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="1000" android:progressTint="@color/colorAccent" android:thumbTint="@color/colorAccent" android:layout_marginBottom="6dp" />
                     <TextView android:id="@+id/tvSkipSpacingLabelL" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/textSecondary" android:textSize="13sp" android:paddingTop="4dp" android:paddingBottom="2dp" />
-                    <SeekBar android:id="@+id/sbSkipSpacingL" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="150" android:progressTint="@color/colorAccent" android:thumbTint="@color/colorAccent" android:layout_marginBottom="6dp" />
+                    <SeekBar android:id="@+id/sbSkipSpacingL" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="400" android:progressTint="@color/colorAccent" android:thumbTint="@color/colorAccent" android:layout_marginBottom="6dp" />
                 </LinearLayout>
             </LinearLayout>
 

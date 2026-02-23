@@ -498,6 +498,10 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
         int skipOffsetDp = prefs.contains(isLandscape ? SettingsActivity.PREF_SKIP_BTN_OFFSET_Y_LANDSCAPE : SettingsActivity.PREF_SKIP_BTN_OFFSET_Y_PORTRAIT)
                 ? prefs.getInt(isLandscape ? SettingsActivity.PREF_SKIP_BTN_OFFSET_Y_LANDSCAPE : SettingsActivity.PREF_SKIP_BTN_OFFSET_Y_PORTRAIT, SettingsActivity.DEFAULT_SKIP_BTN_OFFSET_Y)
                 : prefs.getInt(SettingsActivity.PREF_SKIP_BTN_OFFSET_Y, SettingsActivity.DEFAULT_SKIP_BTN_OFFSET_Y);
+        if (isLandscape) {
+            seekOffsetDp = Math.max(-200, Math.min(200, seekOffsetDp));
+            skipOffsetDp = Math.max(-200, Math.min(200, skipOffsetDp));
+        }
         View centerContainer = findViewById(R.id.centerControlsContainer);
         View seekRow = findViewById(R.id.seekRow);
         View skipRow = findViewById(R.id.skipRow);
@@ -615,9 +619,16 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
         if (btnSkipNext != null) btnSkipNext.setAlpha(alphaF);
 
         // ── 切换按钮间距（上一首/下一首之间的间距）────────────────────────────
-        int skipSpacingDp = prefs.contains(isLandscape ? SettingsActivity.PREF_SKIP_BTN_SPACING_LANDSCAPE : SettingsActivity.PREF_SKIP_BTN_SPACING_PORTRAIT)
-                ? prefs.getInt(isLandscape ? SettingsActivity.PREF_SKIP_BTN_SPACING_LANDSCAPE : SettingsActivity.PREF_SKIP_BTN_SPACING_PORTRAIT, SettingsActivity.DEFAULT_SKIP_BTN_SPACING)
-                : prefs.getInt(SettingsActivity.PREF_SKIP_BTN_SPACING, SettingsActivity.DEFAULT_SKIP_BTN_SPACING);
+        int skipSpacingDp;
+        if (isLandscape) {
+            skipSpacingDp = prefs.contains(SettingsActivity.PREF_SKIP_BTN_SPACING_LANDSCAPE)
+                    ? prefs.getInt(SettingsActivity.PREF_SKIP_BTN_SPACING_LANDSCAPE, SettingsActivity.DEFAULT_SKIP_BTN_SPACING_LANDSCAPE)
+                    : SettingsActivity.DEFAULT_SKIP_BTN_SPACING_LANDSCAPE;
+        } else {
+            skipSpacingDp = prefs.contains(SettingsActivity.PREF_SKIP_BTN_SPACING_PORTRAIT)
+                    ? prefs.getInt(SettingsActivity.PREF_SKIP_BTN_SPACING_PORTRAIT, SettingsActivity.DEFAULT_SKIP_BTN_SPACING)
+                    : prefs.getInt(SettingsActivity.PREF_SKIP_BTN_SPACING, SettingsActivity.DEFAULT_SKIP_BTN_SPACING);
+        }
         int halfSkipSpacingPx = dpToPx(skipSpacingDp / 2);
         if (btnSkipPrev != null && btnSkipPrev.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
             ViewGroup.MarginLayoutParams spMlp = (ViewGroup.MarginLayoutParams) btnSkipPrev.getLayoutParams();
@@ -692,13 +703,12 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
         }
         if (seekH <= 0) seekH = dpToPx(72);
         if (skipH <= 0) skipH = dpToPx(48);
-        int gapPx = dpToPx(4);
         int seekOffPx = dpToPx(seekOffsetDp);
         int skipOffPx = dpToPx(skipOffsetDp);
 
         int centerY = parentH / 2;
         int seekTop = centerY - seekH / 2 - seekOffPx;
-        int skipTop = centerY - seekH / 2 + seekH + gapPx - skipOffPx;
+        int skipTop = centerY - seekH / 2 + seekH - skipOffPx;
 
         if (seekRow.getLayoutParams() instanceof FrameLayout.LayoutParams) {
             FrameLayout.LayoutParams slp = (FrameLayout.LayoutParams) seekRow.getLayoutParams();
