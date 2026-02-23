@@ -48,6 +48,8 @@ import com.videomaster.app.ui.SubtitleListAdapter;
 import com.videomaster.app.ui.SubtitleView;
 import com.videomaster.app.util.TimeUtils;
 
+import android.util.Log;
+
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Random;
@@ -149,18 +151,27 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
     // Seek button settings (loaded from prefs)
     private int seekMs = 5000;
 
-    // ── Handlers / runnables ───────────────────────────────────────────────
-
-    private final Handler  uiHandler              = new Handler(Looper.getMainLooper());
-    private final Runnable hideControlsRunnable    = this::hideControls;
-    private final Runnable hideBrightnessRunnable  = () -> brightnessIndicator.setVisibility(View.GONE);
-
     // ── State ──────────────────────────────────────────────────────────────
 
     private boolean isDraggingSeekBar = false;
     private boolean isLocked          = false;
     private long    savedPosition     = 0;
     private boolean isPanelVisible    = false;
+    private boolean goingToSettings   = false;
+
+    // Real-time settings preview (through transparent settings page)
+    private final SharedPreferences.OnSharedPreferenceChangeListener settingsChangeListener =
+            (prefs, key) -> {
+                if (goingToSettings) {
+                    runOnUiThread(this::applyPlayerSettings);
+                }
+            };
+
+    // ── Handlers / runnables ───────────────────────────────────────────────
+
+    private final Handler  uiHandler              = new Handler(Looper.getMainLooper());
+    private final Runnable hideControlsRunnable    = this::hideControls;
+    private final Runnable hideBrightnessRunnable  = () -> brightnessIndicator.setVisibility(View.GONE);
 
     // Playlist navigation context
     private ArrayList<String> playlistUris  = null;
@@ -259,6 +270,9 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
         Uri videoUri = Uri.parse(uriStr);
         playerManager.play(videoUri);
         if (savedPosition > 0) playerManager.seekTo(savedPosition);
+
+        getSharedPreferences(SettingsActivity.PREFS_NAME, MODE_PRIVATE)
+                .registerOnSharedPreferenceChangeListener(settingsChangeListener);
     }
 
     @Override
@@ -289,9 +303,14 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
         if (!isLocked && gestureHandler != null && ev != null
-                && !isSubtitlePanelVisible && !isPanelVisible) {
-            float windowW = getWindow().getDecorView().getWidth();
-            gestureHandler.feedSwipeEvent(ev, windowW);
+                && !isSubtitlePanelVisible && !isPanelVisible
+                && !isDraggingSeekBar) {
+            try {
+                float windowW = getWindow().getDecorView().getWidth();
+                gestureHandler.feedSwipeEvent(ev, windowW);
+            } catch (Exception e) {
+                Log.e("PlayerActivity", "feedSwipeEvent error", e);
+            }
         }
         return super.dispatchTouchEvent(ev);
     }
@@ -312,18 +331,25 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
         super.onPause();
         if (playerManager != null) {
             saveCurrentProgress();
-            playerManager.pause();
+            if (!goingToSettings) {
+                playerManager.pause();
+            }
         }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        goingToSettings = false;
         enterImmersiveMode();
+        applyPlayerSettings();
     }
 
     @Override
     protected void onDestroy() {
+        getSharedPreferences(SettingsActivity.PREFS_NAME, MODE_PRIVATE)
+                .unregisterOnSharedPreferenceChangeListener(settingsChangeListener);
+
         // Finalize any in-progress play segment
         if (playStatsStartMs >= 0) {
             playStatsAccumMs += android.os.SystemClock.elapsedRealtime() - playStatsStartMs;
@@ -536,6 +562,25 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
         View skipRow = findViewById(R.id.skipRow);
         if (skipRow != null) {
             skipRow.setTranslationY(-dpToPx(skipOffsetDp));
+        }
+
+        // ── Play/Pause button size / alpha / offset ──
+        int ppSizeDp = prefs.getInt(SettingsActivity.PREF_PLAYPAUSE_BTN_SIZE,
+                SettingsActivity.DEFAULT_PLAYPAUSE_BTN_SIZE);
+        if (btnPlayPause != null) {
+            ViewGroup.LayoutParams ppLp = btnPlayPause.getLayoutParams();
+            int ppSizePx = dpToPx(ppSizeDp);
+            ppLp.width = ppSizePx; ppLp.height = ppSizePx;
+            btnPlayPause.setLayoutParams(ppLp);
+        }
+        int ppAlpha = prefs.getInt(SettingsActivity.PREF_PLAYPAUSE_BTN_ALPHA,
+                SettingsActivity.DEFAULT_PLAYPAUSE_BTN_ALPHA);
+        if (btnPlayPause != null) btnPlayPause.setAlpha(ppAlpha / 100f);
+
+        int ppOffsetDp = prefs.getInt(SettingsActivity.PREF_PLAYPAUSE_BTN_OFFSET_Y,
+                SettingsActivity.DEFAULT_PLAYPAUSE_BTN_OFFSET_Y);
+        if (btnPlayPause != null) {
+            btnPlayPause.setTranslationY(-dpToPx(ppOffsetDp));
         }
 
         // ── Button order in top/center bar ────────────────────────────────
@@ -796,11 +841,14 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
 
             @Override public void onSwipeMedia(boolean toNext) {
                 if (!isLocked) {
-                    // Cancel speed boost if it was active from a long press
-                    playerManager.deactivateLongPressSpeed();
-                    tvLongPressHint.setVisibility(View.GONE);
-                    if (toNext) playNext();
-                    else        playPrevious();
+                    try {
+                        playerManager.deactivateLongPressSpeed();
+                        tvLongPressHint.setVisibility(View.GONE);
+                        if (toNext) playNext();
+                        else        playPrevious();
+                    } catch (Exception e) {
+                        Log.e("PlayerActivity", "onSwipeMedia error", e);
+                    }
                 }
             }
         });
@@ -837,8 +885,13 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
         btnSkipNext.setOnClickListener(v -> { playNext(); scheduleHideControls(); });
         btnRotate.setOnClickListener(v -> toggleOrientation());
         if (btnPlayerSettings != null) {
-            btnPlayerSettings.setOnClickListener(v ->
-                    settingsLauncher.launch(new Intent(this, SettingsActivity.class)));
+            btnPlayerSettings.setOnClickListener(v -> {
+                goingToSettings = true;
+                uiHandler.removeCallbacks(hideControlsRunnable);
+                controlsOverlay.setVisibility(View.VISIBLE);
+                controlsOverlay.setAlpha(1f);
+                settingsLauncher.launch(new Intent(this, SettingsActivity.class));
+            });
         }
         btnSubtitle.setOnClickListener(v -> handleSubtitleButtonClick());
         if (btnSubtitleToggle != null) {
@@ -1227,7 +1280,11 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
     // ── Playlist navigation ────────────────────────────────────────────────
 
     private void playNext() {
-        if (playlistUris == null || playlistUris.isEmpty()) return;
+        if (playlistUris == null || playlistUris.isEmpty()) {
+            Log.w("PlayerActivity", "playNext: no playlist (null="
+                    + (playlistUris == null) + ")");
+            return;
+        }
 
         if (playerManager.getPlayMode() == PlayMode.SHUFFLE) {
             playNextShuffle();
@@ -1245,7 +1302,11 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
     }
 
     private void playPrevious() {
-        if (playlistUris == null || playlistUris.isEmpty()) return;
+        if (playlistUris == null || playlistUris.isEmpty()) {
+            Log.w("PlayerActivity", "playPrevious: no playlist (null="
+                    + (playlistUris == null) + ")");
+            return;
+        }
         int prev = playlistIndex - 1;
         if (prev < 0) {
             Toast.makeText(this, R.string.playlist_start, Toast.LENGTH_SHORT).show();
@@ -1257,17 +1318,23 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
     }
 
     private void switchToPlaylistItem(int index) {
-        String uriStr = playlistUris.get(index);
-        Uri    uri    = Uri.parse(uriStr);
-        savedPosition = 0;
+        try {
+            String uriStr = playlistUris.get(index);
+            Uri    uri    = Uri.parse(uriStr);
+            savedPosition = 0;
 
-        long[] prog = mediaListManager.getProgress(uriStr);
-        if (prog != null && prog[1] > 0) savedPosition = prog[0];
+            long[] prog = mediaListManager.getProgress(uriStr);
+            if (prog != null && prog[1] > 0) savedPosition = prog[0];
 
-        subtitleManager.clearSubtitles();
-        subtitleView.setSubtitle(null);
-        playerManager.play(uri);
-        if (savedPosition > 0) playerManager.seekTo(savedPosition);
+            subtitleManager.clearSubtitles();
+            subtitleView.setSubtitle(null);
+            playerManager.play(uri);
+            if (savedPosition > 0) playerManager.seekTo(savedPosition);
+        } catch (Exception e) {
+            Log.e("PlayerActivity", "switchToPlaylistItem error at index " + index, e);
+            Toast.makeText(this, "切换失败: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         if (panelAdapter != null) panelAdapter.setCurrentIndex(index);
 

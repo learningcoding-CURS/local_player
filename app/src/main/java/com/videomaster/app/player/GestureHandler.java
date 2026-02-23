@@ -3,6 +3,7 @@ package com.videomaster.app.player;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
@@ -10,44 +11,46 @@ import android.view.View;
 /**
  * Handles touch gestures on the player surface.
  *
- * Swipe detection works at both the view level (playerView) AND at the Activity level
- * via feedSwipeEvent(), ensuring swipes are reliably detected even when the controls
- * overlay intercepts touch events.
+ * Architecture:
+ *   Swipe detection is done EXCLUSIVELY at the Activity level via feedSwipeEvent().
+ *   This guarantees swipes work regardless of which child view intercepts touch
+ *   events (buttons, seekbar, controls overlay, etc.).
+ *
+ *   The view-level onTouch() path only handles: tap, double-tap, long-press,
+ *   and brightness adjustment (via GestureDetector).
  *
  * Swipe direction for media switching is configurable per orientation:
  *   setPortraitSwipeDirection(SwipeDirection)   – default VERTICAL
  *   setLandscapeSwipeDirection(SwipeDirection)  – default HORIZONTAL
  *
  * Portrait VERTICAL mode (default):
- *   Any side DOWN swipe         → next media
- *   Any side UP   swipe         → previous media
- *   Left side small vertical    → adjust brightness (before threshold)
+ *   Any position DOWN swipe        → next media
+ *   Any position UP   swipe        → previous media
  *
  * Portrait HORIZONTAL mode:
- *   Left side vertical scroll   → adjust brightness
- *   LEFT  swipe                 → next media
- *   RIGHT swipe                 → previous media
+ *   LEFT  swipe                    → next media
+ *   RIGHT swipe                    → previous media
+ *   Left side vertical scroll      → adjust brightness
  *
  * Landscape HORIZONTAL mode (default):
- *   Left side vertical scroll   → adjust brightness
- *   LEFT  swipe                 → next media
- *   RIGHT swipe                 → previous media
+ *   LEFT  swipe                    → next media
+ *   RIGHT swipe                    → previous media
+ *   Left side vertical scroll      → adjust brightness
  *
  * Landscape VERTICAL mode:
- *   Any side DOWN swipe         → next media
- *   Any side UP   swipe         → previous media
- *   Left side small vertical    → adjust brightness (before threshold)
+ *   Any position DOWN swipe        → next media
+ *   Any position UP   swipe        → previous media
  *
  * Long press (no movement) always activates 2.5× speed boost regardless of orientation.
  */
 public class GestureHandler implements View.OnTouchListener {
 
+    private static final String TAG = "GestureHandler";
+
     // ── Swipe direction enum ────────────────────────────────────────────────
 
     public enum SwipeDirection {
-        /** Up/Down swipe triggers media switch (left side reserved for brightness). */
         VERTICAL,
-        /** Left/Right swipe triggers media switch. */
         HORIZONTAL
     }
 
@@ -57,29 +60,15 @@ public class GestureHandler implements View.OnTouchListener {
         void onSingleTap();
         void onDoubleTap();
         void onLongPressStart();
-
-        /** Fired on release when no swipe occurred during long press. */
         void onLongPressEnd();
-
-        /**
-         * Fired during left-side vertical scroll.
-         * @param delta positive = brighter; negative = dimmer.
-         */
         void onBrightnessScroll(float delta);
-
-        /**
-         * Fired when a media-switch swipe is detected.
-         * @param toNext true = go to next; false = go to previous.
-         */
         void onSwipeMedia(boolean toNext);
     }
 
     // ── Tuning constants ───────────────────────────────────────────────────
 
     private static final long  DOUBLE_TAP_TIMEOUT_MS  = 300;
-    /** Minimum finger travel (px equivalent of dp) to register a media-switch swipe. */
     private static final float SWITCH_THRESHOLD_DP    = 50f;
-    /** Brightness sensitivity: fraction of [0,1] per pixel scrolled. */
     private static final float BRIGHTNESS_SENSITIVITY = 0.005f;
 
     // ── State ──────────────────────────────────────────────────────────────
@@ -87,34 +76,29 @@ public class GestureHandler implements View.OnTouchListener {
     private final GestureDetector detector;
     private final GestureListener listener;
     private final Handler         handler = new Handler(Looper.getMainLooper());
+    private final float           switchThresholdPx;
+    private final Runnable        singleTapRunnable;
 
     private boolean isLandscape     = false;
     private float   viewWidth       = 1f;
 
-    /** Swipe direction for media switching in portrait mode. */
     private SwipeDirection portraitSwipe  = SwipeDirection.VERTICAL;
-    /** Swipe direction for media switching in landscape mode. */
     private SwipeDirection landscapeSwipe = SwipeDirection.HORIZONTAL;
 
     // Long-press state
     private boolean lpActive  = false;
     private boolean lpSwiped  = false;
 
-    // Shared one-shot swipe guard — reset on each ACTION_DOWN
-    // Used by BOTH the view-level and activity-level paths to prevent double-fire.
-    private boolean swipeConsumed = false;
-
-    // Stored initial touch position (avoids relying on possibly-recycled MotionEvent e1)
+    // View-level touch start position (used for brightness left/right detection)
     private float touchStartX = 0f;
-    private float touchStartY = 0f;
 
-    // Activity-level swipe tracking (separate start position for dispatchTouchEvent path)
-    private float activityStartX = 0f;
-    private float activityStartY = 0f;
-    private float activityWindowWidth = 1f;
-
-    private final float switchThresholdPx;
-    private final Runnable singleTapRunnable;
+    // ── Activity-level swipe state (EXCLUSIVE swipe detection path) ──────
+    // These fields are ONLY used by feedSwipeEvent(). They are completely
+    // independent of the view-level onTouch() path.
+    private float   actStartX      = 0f;
+    private float   actStartY      = 0f;
+    private float   actWindowWidth = 1f;
+    private boolean actSwipeFired  = false;
 
     // ── Constructor ────────────────────────────────────────────────────────
 
@@ -161,10 +145,11 @@ public class GestureHandler implements View.OnTouchListener {
                     if (lpActive) {
                         lpSwiped = true;
                     } else {
-                        // Only handle brightness here; swipe handled in direct ACTION_MOVE path
                         handleBrightnessScroll(distanceX, distanceY);
                     }
-                } catch (Exception ignored) {}
+                } catch (Exception e) {
+                    Log.w(TAG, "onScroll error", e);
+                }
                 return true;
             }
         });
@@ -172,7 +157,6 @@ public class GestureHandler implements View.OnTouchListener {
 
     // ── Public API ─────────────────────────────────────────────────────────
 
-    /** Update orientation flag. Call from onConfigurationChanged and on setup. */
     public void setLandscape(boolean landscape) {
         this.isLandscape = landscape;
     }
@@ -181,57 +165,56 @@ public class GestureHandler implements View.OnTouchListener {
         return isLandscape;
     }
 
-    /**
-     * Set the swipe direction used for media switching in portrait mode.
-     * Default: VERTICAL (right-side up/down swipe).
-     */
     public void setPortraitSwipeDirection(SwipeDirection dir) {
         this.portraitSwipe = dir;
     }
 
-    /**
-     * Set the swipe direction used for media switching in landscape mode.
-     * Default: HORIZONTAL (left/right swipe).
-     */
     public void setLandscapeSwipeDirection(SwipeDirection dir) {
         this.landscapeSwipe = dir;
     }
 
     /**
      * Called from PlayerActivity.dispatchTouchEvent to detect swipes at the Activity level.
-     * This ensures swipes work even when the controls overlay intercepts touch events
-     * before they reach playerView.
+     * This is the ONLY path that detects media-switch swipes.
      *
-     * Uses the shared {@code swipeConsumed} flag to prevent double-firing if the swipe
-     * is also detected via the view-level path.
+     * It runs BEFORE super.dispatchTouchEvent(), so it processes every touch event
+     * regardless of which child view eventually consumes it.
      *
-     * Swipe detection is NOT blocked by lpActive — if a swipe is detected during a
-     * long press, the long press is cancelled and the swipe takes priority.
+     * Does NOT use try-catch — exceptions propagate to the caller so errors are visible.
      */
     public void feedSwipeEvent(MotionEvent ev, float windowWidth) {
         if (ev == null || listener == null) return;
-        try {
-            activityWindowWidth = windowWidth > 0 ? windowWidth : activityWindowWidth;
-            int action = ev.getActionMasked();
 
-            if (action == MotionEvent.ACTION_DOWN) {
-                activityStartX = ev.getX();
-                activityStartY = ev.getY();
-                swipeConsumed = false;
-            } else if (action == MotionEvent.ACTION_MOVE && !swipeConsumed) {
-                detectSwipe(ev.getX(), ev.getY(), activityStartX, activityStartY, activityWindowWidth);
-            } else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
-                if (lpActive) {
-                    lpActive = false;
-                    if (!lpSwiped) listener.onLongPressEnd();
-                    lpSwiped = false;
-                }
+        if (windowWidth > 0) actWindowWidth = windowWidth;
+
+        int action = ev.getActionMasked();
+
+        if (action == MotionEvent.ACTION_DOWN) {
+            actStartX     = ev.getX();
+            actStartY     = ev.getY();
+            actSwipeFired = false;
+
+        } else if (action == MotionEvent.ACTION_MOVE) {
+            if (!actSwipeFired) {
+                checkAndFireSwipe(ev.getX(), ev.getY());
             }
-        } catch (Exception ignored) {}
+
+        } else if (action == MotionEvent.ACTION_UP
+                || action == MotionEvent.ACTION_CANCEL) {
+            if (lpActive) {
+                lpActive = false;
+                if (!lpSwiped) listener.onLongPressEnd();
+                lpSwiped = false;
+            }
+        }
     }
 
     // ── View.OnTouchListener ───────────────────────────────────────────────
 
+    /**
+     * Handles taps, double-taps, long-press, and brightness only.
+     * Swipe detection is NOT done here — it is handled exclusively by feedSwipeEvent().
+     */
     @Override
     public boolean onTouch(View v, MotionEvent event) {
         if (event == null) return false;
@@ -243,20 +226,10 @@ public class GestureHandler implements View.OnTouchListener {
             int action = event.getActionMasked();
 
             if (action == MotionEvent.ACTION_DOWN) {
-                swipeConsumed = false;
                 touchStartX = event.getX();
-                touchStartY = event.getY();
             }
 
-            // Feed to GestureDetector for tap/double-tap/long-press/brightness
             detector.onTouchEvent(event);
-
-            // Direct swipe detection — not blocked by lpActive; a swipe during long
-            // press cancels the long press and takes priority.
-            if (action == MotionEvent.ACTION_MOVE && !swipeConsumed) {
-                float width = viewWidth > 1 ? viewWidth : activityWindowWidth;
-                detectSwipe(event.getX(), event.getY(), touchStartX, touchStartY, width);
-            }
 
             if (lpActive && (action == MotionEvent.ACTION_UP
                     || action == MotionEvent.ACTION_CANCEL)) {
@@ -266,35 +239,23 @@ public class GestureHandler implements View.OnTouchListener {
                 }
                 lpSwiped = false;
             }
-        } catch (Exception ignored) {}
+        } catch (Exception e) {
+            Log.w(TAG, "onTouch error", e);
+        }
         return true;
     }
 
-    // ── Internal gesture helpers ───────────────────────────────────────────
+    // ── Internal helpers ───────────────────────────────────────────────────
 
     /**
-     * Detects and fires a media-switch swipe event.
-     * Uses the shared {@code swipeConsumed} flag so it fires at most once per gesture
-     * regardless of which path (view-level or activity-level) calls it first.
-     *
-     * HORIZONTAL mode: left/right swipe anywhere on screen → media switch.
-     *   Left-side vertical scroll is reserved for brightness (early return).
-     *
-     * VERTICAL mode: up/down swipe on EITHER side → media switch.
-     *   No side restriction; brightness still works for small movements on the left
-     *   side (handled separately by handleBrightnessScroll via GestureDetector).
-     *   Once the swipe threshold is crossed, swipeConsumed = true which stops
-     *   further brightness events in the same gesture.
+     * Core swipe detection logic. Called ONLY from feedSwipeEvent.
+     * Uses window-relative coordinates from Activity.dispatchTouchEvent.
      */
-    private void detectSwipe(float currentX, float currentY,
-                              float startX, float startY, float width) {
-        if (listener == null || swipeConsumed) return;
-
-        float totalDx = currentX - startX;
-        float totalDy = currentY - startY;
-        float absDX   = Math.abs(totalDx);
-        float absDY   = Math.abs(totalDy);
-        boolean isLeft = startX < width / 2f;
+    private void checkAndFireSwipe(float currentX, float currentY) {
+        float dx    = currentX - actStartX;
+        float dy    = currentY - actStartY;
+        float absDX = Math.abs(dx);
+        float absDY = Math.abs(dy);
 
         SwipeDirection dir = isLandscape ? landscapeSwipe : portraitSwipe;
 
@@ -302,36 +263,41 @@ public class GestureHandler implements View.OnTouchListener {
         boolean toNext    = false;
 
         if (dir == SwipeDirection.HORIZONTAL) {
-            if (absDY > absDX && isLeft) return;
+            boolean isLeftSide = actStartX < actWindowWidth / 2f;
+            // Left-side vertical scroll is reserved for brightness
+            if (absDY > absDX && isLeftSide) return;
             if (absDX > absDY && absDX > switchThresholdPx) {
                 triggered = true;
-                toNext    = totalDx < 0;
+                toNext    = dx < 0;  // swipe left → next
             }
         } else {
+            // VERTICAL mode: up/down swipe anywhere on screen
             if (absDY > absDX && absDY > switchThresholdPx) {
                 triggered = true;
-                toNext    = totalDy > 0;
+                toNext    = dy > 0;  // swipe down → next
             }
         }
 
         if (triggered) {
-            swipeConsumed = true;
-            // If a long press was active, cancel it — swipe takes priority
+            actSwipeFired = true;
+            // Swipe overrides long-press speed boost
             if (lpActive) {
                 lpActive = false;
                 lpSwiped = true;
             }
+            Log.d(TAG, "Swipe detected: toNext=" + toNext + " dir=" + dir
+                    + " dx=" + dx + " dy=" + dy);
             listener.onSwipeMedia(toNext);
         }
     }
 
     /**
      * Handles left-side vertical scroll for brightness adjustment.
-     * Called from GestureDetector.onScroll where distanceX/Y are per-event deltas.
-     * Skipped once a media-switch swipe has been committed (swipeConsumed = true).
+     * Called from GestureDetector.onScroll (view-level path only).
+     * Suppressed once a media-switch swipe has been committed.
      */
     private void handleBrightnessScroll(float distanceX, float distanceY) {
-        if (listener == null || swipeConsumed) return;
+        if (listener == null || actSwipeFired) return;
         float absDX  = Math.abs(distanceX);
         float absDY  = Math.abs(distanceY);
         boolean isLeft = touchStartX < viewWidth / 2f;

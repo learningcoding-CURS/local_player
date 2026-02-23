@@ -1410,4 +1410,109 @@ SubtitleManager.getInstance().registerParser(new MyCustomParser());
 
 ---
 
-*VideoMaster v16.1 — 纯本地，无联网，完全离线。*
+## v16.2 变更记录
+
+### 手势切换视频彻底重构（所有来源、每次可靠）
+
+**根因分析**：
+
+旧版 GestureHandler 使用**双路径**滑动检测（Activity 级 `feedSwipeEvent` + View 级 `onTouch`），两条路径共享同一个 `swipeConsumed` 标志。这导致以下问题：
+
+| 问题 | 说明 |
+|------|------|
+| 标志冲突 | `feedSwipeEvent` 和 `onTouch` 在不同时机重置同一个 `swipeConsumed` 标志，可能互相覆盖导致检测失效 |
+| 异常静默吞没 | 两条路径均使用 `catch (Exception ignored) {}`，如果回调（`playNext`/`switchToPlaylistItem`）抛出异常（如 URI 权限错误），错误被完全隐藏，用户看不到任何反馈 |
+| 控件拦截 | 当控件叠加层的按钮拦截触摸事件时，`onTouch` 路径完全不会触发，仅靠 `feedSwipeEvent` 路径工作，但两条路径共享状态导致行为不可预测 |
+
+**修复方案**：
+
+| 变更 | 说明 |
+|------|------|
+| `feedSwipeEvent` 成为唯一滑动检测路径 | 移除 `onTouch` 中的所有滑动检测代码，`onTouch` 仅负责 GestureDetector（点击/双击/长按/亮度） |
+| 独立状态标志 | 新增 `actSwipeFired` 标志，仅由 `feedSwipeEvent` 使用，不与其他路径共享 |
+| 移除 `catch (Exception ignored)` | `feedSwipeEvent` 不再使用 try-catch-ignore，异常可以正常传播和记录 |
+| 结构化日志 | 滑动检测成功时输出 `Log.d` 日志（方向、偏移量），方便排查问题 |
+| SeekBar 拖拽保护 | `dispatchTouchEvent` 新增 `isDraggingSeekBar` 条件，防止拖拽进度条时误触发切换 |
+| 回调错误处理 | `onSwipeMedia` 回调和 `switchToPlaylistItem` 均添加 try-catch，捕获异常后以 Toast 显示错误信息而非静默失败 |
+| `playNext`/`playPrevious` 日志 | 当播放列表为空/null 时输出警告日志，帮助定位数据传递问题 |
+
+**三个入口的播放列表传递验证**：
+
+| 来源 | 方法 | 传递方式 | 状态 |
+|------|------|---------|------|
+| 媒体库 | `openPlayerWithList(item, videoList)` | 整个 videoList 转为 URI 列表传入 | ✅ |
+| 内置媒体 | `openPlayerWithList(item, builtinList)` | 整个 builtinList 转为 URI 列表传入 | ✅ |
+| 我的列表 | 内联 lambda 构建 uriStrs | currentListItems 快照 + playlistId 传入 | ✅ |
+
+### 播放界面跳转设置不暂停 + 实时设置预览
+
+**功能**：从播放界面点击设置按钮跳转时，视频继续播放不暂停。在透明设置页面调整按钮颜色/大小等参数时，播放界面实时反映修改效果。
+
+| 行为 | 旧版 | v16.2 |
+|------|------|-------|
+| 点击播放界面设置按钮 | 视频暂停 | 视频继续播放 |
+| 在设置页改变按钮颜色 | 返回后才能看到效果 | 通过透明设置页实时看到效果 |
+| 在设置页改变按钮大小 | 返回后才能看到效果 | 实时更新 |
+| 跳转到设置时控件状态 | 控件可能自动隐藏 | 控件保持显示，方便透过设置页预览 |
+
+**技术实现**：
+
+| 机制 | 说明 |
+|------|------|
+| `goingToSettings` 标志 | 点击设置按钮时置 true，`onPause()` 据此跳过 `playerManager.pause()` |
+| `OnSharedPreferenceChangeListener` | 在 `onCreate` 注册、`onDestroy` 注销；当 `goingToSettings=true` 时每次设置变更自动调用 `applyPlayerSettings()` 刷新 UI |
+| 控件保持可见 | 跳转前取消自动隐藏定时器，确保控件叠加层保持 `VISIBLE` 且 `alpha=1` |
+| `onResume()` 兜底 | 返回时重置标志并再次调用 `applyPlayerSettings()`，确保所有设置生效 |
+
+### v16.2 修改记录
+
+| 文件 | 修改内容 |
+|------|---------|
+| `GestureHandler.java` | 彻底重构：`feedSwipeEvent` 作为唯一滑动检测路径；新增独立 `actSwipeFired` 标志；移除 `onTouch` 中的滑动检测和 `swipeConsumed` 共享标志；`handleBrightnessScroll` 改用 `actSwipeFired` 判断；移除 `feedSwipeEvent` 的 catch-all try-catch；新增 `checkAndFireSwipe` 私有方法集中滑动逻辑；添加 Log.d 日志 |
+| `PlayerActivity.java` | 新增 `goingToSettings` 标志控制 `onPause` 跳过暂停；新增 `settingsChangeListener` 监听 SharedPreferences 变化实时调用 `applyPlayerSettings()`；设置按钮点击时保持控件可见并取消自动隐藏；`onResume` 重置标志并重新应用设置；`onCreate` 注册 / `onDestroy` 注销偏好监听器；`dispatchTouchEvent` 新增 `isDraggingSeekBar` 条件；`onSwipeMedia`/`switchToPlaylistItem` 添加错误处理 |
+
+---
+
+## v16.3 变更记录
+
+### 设置界面：按钮调试区可折叠标签切换
+
+**功能**：跳转按钮、切换按钮、暂停按钮、进度条四组设置改为并排标签切换，点击展开对应设置面板，再次点击收起。支持同时展开多个面板。
+
+| 标签 | 内容 |
+|------|------|
+| 跳转 | 按钮大小、跳转时长、透明度、上下偏移 |
+| 切换 | 按钮大小、透明度、上下偏移 |
+| 暂停 | **新增** — 按钮大小、透明度、上下偏移 |
+| 进度条 | 进度条粗细、已播放透明度 |
+
+选中的标签高亮为主题色，未选中恢复默认背景。
+
+### 暂停按钮可配置（新增）
+
+| 设置项 | 范围 | 默认值 | 说明 |
+|--------|------|--------|------|
+| 按钮大小 | 32–160 dp | 72 dp | 播放/暂停按钮图标尺寸 |
+| 按钮透明度 | 10–100% | 100% | 不透明度 |
+| 按钮上下偏移 | -150 ~ +150 dp | 0 dp | 仅偏移播放/暂停按钮自身（正值向上） |
+
+### 新增偏好键
+
+| 偏好键 | 类型 | 默认值 |
+|--------|------|--------|
+| `playpause_btn_size` | int | 72 |
+| `playpause_btn_alpha` | int | 100 |
+| `playpause_btn_offset_y` | int | 0 |
+
+### v16.3 修改记录
+
+| 文件 | 修改内容 |
+|------|---------|
+| `activity_settings.xml` | 跳转/切换/进度条三个独立区块替换为4个并排 `TextView` 标签（跳转/切换/暂停/进度条）+ 4个可折叠 `LinearLayout` 容器（默认 GONE）；新增暂停按钮的大小/透明度/偏移 SeekBar |
+| `SettingsActivity.java` | 新增 `PREF_PLAYPAUSE_BTN_SIZE` / `PREF_PLAYPAUSE_BTN_ALPHA` / `PREF_PLAYPAUSE_BTN_OFFSET_Y` 常量及默认值；新增标签切换逻辑（点击切换 VISIBLE/GONE + 背景色高亮）；新增暂停按钮的 SeekBar 绑定和保存逻辑 |
+| `PlayerActivity.java` | `applyPlayerSettings()` 新增暂停按钮大小（LayoutParams）、透明度（setAlpha）、偏移（setTranslationY）的读取和应用 |
+| `strings.xml` | 新增 `settings_playpause_btn_size`、`settings_playpause_btn_alpha`、`settings_playpause_btn_offset` |
+
+---
+
+*VideoMaster v16.3 — 纯本地，无联网，完全离线。*

@@ -96,6 +96,12 @@ public class SettingsActivity extends AppCompatActivity {
     public static final String PREF_BTN_PLAYER_SETTINGS_COLOR   = "btn_player_settings_color";
     public static final String PREF_BTN_PLAYPAUSE_VISIBLE     = "btn_playpause_visible";
     public static final String PREF_BTN_PLAYPAUSE_COLOR      = "btn_playpause_color";
+    public static final String PREF_PLAYPAUSE_BTN_SIZE        = "playpause_btn_size";
+    public static final int    DEFAULT_PLAYPAUSE_BTN_SIZE     = 72;
+    public static final String PREF_PLAYPAUSE_BTN_ALPHA       = "playpause_btn_alpha";
+    public static final int    DEFAULT_PLAYPAUSE_BTN_ALPHA    = 100;
+    public static final String PREF_PLAYPAUSE_BTN_OFFSET_Y    = "playpause_btn_offset_y";
+    public static final int    DEFAULT_PLAYPAUSE_BTN_OFFSET_Y = 0;
 
     // Home toolbar button visibility
     public static final String PREF_HOME_BTN_STATS_VISIBLE       = "home_btn_stats_visible";
@@ -333,6 +339,38 @@ public class SettingsActivity extends AppCompatActivity {
             }
         });
 
+        // ── 按钮调试区标签切换 ─────────────────────────────────────────────────
+        {
+            View sectionSeek      = findViewById(R.id.sectionSeek);
+            View sectionSkip      = findViewById(R.id.sectionSkip);
+            View sectionPlayPause = findViewById(R.id.sectionPlayPause);
+            View sectionProgress  = findViewById(R.id.sectionProgress);
+
+            TextView tabSeek      = findViewById(R.id.tabSeek);
+            TextView tabSkip      = findViewById(R.id.tabSkip);
+            TextView tabPlayPause = findViewById(R.id.tabPlayPause);
+            TextView tabProgress  = findViewById(R.id.tabProgress);
+
+            View.OnClickListener tabToggle = v -> {
+                View section;
+                if (v == tabSeek)           section = sectionSeek;
+                else if (v == tabSkip)      section = sectionSkip;
+                else if (v == tabPlayPause) section = sectionPlayPause;
+                else                        section = sectionProgress;
+
+                boolean wasVisible = section.getVisibility() == View.VISIBLE;
+                section.setVisibility(wasVisible ? View.GONE : View.VISIBLE);
+
+                int activeColor = getResources().getColor(R.color.colorAccent, null);
+                int normalColor = 0x00000000;
+                ((TextView) v).setBackgroundColor(wasVisible ? normalColor : activeColor);
+            };
+            tabSeek.setOnClickListener(tabToggle);
+            tabSkip.setOnClickListener(tabToggle);
+            tabPlayPause.setOnClickListener(tabToggle);
+            tabProgress.setOnClickListener(tabToggle);
+        }
+
         // ── 跳转按钮大小 ──────────────────────────────────────────────────────
         SeekBar sbSeekIconSize = findViewById(R.id.sbSeekIconSize);
         TextView tvSeekIconSizeLabel = findViewById(R.id.tvSeekIconSizeLabel);
@@ -442,6 +480,58 @@ public class SettingsActivity extends AppCompatActivity {
                 @Override public void onStartTrackingTouch(SeekBar sb) {}
                 @Override public void onStopTrackingTouch(SeekBar sb) {
                     prefs.edit().putInt(PREF_SKIP_BTN_OFFSET_Y, sb.getProgress() - 150).apply();
+                }
+            });
+        }
+
+        // ── 暂停按钮大小/透明度/偏移 ──────────────────────────────────────
+        {
+            int savedPPSize   = prefs.getInt(PREF_PLAYPAUSE_BTN_SIZE,     DEFAULT_PLAYPAUSE_BTN_SIZE);
+            int savedPPAlpha  = prefs.getInt(PREF_PLAYPAUSE_BTN_ALPHA,    DEFAULT_PLAYPAUSE_BTN_ALPHA);
+            int savedPPOffset = prefs.getInt(PREF_PLAYPAUSE_BTN_OFFSET_Y, DEFAULT_PLAYPAUSE_BTN_OFFSET_Y);
+
+            SeekBar sbPPSize = findViewById(R.id.sbPlayPauseSize);
+            TextView tvPPSizeLabel = findViewById(R.id.tvPlayPauseSizeLabel);
+            sbPPSize.setMax(128); // 32-160 dp
+            sbPPSize.setProgress(Math.max(0, Math.min(128, savedPPSize - 32)));
+            tvPPSizeLabel.setText(getString(R.string.settings_playpause_btn_size, savedPPSize));
+            sbPPSize.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override public void onProgressChanged(SeekBar sb, int p, boolean user) {
+                    tvPPSizeLabel.setText(getString(R.string.settings_playpause_btn_size, p + 32));
+                }
+                @Override public void onStartTrackingTouch(SeekBar sb) {}
+                @Override public void onStopTrackingTouch(SeekBar sb) {
+                    prefs.edit().putInt(PREF_PLAYPAUSE_BTN_SIZE, sb.getProgress() + 32).apply();
+                }
+            });
+
+            SeekBar sbPPAlpha = findViewById(R.id.sbPlayPauseAlpha);
+            TextView tvPPAlphaLabel = findViewById(R.id.tvPlayPauseAlphaLabel);
+            sbPPAlpha.setMax(90); // 10-100%
+            sbPPAlpha.setProgress(Math.max(0, Math.min(90, savedPPAlpha - 10)));
+            tvPPAlphaLabel.setText(getString(R.string.settings_playpause_btn_alpha, savedPPAlpha));
+            sbPPAlpha.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override public void onProgressChanged(SeekBar sb, int p, boolean user) {
+                    tvPPAlphaLabel.setText(getString(R.string.settings_playpause_btn_alpha, p + 10));
+                }
+                @Override public void onStartTrackingTouch(SeekBar sb) {}
+                @Override public void onStopTrackingTouch(SeekBar sb) {
+                    prefs.edit().putInt(PREF_PLAYPAUSE_BTN_ALPHA, sb.getProgress() + 10).apply();
+                }
+            });
+
+            SeekBar sbPPOffset = findViewById(R.id.sbPlayPauseOffset);
+            TextView tvPPOffsetLabel = findViewById(R.id.tvPlayPauseOffsetLabel);
+            sbPPOffset.setMax(300); // -150 to +150 dp
+            sbPPOffset.setProgress(Math.max(0, Math.min(300, savedPPOffset + 150)));
+            tvPPOffsetLabel.setText(getString(R.string.settings_playpause_btn_offset, savedPPOffset));
+            sbPPOffset.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override public void onProgressChanged(SeekBar sb, int p, boolean user) {
+                    tvPPOffsetLabel.setText(getString(R.string.settings_playpause_btn_offset, p - 150));
+                }
+                @Override public void onStartTrackingTouch(SeekBar sb) {}
+                @Override public void onStopTrackingTouch(SeekBar sb) {
+                    prefs.edit().putInt(PREF_PLAYPAUSE_BTN_OFFSET_Y, sb.getProgress() - 150).apply();
                 }
             });
         }
