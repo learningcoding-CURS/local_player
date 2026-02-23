@@ -298,6 +298,7 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
         super.onConfigurationChanged(newConfig);
         boolean landscape = newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE;
         if (gestureHandler != null) gestureHandler.setLandscape(landscape);
+        applyPlayerSettings();
     }
 
     /**
@@ -453,13 +454,16 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
                             : GestureHandler.SwipeDirection.HORIZONTAL);
         }
 
-        // ── Seek buttons ──────────────────────────────────────────────────
-        int seekIconSizeDp = prefs.getInt(SettingsActivity.PREF_SEEK_ICON_SIZE,
-                SettingsActivity.DEFAULT_SEEK_ICON_SIZE);
+        // ── Seek buttons（按竖屏/横屏读取对应偏好）────────────────────────────────
+        boolean isLandscape = getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
+        int seekIconSizeDp = prefs.contains(isLandscape ? SettingsActivity.PREF_SEEK_ICON_SIZE_LANDSCAPE : SettingsActivity.PREF_SEEK_ICON_SIZE_PORTRAIT)
+                ? prefs.getInt(isLandscape ? SettingsActivity.PREF_SEEK_ICON_SIZE_LANDSCAPE : SettingsActivity.PREF_SEEK_ICON_SIZE_PORTRAIT, SettingsActivity.DEFAULT_SEEK_ICON_SIZE)
+                : prefs.getInt(SettingsActivity.PREF_SEEK_ICON_SIZE, SettingsActivity.DEFAULT_SEEK_ICON_SIZE);
         seekMs = prefs.getInt(SettingsActivity.PREF_SEEK_SECONDS,
                 SettingsActivity.DEFAULT_SEEK_SECONDS) * 1000;
-        int seekAlphaPct = prefs.getInt(SettingsActivity.PREF_SEEK_ALPHA,
-                SettingsActivity.DEFAULT_SEEK_ALPHA);
+        int seekAlphaPct = prefs.contains(isLandscape ? SettingsActivity.PREF_SEEK_ALPHA_LANDSCAPE : SettingsActivity.PREF_SEEK_ALPHA_PORTRAIT)
+                ? prefs.getInt(isLandscape ? SettingsActivity.PREF_SEEK_ALPHA_LANDSCAPE : SettingsActivity.PREF_SEEK_ALPHA_PORTRAIT, SettingsActivity.DEFAULT_SEEK_ALPHA)
+                : prefs.getInt(SettingsActivity.PREF_SEEK_ALPHA, SettingsActivity.DEFAULT_SEEK_ALPHA);
 
         int sizePx   = dpToPx(seekIconSizeDp);
         int alphaVal = Math.round(seekAlphaPct * 2.55f);
@@ -475,11 +479,25 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
         btnRewind.setImageAlpha(alphaVal);
         btnForward.setImageAlpha(alphaVal);
 
+        // ── 跳转按钮间距（前进/后退与播放按钮之间的间距）────────────────────────────
+        int seekSpacingDp = prefs.contains(isLandscape ? SettingsActivity.PREF_SEEK_BTN_SPACING_LANDSCAPE : SettingsActivity.PREF_SEEK_BTN_SPACING_PORTRAIT)
+                ? prefs.getInt(isLandscape ? SettingsActivity.PREF_SEEK_BTN_SPACING_LANDSCAPE : SettingsActivity.PREF_SEEK_BTN_SPACING_PORTRAIT, SettingsActivity.DEFAULT_SEEK_BTN_SPACING)
+                : prefs.getInt(SettingsActivity.PREF_SEEK_BTN_SPACING, SettingsActivity.DEFAULT_SEEK_BTN_SPACING);
+        int seekSpacingPx = dpToPx(seekSpacingDp);
+        if (btnPlayPause.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
+            ViewGroup.MarginLayoutParams ppMlp = (ViewGroup.MarginLayoutParams) btnPlayPause.getLayoutParams();
+            ppMlp.setMarginStart(seekSpacingPx);
+            ppMlp.setMarginEnd(seekSpacingPx);
+            btnPlayPause.setLayoutParams(ppMlp);
+        }
+
         // ── Seek/Skip 按钮独立垂直偏移（positive = 上移），两行互不影响，用 post 延迟到布局完成后执行
-        int seekOffsetDp = prefs.getInt(SettingsActivity.PREF_SEEK_OFFSET_Y,
-                SettingsActivity.DEFAULT_SEEK_OFFSET_Y);
-        int skipOffsetDp = prefs.getInt(SettingsActivity.PREF_SKIP_BTN_OFFSET_Y,
-                SettingsActivity.DEFAULT_SKIP_BTN_OFFSET_Y);
+        int seekOffsetDp = prefs.contains(isLandscape ? SettingsActivity.PREF_SEEK_OFFSET_Y_LANDSCAPE : SettingsActivity.PREF_SEEK_OFFSET_Y_PORTRAIT)
+                ? prefs.getInt(isLandscape ? SettingsActivity.PREF_SEEK_OFFSET_Y_LANDSCAPE : SettingsActivity.PREF_SEEK_OFFSET_Y_PORTRAIT, SettingsActivity.DEFAULT_SEEK_OFFSET_Y)
+                : prefs.getInt(SettingsActivity.PREF_SEEK_OFFSET_Y, SettingsActivity.DEFAULT_SEEK_OFFSET_Y);
+        int skipOffsetDp = prefs.contains(isLandscape ? SettingsActivity.PREF_SKIP_BTN_OFFSET_Y_LANDSCAPE : SettingsActivity.PREF_SKIP_BTN_OFFSET_Y_PORTRAIT)
+                ? prefs.getInt(isLandscape ? SettingsActivity.PREF_SKIP_BTN_OFFSET_Y_LANDSCAPE : SettingsActivity.PREF_SKIP_BTN_OFFSET_Y_PORTRAIT, SettingsActivity.DEFAULT_SKIP_BTN_OFFSET_Y)
+                : prefs.getInt(SettingsActivity.PREF_SKIP_BTN_OFFSET_Y, SettingsActivity.DEFAULT_SKIP_BTN_OFFSET_Y);
         View centerContainer = findViewById(R.id.centerControlsContainer);
         View seekRow = findViewById(R.id.seekRow);
         View skipRow = findViewById(R.id.skipRow);
@@ -573,8 +591,9 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
                 SettingsActivity.PREF_BTN_SKIP_COLOR,
                 SettingsActivity.DEFAULT_BTN_COLOR, prefs);
 
-        int skipBtnSizeDp = prefs.getInt(SettingsActivity.PREF_SKIP_BTN_SIZE,
-                SettingsActivity.DEFAULT_SKIP_BTN_SIZE);
+        int skipBtnSizeDp = prefs.contains(isLandscape ? SettingsActivity.PREF_SKIP_BTN_SIZE_LANDSCAPE : SettingsActivity.PREF_SKIP_BTN_SIZE_PORTRAIT)
+                ? prefs.getInt(isLandscape ? SettingsActivity.PREF_SKIP_BTN_SIZE_LANDSCAPE : SettingsActivity.PREF_SKIP_BTN_SIZE_PORTRAIT, SettingsActivity.DEFAULT_SKIP_BTN_SIZE)
+                : prefs.getInt(SettingsActivity.PREF_SKIP_BTN_SIZE, SettingsActivity.DEFAULT_SKIP_BTN_SIZE);
         int skipSizePx = dpToPx(skipBtnSizeDp);
         if (btnSkipPrev != null) {
             ViewGroup.LayoutParams sp = btnSkipPrev.getLayoutParams();
@@ -588,11 +607,28 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
         }
 
         // ── Skip button alpha ──
-        int skipAlpha = prefs.getInt(SettingsActivity.PREF_SKIP_BTN_ALPHA,
-                SettingsActivity.DEFAULT_SKIP_BTN_ALPHA);
+        int skipAlpha = prefs.contains(isLandscape ? SettingsActivity.PREF_SKIP_BTN_ALPHA_LANDSCAPE : SettingsActivity.PREF_SKIP_BTN_ALPHA_PORTRAIT)
+                ? prefs.getInt(isLandscape ? SettingsActivity.PREF_SKIP_BTN_ALPHA_LANDSCAPE : SettingsActivity.PREF_SKIP_BTN_ALPHA_PORTRAIT, SettingsActivity.DEFAULT_SKIP_BTN_ALPHA)
+                : prefs.getInt(SettingsActivity.PREF_SKIP_BTN_ALPHA, SettingsActivity.DEFAULT_SKIP_BTN_ALPHA);
         float alphaF = skipAlpha / 100f;
         if (btnSkipPrev != null) btnSkipPrev.setAlpha(alphaF);
         if (btnSkipNext != null) btnSkipNext.setAlpha(alphaF);
+
+        // ── 切换按钮间距（上一首/下一首之间的间距）────────────────────────────
+        int skipSpacingDp = prefs.contains(isLandscape ? SettingsActivity.PREF_SKIP_BTN_SPACING_LANDSCAPE : SettingsActivity.PREF_SKIP_BTN_SPACING_PORTRAIT)
+                ? prefs.getInt(isLandscape ? SettingsActivity.PREF_SKIP_BTN_SPACING_LANDSCAPE : SettingsActivity.PREF_SKIP_BTN_SPACING_PORTRAIT, SettingsActivity.DEFAULT_SKIP_BTN_SPACING)
+                : prefs.getInt(SettingsActivity.PREF_SKIP_BTN_SPACING, SettingsActivity.DEFAULT_SKIP_BTN_SPACING);
+        int halfSkipSpacingPx = dpToPx(skipSpacingDp / 2);
+        if (btnSkipPrev != null && btnSkipPrev.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
+            ViewGroup.MarginLayoutParams spMlp = (ViewGroup.MarginLayoutParams) btnSkipPrev.getLayoutParams();
+            spMlp.setMarginEnd(halfSkipSpacingPx);
+            btnSkipPrev.setLayoutParams(spMlp);
+        }
+        if (btnSkipNext != null && btnSkipNext.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
+            ViewGroup.MarginLayoutParams snMlp = (ViewGroup.MarginLayoutParams) btnSkipNext.getLayoutParams();
+            snMlp.setMarginStart(halfSkipSpacingPx);
+            btnSkipNext.setLayoutParams(snMlp);
+        }
 
         // ── Play/Pause button size / alpha / offset ──
         int ppSizeDp = prefs.getInt(SettingsActivity.PREF_PLAYPAUSE_BTN_SIZE,

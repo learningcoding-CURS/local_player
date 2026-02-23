@@ -287,7 +287,7 @@
 
             </LinearLayout>
 
-            <!-- ── 跳转按钮（可折叠） ── -->
+            <!-- ── 跳转按钮（可折叠，竖屏/横屏区分） ── -->
             <LinearLayout
                 android:id="@+id/sectionSeek"
                 android:layout_width="match_parent"
@@ -295,20 +295,38 @@
                 android:orientation="vertical"
                 android:visibility="gone">
 
-                <TextView android:id="@+id/tvSeekIconSizeLabel" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/textSecondary" android:textSize="13sp" android:paddingTop="4dp" android:paddingBottom="2dp" />
-                <SeekBar android:id="@+id/sbSeekIconSize" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="128" android:progressTint="@color/colorAccent" android:thumbTint="@color/colorAccent" android:layout_marginBottom="6dp" />
-
                 <TextView android:id="@+id/tvSeekSecondsLabel" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/textSecondary" android:textSize="13sp" android:paddingTop="4dp" android:paddingBottom="2dp" />
                 <SeekBar android:id="@+id/sbSeekSeconds" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="59" android:progressTint="@color/colorAccent" android:thumbTint="@color/colorAccent" android:layout_marginBottom="6dp" />
 
-                <TextView android:id="@+id/tvSeekAlphaLabel" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/textSecondary" android:textSize="13sp" android:paddingTop="4dp" android:paddingBottom="2dp" />
-                <SeekBar android:id="@+id/sbSeekAlpha" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="90" android:progressTint="@color/colorAccent" android:thumbTint="@color/colorAccent" android:layout_marginBottom="6dp" />
+                <LinearLayout android:id="@+id/seekOrientationRow" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:paddingTop="4dp" android:paddingBottom="4dp">
+                    <TextView android:id="@+id/tabSeekPortrait" android:layout_width="0dp" android:layout_weight="1" android:layout_height="32dp" android:text="竖屏" android:textColor="@color/textPrimary" android:textSize="12sp" android:gravity="center" android:background="@drawable/bg_speed_badge" android:layout_marginEnd="4dp" />
+                    <TextView android:id="@+id/tabSeekLandscape" android:layout_width="0dp" android:layout_weight="1" android:layout_height="32dp" android:text="横屏" android:textColor="@color/textPrimary" android:textSize="12sp" android:gravity="center" android:background="@drawable/bg_speed_badge" />
+                </LinearLayout>
 
-                <TextView android:id="@+id/tvSeekOffsetLabel" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/textSecondary" android:textSize="13sp" android:paddingTop="4dp" android:paddingBottom="2dp" />
-                <SeekBar android:id="@+id/sbSeekOffset" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="1000" android:progressTint="@color/colorAccent" android:thumbTint="@color/colorAccent" android:layout_marginBottom="6dp" />
+                <LinearLayout android:id="@+id/sectionSeekPortrait" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone">
+                    <TextView android:id="@+id/tvSeekIconSizeLabelP" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/textSecondary" android:textSize="13sp" android:paddingTop="4dp" android:paddingBottom="2dp" />
+                    <SeekBar android:id="@+id/sbSeekIconSizeP" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="128" android:progressTint="@color/colorAccent" android:thumbTint="@color/colorAccent" android:layout_marginBottom="6dp" />
+                    <TextView android:id="@+id/tvSeekAlphaLabelP" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/textSecondary" android:textSize="13sp" android:paddingTop="4dp" android:paddingBottom="2dp" />
+                    <SeekBar android:id="@+id/sbSeekAlphaP" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="90" android:progressTint="@color/colorAccent" android:thumbTint="@color/colorAccent" android:layout_marginBottom="6dp" />
+                    <TextView android:id="@+id/tvSeekOffsetLabelP" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/textSecondary" android:textSize="13sp" android:paddingTop="4dp" android:paddingBottom="2dp" />
+                    <SeekBar android:id="@+id/sbSeekOffsetP" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="1000" android:progressTint="@color/colorAccent" android:thumbTint="@color/colorAccent" android:layout_marginBottom="6dp" />
+                    <TextView android:id="@+id/tvSeekSpacingLabelP" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/textSecondary" android:textSize="13sp" android:paddingTop="4dp" android:paddingBottom="2dp" />
+                    <SeekBar android:id="@+id/sbSeekSpacingP" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="80" android:progressTint="@color/colorAccent" android:thumbTint="@color/colorAccent" android:layout_marginBottom="6dp" />
+                </LinearLayout>
+
+                <LinearLayout android:id="@+id/sectionSeekLandscape" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone">
+                    <TextView android:id="@+id/tvSeekIconSizeLabelL" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/textSecondary" android:textSize="13sp" android:paddingTop="4dp" android:paddingBottom="2dp" />
+                    <SeekBar android:id="@+id/sbSeekIconSizeL" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="128" android:progressTint="@color/colorAccent" android:thumbTint="@color/colorAccent" android:layout_marginBottom="6dp" />
+                    <TextView android:id="@+id/tvSeekAlphaLabelL" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/textSecondary" android:textSize="13sp" android:paddingTop="4dp" android:paddingBottom="2dp" />
+                    <SeekBar android:id="@+id/sbSeekAlphaL" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="90" android:progressTint="@color/colorAccent" android:thumbTint="@color/colorAccent" android:layout_marginBottom="6dp" />
+                    <TextView android:id="@+id/tvSeekOffsetLabelL" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/textSecondary" android:textSize="13sp" android:paddingTop="4dp" android:paddingBottom="2dp" />
+                    <SeekBar android:id="@+id/sbSeekOffsetL" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="1000" android:progressTint="@color/colorAccent" android:thumbTint="@color/colorAccent" android:layout_marginBottom="6dp" />
+                    <TextView android:id="@+id/tvSeekSpacingLabelL" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/textSecondary" android:textSize="13sp" android:paddingTop="4dp" android:paddingBottom="2dp" />
+                    <SeekBar android:id="@+id/sbSeekSpacingL" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="80" android:progressTint="@color/colorAccent" android:thumbTint="@color/colorAccent" android:layout_marginBottom="6dp" />
+                </LinearLayout>
             </LinearLayout>
 
-            <!-- ── 切换按钮（可折叠） ── -->
+            <!-- ── 切换按钮（可折叠，竖屏/横屏区分） ── -->
             <LinearLayout
                 android:id="@+id/sectionSkip"
                 android:layout_width="match_parent"
@@ -316,14 +334,32 @@
                 android:orientation="vertical"
                 android:visibility="gone">
 
-                <TextView android:id="@+id/tvSkipSizeLabel" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/textSecondary" android:textSize="13sp" android:paddingTop="4dp" android:paddingBottom="2dp" />
-                <SeekBar android:id="@+id/sbSkipSize" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="128" android:progressTint="@color/colorAccent" android:thumbTint="@color/colorAccent" android:layout_marginBottom="6dp" />
+                <LinearLayout android:id="@+id/skipOrientationRow" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:paddingTop="4dp" android:paddingBottom="4dp">
+                    <TextView android:id="@+id/tabSkipPortrait" android:layout_width="0dp" android:layout_weight="1" android:layout_height="32dp" android:text="竖屏" android:textColor="@color/textPrimary" android:textSize="12sp" android:gravity="center" android:background="@drawable/bg_speed_badge" android:layout_marginEnd="4dp" />
+                    <TextView android:id="@+id/tabSkipLandscape" android:layout_width="0dp" android:layout_weight="1" android:layout_height="32dp" android:text="横屏" android:textColor="@color/textPrimary" android:textSize="12sp" android:gravity="center" android:background="@drawable/bg_speed_badge" />
+                </LinearLayout>
 
-                <TextView android:id="@+id/tvSkipAlphaLabel" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/textSecondary" android:textSize="13sp" android:paddingTop="4dp" android:paddingBottom="2dp" />
-                <SeekBar android:id="@+id/sbSkipAlpha" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="90" android:progressTint="@color/colorAccent" android:thumbTint="@color/colorAccent" android:layout_marginBottom="6dp" />
+                <LinearLayout android:id="@+id/sectionSkipPortrait" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone">
+                    <TextView android:id="@+id/tvSkipSizeLabelP" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/textSecondary" android:textSize="13sp" android:paddingTop="4dp" android:paddingBottom="2dp" />
+                    <SeekBar android:id="@+id/sbSkipSizeP" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="128" android:progressTint="@color/colorAccent" android:thumbTint="@color/colorAccent" android:layout_marginBottom="6dp" />
+                    <TextView android:id="@+id/tvSkipAlphaLabelP" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/textSecondary" android:textSize="13sp" android:paddingTop="4dp" android:paddingBottom="2dp" />
+                    <SeekBar android:id="@+id/sbSkipAlphaP" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="90" android:progressTint="@color/colorAccent" android:thumbTint="@color/colorAccent" android:layout_marginBottom="6dp" />
+                    <TextView android:id="@+id/tvSkipOffsetLabelP" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/textSecondary" android:textSize="13sp" android:paddingTop="4dp" android:paddingBottom="2dp" />
+                    <SeekBar android:id="@+id/sbSkipOffsetP" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="1000" android:progressTint="@color/colorAccent" android:thumbTint="@color/colorAccent" android:layout_marginBottom="6dp" />
+                    <TextView android:id="@+id/tvSkipSpacingLabelP" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/textSecondary" android:textSize="13sp" android:paddingTop="4dp" android:paddingBottom="2dp" />
+                    <SeekBar android:id="@+id/sbSkipSpacingP" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="150" android:progressTint="@color/colorAccent" android:thumbTint="@color/colorAccent" android:layout_marginBottom="6dp" />
+                </LinearLayout>
 
-                <TextView android:id="@+id/tvSkipOffsetLabel" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/textSecondary" android:textSize="13sp" android:paddingTop="4dp" android:paddingBottom="2dp" />
-                <SeekBar android:id="@+id/sbSkipOffset" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="1000" android:progressTint="@color/colorAccent" android:thumbTint="@color/colorAccent" android:layout_marginBottom="6dp" />
+                <LinearLayout android:id="@+id/sectionSkipLandscape" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone">
+                    <TextView android:id="@+id/tvSkipSizeLabelL" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/textSecondary" android:textSize="13sp" android:paddingTop="4dp" android:paddingBottom="2dp" />
+                    <SeekBar android:id="@+id/sbSkipSizeL" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="128" android:progressTint="@color/colorAccent" android:thumbTint="@color/colorAccent" android:layout_marginBottom="6dp" />
+                    <TextView android:id="@+id/tvSkipAlphaLabelL" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/textSecondary" android:textSize="13sp" android:paddingTop="4dp" android:paddingBottom="2dp" />
+                    <SeekBar android:id="@+id/sbSkipAlphaL" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="90" android:progressTint="@color/colorAccent" android:thumbTint="@color/colorAccent" android:layout_marginBottom="6dp" />
+                    <TextView android:id="@+id/tvSkipOffsetLabelL" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/textSecondary" android:textSize="13sp" android:paddingTop="4dp" android:paddingBottom="2dp" />
+                    <SeekBar android:id="@+id/sbSkipOffsetL" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="1000" android:progressTint="@color/colorAccent" android:thumbTint="@color/colorAccent" android:layout_marginBottom="6dp" />
+                    <TextView android:id="@+id/tvSkipSpacingLabelL" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/textSecondary" android:textSize="13sp" android:paddingTop="4dp" android:paddingBottom="2dp" />
+                    <SeekBar android:id="@+id/sbSkipSpacingL" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="150" android:progressTint="@color/colorAccent" android:thumbTint="@color/colorAccent" android:layout_marginBottom="6dp" />
+                </LinearLayout>
             </LinearLayout>
 
             <!-- ── 暂停按钮（可折叠） ── -->

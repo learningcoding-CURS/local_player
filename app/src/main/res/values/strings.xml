@@ -179,6 +179,7 @@
     <string name="settings_seek_seconds">跳转时长：%d 秒</string>
     <string name="settings_seek_alpha">按钮透明度：%d%%</string>
     <string name="settings_seek_offset">按钮上下偏移：%ddp</string>
+    <string name="settings_seek_btn_spacing">按钮间距：%ddp</string>
     <string name="settings_section_seekbar">进度条</string>
     <string name="settings_seekbar_height">进度条粗细：%ddp</string>
     <string name="settings_seekbar_progress_alpha">已播放透明度：%d%%</string>
@@ -208,6 +209,7 @@
     <string name="settings_skip_btn_size">切换按钮大小：%ddp</string>
     <string name="settings_skip_btn_alpha">切换按钮透明度：%d%%</string>
     <string name="settings_skip_btn_offset">切换按钮上下偏移：%ddp</string>
+    <string name="settings_skip_btn_spacing">按钮间距：%ddp</string>
     <string name="settings_playpause_btn_size">按钮大小：%ddp</string>
     <string name="settings_playpause_btn_alpha">按钮透明度：%d%%</string>
     <string name="settings_playpause_btn_offset">按钮上下偏移：%ddp</string>

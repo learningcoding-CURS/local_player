@@ -47,12 +47,22 @@ public class SettingsActivity extends AppCompatActivity {
     public static final String PREF_SUBTITLE_SIZE    = "subtitle_size";
     public static final String PREF_SUBTITLE_LINE_SP = "subtitle_line_spacing";
 
-    // Seek button settings
+    // Seek button settings（跳转：前进/后退）
     public static final String PREF_SEEK_ICON_SIZE         = "seek_icon_size";
+    public static final String PREF_SEEK_ICON_SIZE_PORTRAIT  = "seek_icon_size_portrait";
+    public static final String PREF_SEEK_ICON_SIZE_LANDSCAPE = "seek_icon_size_landscape";
     public static final String PREF_SEEK_SECONDS           = "seek_seconds";
     public static final String PREF_SEEK_ALPHA             = "seek_alpha";
+    public static final String PREF_SEEK_ALPHA_PORTRAIT     = "seek_alpha_portrait";
+    public static final String PREF_SEEK_ALPHA_LANDSCAPE    = "seek_alpha_landscape";
     public static final String PREF_SEEK_OFFSET_Y           = "seek_offset_y";
+    public static final String PREF_SEEK_OFFSET_Y_PORTRAIT   = "seek_offset_y_portrait";
+    public static final String PREF_SEEK_OFFSET_Y_LANDSCAPE  = "seek_offset_y_landscape";
     public static final int    DEFAULT_SEEK_OFFSET_Y       = 0;
+    public static final String PREF_SEEK_BTN_SPACING       = "seek_btn_spacing";
+    public static final String PREF_SEEK_BTN_SPACING_PORTRAIT  = "seek_btn_spacing_portrait";
+    public static final String PREF_SEEK_BTN_SPACING_LANDSCAPE = "seek_btn_spacing_landscape";
+    public static final int    DEFAULT_SEEK_BTN_SPACING    = 24;
 
     // Seekbar settings
     public static final String PREF_SEEKBAR_HEIGHT         = "seekbar_height";
@@ -100,15 +110,25 @@ public class SettingsActivity extends AppCompatActivity {
     public static final String PREF_LONGPRESS_HINT_ALPHA       = "longpress_hint_alpha";
     public static final int    DEFAULT_LONGPRESS_HINT_ALPHA    = 100;
 
-    // Skip buttons (prev/next video)
+    // Skip buttons (prev/next video)（切换：上一首/下一首）
     public static final String PREF_BTN_SKIP_VISIBLE         = "btn_skip_visible";
     public static final String PREF_BTN_SKIP_COLOR           = "btn_skip_color";
     public static final String PREF_SKIP_BTN_SIZE            = "skip_btn_size";
+    public static final String PREF_SKIP_BTN_SIZE_PORTRAIT     = "skip_btn_size_portrait";
+    public static final String PREF_SKIP_BTN_SIZE_LANDSCAPE    = "skip_btn_size_landscape";
     public static final int    DEFAULT_SKIP_BTN_SIZE         = 48;
     public static final String PREF_SKIP_BTN_ALPHA           = "skip_btn_alpha";
+    public static final String PREF_SKIP_BTN_ALPHA_PORTRAIT    = "skip_btn_alpha_portrait";
+    public static final String PREF_SKIP_BTN_ALPHA_LANDSCAPE   = "skip_btn_alpha_landscape";
     public static final int    DEFAULT_SKIP_BTN_ALPHA        = 100;
     public static final String PREF_SKIP_BTN_OFFSET_Y        = "skip_btn_offset_y";
+    public static final String PREF_SKIP_BTN_OFFSET_Y_PORTRAIT  = "skip_btn_offset_y_portrait";
+    public static final String PREF_SKIP_BTN_OFFSET_Y_LANDSCAPE = "skip_btn_offset_y_landscape";
     public static final int    DEFAULT_SKIP_BTN_OFFSET_Y     = 0;
+    public static final String PREF_SKIP_BTN_SPACING        = "skip_btn_spacing";
+    public static final String PREF_SKIP_BTN_SPACING_PORTRAIT   = "skip_btn_spacing_portrait";
+    public static final String PREF_SKIP_BTN_SPACING_LANDSCAPE  = "skip_btn_spacing_landscape";
+    public static final int    DEFAULT_SKIP_BTN_SPACING     = 64;
 
     // Player control button colors (string: "white","accent","orange","cyan","green","yellow")
     public static final String PREF_BTN_LOCK_COLOR           = "btn_lock_color";
@@ -265,10 +285,7 @@ public class SettingsActivity extends AppCompatActivity {
         savedGridPlaylistItems = Math.max(MIN_GRID_CELL_WIDTH_DP, Math.min(MAX_GRID_CELL_WIDTH_DP, savedGridPlaylistItems));
         float  savedSubSize   = prefs.getFloat(PREF_SUBTITLE_SIZE, DEFAULT_SUBTITLE_SIZE);
         float  savedLineSp    = prefs.getFloat(PREF_SUBTITLE_LINE_SP, DEFAULT_SUBTITLE_LINE_SP);
-        int    savedSeekIconSize   = prefs.getInt(PREF_SEEK_ICON_SIZE,         DEFAULT_SEEK_ICON_SIZE);
         int    savedSeekSeconds    = prefs.getInt(PREF_SEEK_SECONDS,           DEFAULT_SEEK_SECONDS);
-        int    savedSeekAlpha      = prefs.getInt(PREF_SEEK_ALPHA,             DEFAULT_SEEK_ALPHA);
-        int    savedSeekOffset     = prefs.getInt(PREF_SEEK_OFFSET_Y,          DEFAULT_SEEK_OFFSET_Y);
         int    savedSeekbarHeight  = prefs.getInt(PREF_SEEKBAR_HEIGHT,         DEFAULT_SEEKBAR_HEIGHT);
         int    savedProgAlpha      = prefs.getInt(PREF_SEEKBAR_PROGRESS_ALPHA, DEFAULT_SEEKBAR_PROGRESS_ALPHA);
         int    savedPanelAlpha     = prefs.getInt(PREF_SUBTITLE_PANEL_ALPHA,   DEFAULT_SUBTITLE_PANEL_ALPHA);
@@ -608,23 +625,106 @@ public class SettingsActivity extends AppCompatActivity {
             }
         }
 
-        // ── 跳转按钮大小 ──────────────────────────────────────────────────────
-        SeekBar sbSeekIconSize = findViewById(R.id.sbSeekIconSize);
-        TextView tvSeekIconSizeLabel = findViewById(R.id.tvSeekIconSizeLabel);
-        sbSeekIconSize.setMax(128); // 32-160 dp
-        sbSeekIconSize.setProgress(Math.max(0, Math.min(128, savedSeekIconSize - 32)));
-        tvSeekIconSizeLabel.setText(getString(R.string.settings_seek_icon_size, savedSeekIconSize));
-        sbSeekIconSize.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override public void onProgressChanged(SeekBar sb, int p, boolean user) {
-                tvSeekIconSizeLabel.setText(getString(R.string.settings_seek_icon_size, p + 32));
-            }
-            @Override public void onStartTrackingTouch(SeekBar sb) {}
-            @Override public void onStopTrackingTouch(SeekBar sb) {
-                prefs.edit().putInt(PREF_SEEK_ICON_SIZE, sb.getProgress() + 32).apply();
-            }
-        });
+        // ── 跳转按钮（竖屏/横屏区分）────────────────────────────────────────────
+        {
+            View sectionSeekPortrait  = findViewById(R.id.sectionSeekPortrait);
+            View sectionSeekLandscape = findViewById(R.id.sectionSeekLandscape);
+            TextView tabSeekPortrait  = findViewById(R.id.tabSeekPortrait);
+            TextView tabSeekLandscape = findViewById(R.id.tabSeekLandscape);
+            View.OnClickListener seekOrientationToggle = v -> {
+                boolean isPortrait = (v == tabSeekPortrait);
+                if (sectionSeekPortrait != null) sectionSeekPortrait.setVisibility(isPortrait ? View.VISIBLE : View.GONE);
+                if (sectionSeekLandscape != null) sectionSeekLandscape.setVisibility(isPortrait ? View.GONE : View.VISIBLE);
+                int activeColor = getResources().getColor(R.color.colorAccent, null);
+                int normalColor = 0x00000000;
+                if (tabSeekPortrait != null) tabSeekPortrait.setBackgroundColor(isPortrait ? activeColor : normalColor);
+                if (tabSeekLandscape != null) tabSeekLandscape.setBackgroundColor(isPortrait ? normalColor : activeColor);
+            };
+            if (tabSeekPortrait != null) tabSeekPortrait.setOnClickListener(seekOrientationToggle);
+            if (tabSeekLandscape != null) tabSeekLandscape.setOnClickListener(seekOrientationToggle);
+            if (tabSeekPortrait != null) tabSeekPortrait.setBackgroundColor(getResources().getColor(R.color.colorAccent, null));
+            if (tabSeekLandscape != null) tabSeekLandscape.setBackgroundColor(0x00000000);
 
-        // ── 跳转时长 ───────────────────────────────────────────────────────
+            int sp = prefs.contains(PREF_SEEK_ICON_SIZE_PORTRAIT) ? prefs.getInt(PREF_SEEK_ICON_SIZE_PORTRAIT, DEFAULT_SEEK_ICON_SIZE) : prefs.getInt(PREF_SEEK_ICON_SIZE, DEFAULT_SEEK_ICON_SIZE);
+            int sl = prefs.contains(PREF_SEEK_ICON_SIZE_LANDSCAPE) ? prefs.getInt(PREF_SEEK_ICON_SIZE_LANDSCAPE, DEFAULT_SEEK_ICON_SIZE) : prefs.getInt(PREF_SEEK_ICON_SIZE, DEFAULT_SEEK_ICON_SIZE);
+            SeekBar sbSeekIconSizeP = findViewById(R.id.sbSeekIconSizeP);
+            SeekBar sbSeekIconSizeL = findViewById(R.id.sbSeekIconSizeL);
+            final TextView tvSeekIconSizeP = findViewById(R.id.tvSeekIconSizeLabelP);
+            final TextView tvSeekIconSizeL = findViewById(R.id.tvSeekIconSizeLabelL);
+            sbSeekIconSizeP.setMax(128); sbSeekIconSizeP.setProgress(Math.max(0, Math.min(128, sp - 32))); tvSeekIconSizeP.setText(getString(R.string.settings_seek_icon_size, sp));
+            sbSeekIconSizeL.setMax(128); sbSeekIconSizeL.setProgress(Math.max(0, Math.min(128, sl - 32))); tvSeekIconSizeL.setText(getString(R.string.settings_seek_icon_size, sl));
+            sbSeekIconSizeP.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override public void onProgressChanged(SeekBar sb, int p, boolean user) { tvSeekIconSizeP.setText(getString(R.string.settings_seek_icon_size, p + 32)); }
+                @Override public void onStartTrackingTouch(SeekBar sb) {}
+                @Override public void onStopTrackingTouch(SeekBar sb) { prefs.edit().putInt(PREF_SEEK_ICON_SIZE_PORTRAIT, sb.getProgress() + 32).apply(); }
+            });
+            sbSeekIconSizeL.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override public void onProgressChanged(SeekBar sb, int p, boolean user) { tvSeekIconSizeL.setText(getString(R.string.settings_seek_icon_size, p + 32)); }
+                @Override public void onStartTrackingTouch(SeekBar sb) {}
+                @Override public void onStopTrackingTouch(SeekBar sb) { prefs.edit().putInt(PREF_SEEK_ICON_SIZE_LANDSCAPE, sb.getProgress() + 32).apply(); }
+            });
+
+            sp = prefs.contains(PREF_SEEK_ALPHA_PORTRAIT) ? prefs.getInt(PREF_SEEK_ALPHA_PORTRAIT, DEFAULT_SEEK_ALPHA) : prefs.getInt(PREF_SEEK_ALPHA, DEFAULT_SEEK_ALPHA);
+            sl = prefs.contains(PREF_SEEK_ALPHA_LANDSCAPE) ? prefs.getInt(PREF_SEEK_ALPHA_LANDSCAPE, DEFAULT_SEEK_ALPHA) : prefs.getInt(PREF_SEEK_ALPHA, DEFAULT_SEEK_ALPHA);
+            SeekBar sbSeekAlphaP = findViewById(R.id.sbSeekAlphaP);
+            SeekBar sbSeekAlphaL = findViewById(R.id.sbSeekAlphaL);
+            final TextView tvSeekAlphaP = findViewById(R.id.tvSeekAlphaLabelP);
+            final TextView tvSeekAlphaL = findViewById(R.id.tvSeekAlphaLabelL);
+            sbSeekAlphaP.setMax(90); sbSeekAlphaP.setProgress(Math.max(0, Math.min(90, sp - 10))); tvSeekAlphaP.setText(getString(R.string.settings_seek_alpha, sp));
+            sbSeekAlphaL.setMax(90); sbSeekAlphaL.setProgress(Math.max(0, Math.min(90, sl - 10))); tvSeekAlphaL.setText(getString(R.string.settings_seek_alpha, sl));
+            sbSeekAlphaP.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override public void onProgressChanged(SeekBar sb, int p, boolean user) { tvSeekAlphaP.setText(getString(R.string.settings_seek_alpha, p + 10)); }
+                @Override public void onStartTrackingTouch(SeekBar sb) {}
+                @Override public void onStopTrackingTouch(SeekBar sb) { prefs.edit().putInt(PREF_SEEK_ALPHA_PORTRAIT, sb.getProgress() + 10).apply(); }
+            });
+            sbSeekAlphaL.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override public void onProgressChanged(SeekBar sb, int p, boolean user) { tvSeekAlphaL.setText(getString(R.string.settings_seek_alpha, p + 10)); }
+                @Override public void onStartTrackingTouch(SeekBar sb) {}
+                @Override public void onStopTrackingTouch(SeekBar sb) { prefs.edit().putInt(PREF_SEEK_ALPHA_LANDSCAPE, sb.getProgress() + 10).apply(); }
+            });
+
+            sp = prefs.contains(PREF_SEEK_OFFSET_Y_PORTRAIT) ? prefs.getInt(PREF_SEEK_OFFSET_Y_PORTRAIT, DEFAULT_SEEK_OFFSET_Y) : prefs.getInt(PREF_SEEK_OFFSET_Y, DEFAULT_SEEK_OFFSET_Y);
+            sl = prefs.contains(PREF_SEEK_OFFSET_Y_LANDSCAPE) ? prefs.getInt(PREF_SEEK_OFFSET_Y_LANDSCAPE, DEFAULT_SEEK_OFFSET_Y) : prefs.getInt(PREF_SEEK_OFFSET_Y, DEFAULT_SEEK_OFFSET_Y);
+            SeekBar sbSeekOffsetP = findViewById(R.id.sbSeekOffsetP);
+            SeekBar sbSeekOffsetL = findViewById(R.id.sbSeekOffsetL);
+            final TextView tvSeekOffsetP = findViewById(R.id.tvSeekOffsetLabelP);
+            final TextView tvSeekOffsetL = findViewById(R.id.tvSeekOffsetLabelL);
+            sbSeekOffsetP.setMax(1600); sbSeekOffsetP.setProgress(Math.max(0, Math.min(1600, sp + 800))); tvSeekOffsetP.setText(getString(R.string.settings_seek_offset, sp));
+            sbSeekOffsetL.setMax(1600); sbSeekOffsetL.setProgress(Math.max(0, Math.min(1600, sl + 800))); tvSeekOffsetL.setText(getString(R.string.settings_seek_offset, sl));
+            sbSeekOffsetP.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override public void onProgressChanged(SeekBar sb, int p, boolean user) { tvSeekOffsetP.setText(getString(R.string.settings_seek_offset, p - 800)); }
+                @Override public void onStartTrackingTouch(SeekBar sb) {}
+                @Override public void onStopTrackingTouch(SeekBar sb) { prefs.edit().putInt(PREF_SEEK_OFFSET_Y_PORTRAIT, sb.getProgress() - 800).apply(); }
+            });
+            sbSeekOffsetL.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override public void onProgressChanged(SeekBar sb, int p, boolean user) { tvSeekOffsetL.setText(getString(R.string.settings_seek_offset, p - 800)); }
+                @Override public void onStartTrackingTouch(SeekBar sb) {}
+                @Override public void onStopTrackingTouch(SeekBar sb) { prefs.edit().putInt(PREF_SEEK_OFFSET_Y_LANDSCAPE, sb.getProgress() - 800).apply(); }
+            });
+
+            sp = prefs.contains(PREF_SEEK_BTN_SPACING_PORTRAIT) ? prefs.getInt(PREF_SEEK_BTN_SPACING_PORTRAIT, DEFAULT_SEEK_BTN_SPACING) : prefs.getInt(PREF_SEEK_BTN_SPACING, DEFAULT_SEEK_BTN_SPACING);
+            sl = prefs.contains(PREF_SEEK_BTN_SPACING_LANDSCAPE) ? prefs.getInt(PREF_SEEK_BTN_SPACING_LANDSCAPE, DEFAULT_SEEK_BTN_SPACING) : prefs.getInt(PREF_SEEK_BTN_SPACING, DEFAULT_SEEK_BTN_SPACING);
+            SeekBar sbSeekSpacingP = findViewById(R.id.sbSeekSpacingP);
+            SeekBar sbSeekSpacingL = findViewById(R.id.sbSeekSpacingL);
+            final TextView tvSeekSpacingP = findViewById(R.id.tvSeekSpacingLabelP);
+            final TextView tvSeekSpacingL = findViewById(R.id.tvSeekSpacingLabelL);
+            sbSeekSpacingP.setMax(80); sbSeekSpacingP.setProgress(Math.max(0, Math.min(80, sp))); tvSeekSpacingP.setText(getString(R.string.settings_seek_btn_spacing, sp));
+            sbSeekSpacingL.setMax(80); sbSeekSpacingL.setProgress(Math.max(0, Math.min(80, sl))); tvSeekSpacingL.setText(getString(R.string.settings_seek_btn_spacing, sl));
+            sbSeekSpacingP.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override public void onProgressChanged(SeekBar sb, int p, boolean user) { tvSeekSpacingP.setText(getString(R.string.settings_seek_btn_spacing, p)); }
+                @Override public void onStartTrackingTouch(SeekBar sb) {}
+                @Override public void onStopTrackingTouch(SeekBar sb) { prefs.edit().putInt(PREF_SEEK_BTN_SPACING_PORTRAIT, sb.getProgress()).apply(); }
+            });
+            sbSeekSpacingL.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override public void onProgressChanged(SeekBar sb, int p, boolean user) { tvSeekSpacingL.setText(getString(R.string.settings_seek_btn_spacing, p)); }
+                @Override public void onStartTrackingTouch(SeekBar sb) {}
+                @Override public void onStopTrackingTouch(SeekBar sb) { prefs.edit().putInt(PREF_SEEK_BTN_SPACING_LANDSCAPE, sb.getProgress()).apply(); }
+            });
+
+            if (tabSeekPortrait != null) tabSeekPortrait.performClick();
+        }
+
+        // ── 跳转时长（全局，不区分竖横屏）────────────────────────────────────────
         SeekBar sbSeekSeconds = findViewById(R.id.sbSeekSeconds);
         TextView tvSeekSecondsLabel = findViewById(R.id.tvSeekSecondsLabel);
         sbSeekSeconds.setMax(59);
@@ -640,86 +740,103 @@ public class SettingsActivity extends AppCompatActivity {
             }
         });
 
-        // ── 跳转按钮透明度 ────────────────────────────────────────────────
-        SeekBar sbSeekAlpha = findViewById(R.id.sbSeekAlpha);
-        TextView tvSeekAlphaLabel = findViewById(R.id.tvSeekAlphaLabel);
-        sbSeekAlpha.setMax(90);
-        sbSeekAlpha.setProgress(Math.max(0, Math.min(90, savedSeekAlpha - 10)));
-        tvSeekAlphaLabel.setText(getString(R.string.settings_seek_alpha, savedSeekAlpha));
-        sbSeekAlpha.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override public void onProgressChanged(SeekBar sb, int p, boolean user) {
-                tvSeekAlphaLabel.setText(getString(R.string.settings_seek_alpha, p + 10));
-            }
-            @Override public void onStartTrackingTouch(SeekBar sb) {}
-            @Override public void onStopTrackingTouch(SeekBar sb) {
-                prefs.edit().putInt(PREF_SEEK_ALPHA, sb.getProgress() + 10).apply();
-            }
-        });
-
-        // ── 跳转按钮上下偏移（±800 dp，覆盖全屏任意位置）─────────────────────────────
-        SeekBar sbSeekOffset = findViewById(R.id.sbSeekOffset);
-        TextView tvSeekOffsetLabel = findViewById(R.id.tvSeekOffsetLabel);
-        sbSeekOffset.setMax(1600); // -800 to +800 dp，全屏可移
-        sbSeekOffset.setProgress(Math.max(0, Math.min(1600, savedSeekOffset + 800)));
-        tvSeekOffsetLabel.setText(getString(R.string.settings_seek_offset, savedSeekOffset));
-        sbSeekOffset.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override public void onProgressChanged(SeekBar sb, int p, boolean user) {
-                tvSeekOffsetLabel.setText(getString(R.string.settings_seek_offset, p - 800));
-            }
-            @Override public void onStartTrackingTouch(SeekBar sb) {}
-            @Override public void onStopTrackingTouch(SeekBar sb) {
-                prefs.edit().putInt(PREF_SEEK_OFFSET_Y, sb.getProgress() - 800).apply();
-            }
-        });
-
-        // ── 切换按钮大小 ──────────────────────────────────────────────────────
+        // ── 切换按钮（竖屏/横屏区分）────────────────────────────────────────────
         {
-            int savedSkipBtnSize   = prefs.getInt(PREF_SKIP_BTN_SIZE,      DEFAULT_SKIP_BTN_SIZE);
-            int savedSkipBtnAlpha  = prefs.getInt(PREF_SKIP_BTN_ALPHA,     DEFAULT_SKIP_BTN_ALPHA);
-            int savedSkipBtnOffset = prefs.getInt(PREF_SKIP_BTN_OFFSET_Y,  DEFAULT_SKIP_BTN_OFFSET_Y);
+            View sectionSkipPortrait  = findViewById(R.id.sectionSkipPortrait);
+            View sectionSkipLandscape = findViewById(R.id.sectionSkipLandscape);
+            TextView tabSkipPortrait  = findViewById(R.id.tabSkipPortrait);
+            TextView tabSkipLandscape = findViewById(R.id.tabSkipLandscape);
+            View.OnClickListener skipOrientationToggle = v -> {
+                boolean isPortrait = (v == tabSkipPortrait);
+                if (sectionSkipPortrait != null) sectionSkipPortrait.setVisibility(isPortrait ? View.VISIBLE : View.GONE);
+                if (sectionSkipLandscape != null) sectionSkipLandscape.setVisibility(isPortrait ? View.GONE : View.VISIBLE);
+                int activeColor = getResources().getColor(R.color.colorAccent, null);
+                int normalColor = 0x00000000;
+                if (tabSkipPortrait != null) tabSkipPortrait.setBackgroundColor(isPortrait ? activeColor : normalColor);
+                if (tabSkipLandscape != null) tabSkipLandscape.setBackgroundColor(isPortrait ? normalColor : activeColor);
+            };
+            if (tabSkipPortrait != null) tabSkipPortrait.setOnClickListener(skipOrientationToggle);
+            if (tabSkipLandscape != null) tabSkipLandscape.setOnClickListener(skipOrientationToggle);
+            if (tabSkipPortrait != null) tabSkipPortrait.setBackgroundColor(getResources().getColor(R.color.colorAccent, null));
+            if (tabSkipLandscape != null) tabSkipLandscape.setBackgroundColor(0x00000000);
 
-            SeekBar sbSkipSize = findViewById(R.id.sbSkipSize);
-            TextView tvSkipSizeLabel = findViewById(R.id.tvSkipSizeLabel);
-            sbSkipSize.setProgress(Math.max(0, Math.min(128, savedSkipBtnSize - 32)));
-            tvSkipSizeLabel.setText(getString(R.string.settings_skip_btn_size, savedSkipBtnSize));
-            sbSkipSize.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                @Override public void onProgressChanged(SeekBar sb, int p, boolean user) {
-                    tvSkipSizeLabel.setText(getString(R.string.settings_skip_btn_size, p + 32));
-                }
+            int sp = prefs.contains(PREF_SKIP_BTN_SIZE_PORTRAIT) ? prefs.getInt(PREF_SKIP_BTN_SIZE_PORTRAIT, DEFAULT_SKIP_BTN_SIZE) : prefs.getInt(PREF_SKIP_BTN_SIZE, DEFAULT_SKIP_BTN_SIZE);
+            int sl = prefs.contains(PREF_SKIP_BTN_SIZE_LANDSCAPE) ? prefs.getInt(PREF_SKIP_BTN_SIZE_LANDSCAPE, DEFAULT_SKIP_BTN_SIZE) : prefs.getInt(PREF_SKIP_BTN_SIZE, DEFAULT_SKIP_BTN_SIZE);
+            SeekBar sbSkipSizeP = findViewById(R.id.sbSkipSizeP);
+            SeekBar sbSkipSizeL = findViewById(R.id.sbSkipSizeL);
+            final TextView tvSkipSizeP = findViewById(R.id.tvSkipSizeLabelP);
+            final TextView tvSkipSizeL = findViewById(R.id.tvSkipSizeLabelL);
+            sbSkipSizeP.setMax(128); sbSkipSizeP.setProgress(Math.max(0, Math.min(128, sp - 32))); tvSkipSizeP.setText(getString(R.string.settings_skip_btn_size, sp));
+            sbSkipSizeL.setMax(128); sbSkipSizeL.setProgress(Math.max(0, Math.min(128, sl - 32))); tvSkipSizeL.setText(getString(R.string.settings_skip_btn_size, sl));
+            sbSkipSizeP.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override public void onProgressChanged(SeekBar sb, int p, boolean user) { tvSkipSizeP.setText(getString(R.string.settings_skip_btn_size, p + 32)); }
                 @Override public void onStartTrackingTouch(SeekBar sb) {}
-                @Override public void onStopTrackingTouch(SeekBar sb) {
-                    prefs.edit().putInt(PREF_SKIP_BTN_SIZE, sb.getProgress() + 32).apply();
-                }
+                @Override public void onStopTrackingTouch(SeekBar sb) { prefs.edit().putInt(PREF_SKIP_BTN_SIZE_PORTRAIT, sb.getProgress() + 32).apply(); }
+            });
+            sbSkipSizeL.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override public void onProgressChanged(SeekBar sb, int p, boolean user) { tvSkipSizeL.setText(getString(R.string.settings_skip_btn_size, p + 32)); }
+                @Override public void onStartTrackingTouch(SeekBar sb) {}
+                @Override public void onStopTrackingTouch(SeekBar sb) { prefs.edit().putInt(PREF_SKIP_BTN_SIZE_LANDSCAPE, sb.getProgress() + 32).apply(); }
             });
 
-            SeekBar sbSkipAlpha = findViewById(R.id.sbSkipAlpha);
-            TextView tvSkipAlphaLabel = findViewById(R.id.tvSkipAlphaLabel);
-            sbSkipAlpha.setProgress(Math.max(0, Math.min(90, savedSkipBtnAlpha - 10)));
-            tvSkipAlphaLabel.setText(getString(R.string.settings_skip_btn_alpha, savedSkipBtnAlpha));
-            sbSkipAlpha.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                @Override public void onProgressChanged(SeekBar sb, int p, boolean user) {
-                    tvSkipAlphaLabel.setText(getString(R.string.settings_skip_btn_alpha, p + 10));
-                }
+            sp = prefs.contains(PREF_SKIP_BTN_ALPHA_PORTRAIT) ? prefs.getInt(PREF_SKIP_BTN_ALPHA_PORTRAIT, DEFAULT_SKIP_BTN_ALPHA) : prefs.getInt(PREF_SKIP_BTN_ALPHA, DEFAULT_SKIP_BTN_ALPHA);
+            sl = prefs.contains(PREF_SKIP_BTN_ALPHA_LANDSCAPE) ? prefs.getInt(PREF_SKIP_BTN_ALPHA_LANDSCAPE, DEFAULT_SKIP_BTN_ALPHA) : prefs.getInt(PREF_SKIP_BTN_ALPHA, DEFAULT_SKIP_BTN_ALPHA);
+            SeekBar sbSkipAlphaP = findViewById(R.id.sbSkipAlphaP);
+            SeekBar sbSkipAlphaL = findViewById(R.id.sbSkipAlphaL);
+            final TextView tvSkipAlphaP = findViewById(R.id.tvSkipAlphaLabelP);
+            final TextView tvSkipAlphaL = findViewById(R.id.tvSkipAlphaLabelL);
+            sbSkipAlphaP.setMax(90); sbSkipAlphaP.setProgress(Math.max(0, Math.min(90, sp - 10))); tvSkipAlphaP.setText(getString(R.string.settings_skip_btn_alpha, sp));
+            sbSkipAlphaL.setMax(90); sbSkipAlphaL.setProgress(Math.max(0, Math.min(90, sl - 10))); tvSkipAlphaL.setText(getString(R.string.settings_skip_btn_alpha, sl));
+            sbSkipAlphaP.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override public void onProgressChanged(SeekBar sb, int p, boolean user) { tvSkipAlphaP.setText(getString(R.string.settings_skip_btn_alpha, p + 10)); }
                 @Override public void onStartTrackingTouch(SeekBar sb) {}
-                @Override public void onStopTrackingTouch(SeekBar sb) {
-                    prefs.edit().putInt(PREF_SKIP_BTN_ALPHA, sb.getProgress() + 10).apply();
-                }
+                @Override public void onStopTrackingTouch(SeekBar sb) { prefs.edit().putInt(PREF_SKIP_BTN_ALPHA_PORTRAIT, sb.getProgress() + 10).apply(); }
+            });
+            sbSkipAlphaL.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override public void onProgressChanged(SeekBar sb, int p, boolean user) { tvSkipAlphaL.setText(getString(R.string.settings_skip_btn_alpha, p + 10)); }
+                @Override public void onStartTrackingTouch(SeekBar sb) {}
+                @Override public void onStopTrackingTouch(SeekBar sb) { prefs.edit().putInt(PREF_SKIP_BTN_ALPHA_LANDSCAPE, sb.getProgress() + 10).apply(); }
             });
 
-            SeekBar sbSkipOffset = findViewById(R.id.sbSkipOffset);
-            TextView tvSkipOffsetLabel = findViewById(R.id.tvSkipOffsetLabel);
-            sbSkipOffset.setMax(1600); // -800 to +800 dp，全屏可移
-            sbSkipOffset.setProgress(Math.max(0, Math.min(1600, savedSkipBtnOffset + 800)));
-            tvSkipOffsetLabel.setText(getString(R.string.settings_skip_btn_offset, savedSkipBtnOffset));
-            sbSkipOffset.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                @Override public void onProgressChanged(SeekBar sb, int p, boolean user) {
-                    tvSkipOffsetLabel.setText(getString(R.string.settings_skip_btn_offset, p - 800));
-                }
+            sp = prefs.contains(PREF_SKIP_BTN_OFFSET_Y_PORTRAIT) ? prefs.getInt(PREF_SKIP_BTN_OFFSET_Y_PORTRAIT, DEFAULT_SKIP_BTN_OFFSET_Y) : prefs.getInt(PREF_SKIP_BTN_OFFSET_Y, DEFAULT_SKIP_BTN_OFFSET_Y);
+            sl = prefs.contains(PREF_SKIP_BTN_OFFSET_Y_LANDSCAPE) ? prefs.getInt(PREF_SKIP_BTN_OFFSET_Y_LANDSCAPE, DEFAULT_SKIP_BTN_OFFSET_Y) : prefs.getInt(PREF_SKIP_BTN_OFFSET_Y, DEFAULT_SKIP_BTN_OFFSET_Y);
+            SeekBar sbSkipOffsetP = findViewById(R.id.sbSkipOffsetP);
+            SeekBar sbSkipOffsetL = findViewById(R.id.sbSkipOffsetL);
+            final TextView tvSkipOffsetP = findViewById(R.id.tvSkipOffsetLabelP);
+            final TextView tvSkipOffsetL = findViewById(R.id.tvSkipOffsetLabelL);
+            sbSkipOffsetP.setMax(1600); sbSkipOffsetP.setProgress(Math.max(0, Math.min(1600, sp + 800))); tvSkipOffsetP.setText(getString(R.string.settings_skip_btn_offset, sp));
+            sbSkipOffsetL.setMax(1600); sbSkipOffsetL.setProgress(Math.max(0, Math.min(1600, sl + 800))); tvSkipOffsetL.setText(getString(R.string.settings_skip_btn_offset, sl));
+            sbSkipOffsetP.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override public void onProgressChanged(SeekBar sb, int p, boolean user) { tvSkipOffsetP.setText(getString(R.string.settings_skip_btn_offset, p - 800)); }
                 @Override public void onStartTrackingTouch(SeekBar sb) {}
-                @Override public void onStopTrackingTouch(SeekBar sb) {
-                    prefs.edit().putInt(PREF_SKIP_BTN_OFFSET_Y, sb.getProgress() - 800).apply();
-                }
+                @Override public void onStopTrackingTouch(SeekBar sb) { prefs.edit().putInt(PREF_SKIP_BTN_OFFSET_Y_PORTRAIT, sb.getProgress() - 800).apply(); }
             });
+            sbSkipOffsetL.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override public void onProgressChanged(SeekBar sb, int p, boolean user) { tvSkipOffsetL.setText(getString(R.string.settings_skip_btn_offset, p - 800)); }
+                @Override public void onStartTrackingTouch(SeekBar sb) {}
+                @Override public void onStopTrackingTouch(SeekBar sb) { prefs.edit().putInt(PREF_SKIP_BTN_OFFSET_Y_LANDSCAPE, sb.getProgress() - 800).apply(); }
+            });
+
+            sp = prefs.contains(PREF_SKIP_BTN_SPACING_PORTRAIT) ? prefs.getInt(PREF_SKIP_BTN_SPACING_PORTRAIT, DEFAULT_SKIP_BTN_SPACING) : prefs.getInt(PREF_SKIP_BTN_SPACING, DEFAULT_SKIP_BTN_SPACING);
+            sl = prefs.contains(PREF_SKIP_BTN_SPACING_LANDSCAPE) ? prefs.getInt(PREF_SKIP_BTN_SPACING_LANDSCAPE, DEFAULT_SKIP_BTN_SPACING) : prefs.getInt(PREF_SKIP_BTN_SPACING, DEFAULT_SKIP_BTN_SPACING);
+            SeekBar sbSkipSpacingP = findViewById(R.id.sbSkipSpacingP);
+            SeekBar sbSkipSpacingL = findViewById(R.id.sbSkipSpacingL);
+            final TextView tvSkipSpacingP = findViewById(R.id.tvSkipSpacingLabelP);
+            final TextView tvSkipSpacingL = findViewById(R.id.tvSkipSpacingLabelL);
+            sbSkipSpacingP.setMax(150); sbSkipSpacingP.setProgress(Math.max(0, Math.min(150, sp))); tvSkipSpacingP.setText(getString(R.string.settings_skip_btn_spacing, sp));
+            sbSkipSpacingL.setMax(150); sbSkipSpacingL.setProgress(Math.max(0, Math.min(150, sl))); tvSkipSpacingL.setText(getString(R.string.settings_skip_btn_spacing, sl));
+            sbSkipSpacingP.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override public void onProgressChanged(SeekBar sb, int p, boolean user) { tvSkipSpacingP.setText(getString(R.string.settings_skip_btn_spacing, p)); }
+                @Override public void onStartTrackingTouch(SeekBar sb) {}
+                @Override public void onStopTrackingTouch(SeekBar sb) { prefs.edit().putInt(PREF_SKIP_BTN_SPACING_PORTRAIT, sb.getProgress()).apply(); }
+            });
+            sbSkipSpacingL.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override public void onProgressChanged(SeekBar sb, int p, boolean user) { tvSkipSpacingL.setText(getString(R.string.settings_skip_btn_spacing, p)); }
+                @Override public void onStartTrackingTouch(SeekBar sb) {}
+                @Override public void onStopTrackingTouch(SeekBar sb) { prefs.edit().putInt(PREF_SKIP_BTN_SPACING_LANDSCAPE, sb.getProgress()).apply(); }
+            });
+
+            if (tabSkipPortrait != null) tabSkipPortrait.performClick();
         }
 
         // ── 暂停按钮大小/透明度/偏移 ──────────────────────────────────────
