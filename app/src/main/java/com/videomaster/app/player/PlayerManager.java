@@ -21,7 +21,11 @@ import java.util.List;
 
 /**
  * Wraps ExoPlayer and exposes a clean API with extensible listener callbacks.
- * Dispatches subtitle updates, position ticks, and playback events.
+ *
+ * Extensibility points:
+ *   – {@link #setSpeedProvider(ISpeedProvider)}  custom speed table
+ *   – {@link #setPlayMode(PlayMode)}             playback order (sequential / shuffle / …)
+ *   – {@link #addListener(IPlayerEventListener)} / {@link #removeListener}
  */
 public class PlayerManager {
 
@@ -29,11 +33,17 @@ public class PlayerManager {
 
     private final ExoPlayer                  player;
     private final Handler                    handler;
-    private final List<IPlayerEventListener> listeners    = new ArrayList<>();
+    private final List<IPlayerEventListener> listeners     = new ArrayList<>();
     private       ISpeedProvider             speedProvider;
     private       float                      currentSpeed;
     private       float                      previousSpeed;
     private final SubtitleManager            subtitleManager;
+
+    // ── Play mode ──────────────────────────────────────────────────────────
+
+    private PlayMode playMode = PlayMode.SEQUENTIAL;
+
+    // ── Position ticker ────────────────────────────────────────────────────
 
     private final Runnable positionUpdater = new Runnable() {
         @Override
@@ -42,11 +52,13 @@ public class PlayerManager {
                 long pos      = player.getCurrentPosition();
                 long duration = player.getDuration();
                 notifyPositionChanged(pos, duration < 0 ? 0 : duration);
-                subtitleManager.onSeek(); // let manager re-check position efficiently
+                subtitleManager.onSeek();
             }
             handler.postDelayed(this, POSITION_UPDATE_INTERVAL_MS);
         }
     };
+
+    // ── Constructor ────────────────────────────────────────────────────────
 
     public PlayerManager(Context context) {
         handler         = new Handler(Looper.getMainLooper());
@@ -86,9 +98,9 @@ public class PlayerManager {
         });
     }
 
-    // ──────────────────────── Playback control ────────────────────────
+    // ── Playback control ───────────────────────────────────────────────────
 
-    /** Loads and starts playing a video URI. */
+    /** Loads and starts playing the given URI from position 0. */
     public void play(Uri uri) {
         player.setMediaItem(MediaItem.fromUri(uri));
         player.prepare();
@@ -96,21 +108,20 @@ public class PlayerManager {
         applySpeed(currentSpeed);
     }
 
-    public void pause() { player.pause(); }
-
+    public void pause()  { player.pause(); }
     public void resume() { player.play(); }
 
     public void togglePlayPause() {
         if (player.isPlaying()) pause(); else resume();
     }
 
-    /** Seeks to an absolute position. */
+    /** Seeks to an absolute position in milliseconds. */
     public void seekTo(long positionMs) {
         player.seekTo(positionMs);
         subtitleManager.onSeek();
     }
 
-    /** Seeks relative to the current position. */
+    /** Seeks relative to the current position (offset may be negative). */
     public void seekRelative(long offsetMs) {
         long target = Math.max(0, player.getCurrentPosition() + offsetMs);
         seekTo(target);
@@ -121,7 +132,7 @@ public class PlayerManager {
         player.release();
     }
 
-    // ──────────────────────── Speed control ────────────────────────
+    // ── Speed control ──────────────────────────────────────────────────────
 
     public void setSpeed(float speed) {
         currentSpeed = speed;
@@ -129,13 +140,11 @@ public class PlayerManager {
         notifySpeedChanged(speed);
     }
 
-    /** Activates long-press speed temporarily. */
     public void activateLongPressSpeed() {
         previousSpeed = currentSpeed;
         setSpeed(speedProvider.getLongPressSpeed());
     }
 
-    /** Restores the speed that was active before long-press. */
     public void deactivateLongPressSpeed() {
         setSpeed(previousSpeed);
     }
@@ -144,7 +153,22 @@ public class PlayerManager {
         player.setPlaybackParameters(new PlaybackParameters(speed));
     }
 
-    // ──────────────────────── Getters ────────────────────────
+    // ── Play mode ──────────────────────────────────────────────────────────
+
+    /**
+     * Sets the playback-order mode.
+     * The actual navigation logic lives in PlayerActivity; this is stored here
+     * so it survives configuration changes and is accessible to listeners.
+     */
+    public void setPlayMode(PlayMode mode) {
+        this.playMode = mode;
+    }
+
+    public PlayMode getPlayMode() {
+        return playMode;
+    }
+
+    // ── Getters ────────────────────────────────────────────────────────────
 
     public ExoPlayer getExoPlayer()    { return player; }
     public float     getCurrentSpeed() { return currentSpeed; }
@@ -152,13 +176,15 @@ public class PlayerManager {
     public long      getDuration()     { long d = player.getDuration(); return d < 0 ? 0 : d; }
     public long      getPosition()     { return player.getCurrentPosition(); }
 
-    // ──────────────────────── Listener management ────────────────────────
+    // ── Listener management ────────────────────────────────────────────────
 
     public void addListener(IPlayerEventListener listener) {
         if (!listeners.contains(listener)) listeners.add(listener);
     }
 
-    public void removeListener(IPlayerEventListener listener) { listeners.remove(listener); }
+    public void removeListener(IPlayerEventListener listener) {
+        listeners.remove(listener);
+    }
 
     /** Replaces the speed provider (extensibility point). */
     public void setSpeedProvider(ISpeedProvider provider) {
@@ -167,15 +193,15 @@ public class PlayerManager {
 
     public ISpeedProvider getSpeedProvider() { return speedProvider; }
 
-    // ──────────────────────── Notification helpers ────────────────────────
+    // ── Notification helpers ───────────────────────────────────────────────
 
-    private void notifyStarted()                       { for (IPlayerEventListener l : listeners) l.onPlaybackStarted(); }
-    private void notifyPaused()                        { for (IPlayerEventListener l : listeners) l.onPlaybackPaused(); }
-    private void notifyCompleted()                     { for (IPlayerEventListener l : listeners) l.onPlaybackCompleted(); }
-    private void notifyError(String msg)               { for (IPlayerEventListener l : listeners) l.onError(msg); }
-    private void notifyBuffering(boolean b)            { for (IPlayerEventListener l : listeners) l.onBufferingChanged(b); }
-    private void notifySpeedChanged(float s)           { for (IPlayerEventListener l : listeners) l.onSpeedChanged(s); }
+    private void notifyStarted()   { for (IPlayerEventListener l : new ArrayList<>(listeners)) l.onPlaybackStarted(); }
+    private void notifyPaused()    { for (IPlayerEventListener l : new ArrayList<>(listeners)) l.onPlaybackPaused(); }
+    private void notifyCompleted() { for (IPlayerEventListener l : new ArrayList<>(listeners)) l.onPlaybackCompleted(); }
+    private void notifyError(String msg)     { for (IPlayerEventListener l : new ArrayList<>(listeners)) l.onError(msg); }
+    private void notifyBuffering(boolean b)  { for (IPlayerEventListener l : new ArrayList<>(listeners)) l.onBufferingChanged(b); }
+    private void notifySpeedChanged(float s) { for (IPlayerEventListener l : new ArrayList<>(listeners)) l.onSpeedChanged(s); }
     private void notifyPositionChanged(long pos, long dur) {
-        for (IPlayerEventListener l : listeners) l.onPositionChanged(pos, dur);
+        for (IPlayerEventListener l : new ArrayList<>(listeners)) l.onPositionChanged(pos, dur);
     }
 }

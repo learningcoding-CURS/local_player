@@ -1,6 +1,7 @@
 package com.videomaster.app.playlist;
 
 import android.app.Activity;
+import android.content.ClipData;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -25,39 +26,46 @@ import java.util.List;
 /**
  * Shows all media items inside a specific playlist,
  * with per-item playback progress bars and play controls.
+ *
+ * Multi-select: the FAB opens the system file picker with EXTRA_ALLOW_MULTIPLE=true,
+ * so multiple audio/video files can be added in a single tap.
  */
 public class PlaylistDetailActivity extends AppCompatActivity {
 
     public static final String EXTRA_LIST_ID = "extra_list_id";
 
-    private MediaListManager    mediaListManager;
-    private MediaList           mediaList;
+    private MediaListManager     mediaListManager;
+    private MediaList            mediaList;
     private MediaItemListAdapter adapter;
-    private RecyclerView        recyclerView;
-    private TextView            tvEmpty;
+    private RecyclerView         recyclerView;
+    private TextView             tvEmpty;
+
+    // ── File picker (supports multi-select) ───────────────────────────────
 
     private final androidx.activity.result.ActivityResultLauncher<Intent> filePickerLauncher =
             registerForActivityResult(
                     new androidx.activity.result.contract.ActivityResultContracts
                             .StartActivityForResult(), result -> {
                 if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
-                    Uri uri = result.getData().getData();
-                    if (uri != null) {
-                        // Persist permission
-                        getContentResolver().takePersistableUriPermission(uri,
-                                Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                        mediaListManager.addItemToList(mediaList.getId(), uri.toString());
+                    int addedCount = processPickerResult(result.getData());
+                    if (addedCount > 0) {
+                        String msg = addedCount == 1
+                                ? getString(R.string.playlist_add_media)
+                                : getString(R.string.playlist_added_count, addedCount);
+                        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
                         refreshList();
                     }
                 }
             });
+
+    // ── Lifecycle ──────────────────────────────────────────────────────────
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_playlist_detail);
 
-        String listId = getIntent().getStringExtra(EXTRA_LIST_ID);
+        String listId    = getIntent().getStringExtra(EXTRA_LIST_ID);
         mediaListManager = MediaListManager.getInstance(this);
         mediaList        = mediaListManager.getList(listId);
 
@@ -79,7 +87,7 @@ public class PlaylistDetailActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         FloatingActionButton fab = findViewById(R.id.fabAddMedia);
-        fab.setOnClickListener(v -> pickMediaFile());
+        fab.setOnClickListener(v -> pickMediaFiles());
 
         refreshList();
     }
@@ -96,8 +104,8 @@ public class PlaylistDetailActivity extends AppCompatActivity {
     // ── List building ──────────────────────────────────────────────────────
 
     private void refreshList() {
-        List<String> uris = mediaList.getItemUris();
-        int[] progPercents = new int[uris.size()];
+        List<String> uris         = mediaList.getItemUris();
+        int[]        progPercents = new int[uris.size()];
         for (int i = 0; i < uris.size(); i++) {
             progPercents[i] = mediaListManager.getProgressPercent(uris.get(i));
         }
@@ -131,16 +139,55 @@ public class PlaylistDetailActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    // ── Media file picker ──────────────────────────────────────────────────
+    // ── Multi-select media file picker ─────────────────────────────────────
 
-    private void pickMediaFile() {
+    /**
+     * Launches the system file picker with multi-select enabled.
+     * The user can tap multiple audio/video files before confirming.
+     */
+    private void pickMediaFiles() {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         intent.setType("*/*");
         intent.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{"video/*", "audio/*"});
+        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION
                 | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
         filePickerLauncher.launch(intent);
+    }
+
+    /**
+     * Processes the picker result, handling both single and multi-select cases.
+     *
+     * @return number of files successfully added
+     */
+    private int processPickerResult(Intent data) {
+        List<Uri> uris = new ArrayList<>();
+
+        // Multi-select: ClipData contains all selected items
+        ClipData clipData = data.getClipData();
+        if (clipData != null && clipData.getItemCount() > 0) {
+            for (int i = 0; i < clipData.getItemCount(); i++) {
+                Uri uri = clipData.getItemAt(i).getUri();
+                if (uri != null) uris.add(uri);
+            }
+        } else if (data.getData() != null) {
+            // Single-select fallback
+            uris.add(data.getData());
+        }
+
+        int count = 0;
+        for (Uri uri : uris) {
+            try {
+                getContentResolver().takePersistableUriPermission(
+                        uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            } catch (Exception ignored) {
+                // Some URIs may not support persistable permissions; continue anyway.
+            }
+            mediaListManager.addItemToList(mediaList.getId(), uri.toString());
+            count++;
+        }
+        return count;
     }
 
     // ── Item options ───────────────────────────────────────────────────────

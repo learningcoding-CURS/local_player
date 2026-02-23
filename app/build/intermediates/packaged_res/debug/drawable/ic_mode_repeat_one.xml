@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Repeat one: circular arrow with "1" -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- Circle arrow (repeat symbol) -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="@android:color/white"
+        android:strokeWidth="1.8"
+        android:pathData="M7,7 A6,6 0 1 1 5,12" />
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="@android:color/white"
+        android:strokeWidth="1.8"
+        android:pathData="M5,9 L5,12 L8,12" />
+    <!-- Number "1" in center -->
+    <path
+        android:fillColor="@android:color/white"
+        android:pathData="M11.5,9.5 L11.5,14.5 M10.5,10.5 L11.5,9.5" />
+    <path
+        android:strokeColor="@android:color/white"
+        android:strokeWidth="1.5"
+        android:fillColor="#00000000"
+        android:pathData="M11.5,9.5 L11.5,14.5 M10.5,10.5 L11.5,9.5" />
+</vector>

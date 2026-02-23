@@ -1,138 +1,162 @@
 [
     {
-        "merged": "C:\\Users\\JG\\.gradle\\daemon\\8.4\\com.videomaster.app-merged_res-37:\\drawable_ic_playlist.xml.flat",
-        "source": "C:\\Users\\JG\\.gradle\\daemon\\8.4\\com.videomaster.app-main-39:\\drawable\\ic_playlist.xml"
+        "merged": "com.videomaster.app-merged_res-37:/xml_network_security_config.xml.flat",
+        "source": "com.videomaster.app-main-39:/xml/network_security_config.xml"
     },
     {
-        "merged": "C:\\Users\\JG\\.gradle\\daemon\\8.4\\com.videomaster.app-merged_res-37:\\layout_activity_main.xml.flat",
-        "source": "C:\\Users\\JG\\.gradle\\daemon\\8.4\\com.videomaster.app-main-39:\\layout\\activity_main.xml"
+        "merged": "com.videomaster.app-merged_res-37:/drawable_ic_mode_shuffle.xml.flat",
+        "source": "com.videomaster.app-main-39:/drawable/ic_mode_shuffle.xml"
     },
     {
-        "merged": "C:\\Users\\JG\\.gradle\\daemon\\8.4\\com.videomaster.app-merged_res-37:\\drawable_ic_home.xml.flat",
-        "source": "C:\\Users\\JG\\.gradle\\daemon\\8.4\\com.videomaster.app-main-39:\\drawable\\ic_home.xml"
+        "merged": "com.videomaster.app-merged_res-37:/drawable_bg_speed_badge.xml.flat",
+        "source": "com.videomaster.app-main-39:/drawable/bg_speed_badge.xml"
     },
     {
-        "merged": "C:\\Users\\JG\\.gradle\\daemon\\8.4\\com.videomaster.app-merged_res-37:\\mipmap-anydpi-v26_ic_launcher_round.xml.flat",
-        "source": "C:\\Users\\JG\\.gradle\\daemon\\8.4\\com.videomaster.app-main-39:\\mipmap-anydpi-v26\\ic_launcher_round.xml"
+        "merged": "com.videomaster.app-merged_res-37:/xml_file_paths.xml.flat",
+        "source": "com.videomaster.app-main-39:/xml/file_paths.xml"
     },
     {
-        "merged": "C:\\Users\\JG\\.gradle\\daemon\\8.4\\com.videomaster.app-merged_res-37:\\drawable_ic_play_circle.xml.flat",
-        "source": "C:\\Users\\JG\\.gradle\\daemon\\8.4\\com.videomaster.app-main-39:\\drawable\\ic_play_circle.xml"
+        "merged": "com.videomaster.app-merged_res-37:/layout_item_video.xml.flat",
+        "source": "com.videomaster.app-main-39:/layout/item_video.xml"
     },
     {
-        "merged": "C:\\Users\\JG\\.gradle\\daemon\\8.4\\com.videomaster.app-merged_res-37:\\drawable_ic_speed.xml.flat",
-        "source": "C:\\Users\\JG\\.gradle\\daemon\\8.4\\com.videomaster.app-main-39:\\drawable\\ic_speed.xml"
+        "merged": "com.videomaster.app-merged_res-37:/drawable_ic_music.xml.flat",
+        "source": "com.videomaster.app-main-39:/drawable/ic_music.xml"
     },
     {
-        "merged": "C:\\Users\\JG\\.gradle\\daemon\\8.4\\com.videomaster.app-merged_res-37:\\drawable_bg_speed_badge.xml.flat",
-        "source": "C:\\Users\\JG\\.gradle\\daemon\\8.4\\com.videomaster.app-main-39:\\drawable\\bg_speed_badge.xml"
+        "merged": "com.videomaster.app-merged_res-37:/drawable_ic_lock_open.xml.flat",
+        "source": "com.videomaster.app-main-39:/drawable/ic_lock_open.xml"
     },
     {
-        "merged": "C:\\Users\\JG\\.gradle\\daemon\\8.4\\com.videomaster.app-merged_res-37:\\drawable_ic_launcher_foreground.xml.flat",
-        "source": "C:\\Users\\JG\\.gradle\\daemon\\8.4\\com.videomaster.app-main-39:\\drawable\\ic_launcher_foreground.xml"
+        "merged": "com.videomaster.app-merged_res-37:/color_bottom_nav_tint.xml.flat",
+        "source": "com.videomaster.app-main-39:/color/bottom_nav_tint.xml"
     },
     {
-        "merged": "C:\\Users\\JG\\.gradle\\daemon\\8.4\\com.videomaster.app-merged_res-37:\\color_bottom_nav_tint.xml.flat",
-        "source": "C:\\Users\\JG\\.gradle\\daemon\\8.4\\com.videomaster.app-main-39:\\color\\bottom_nav_tint.xml"
+        "merged": "com.videomaster.app-merged_res-37:/menu_bottom_nav_menu.xml.flat",
+        "source": "com.videomaster.app-main-39:/menu/bottom_nav_menu.xml"
     },
     {
-        "merged": "C:\\Users\\JG\\.gradle\\daemon\\8.4\\com.videomaster.app-merged_res-37:\\layout_item_video.xml.flat",
-        "source": "C:\\Users\\JG\\.gradle\\daemon\\8.4\\com.videomaster.app-main-39:\\layout\\item_video.xml"
-    },
-    {
-        "merged": "C:\\Users\\JG\\.gradle\\daemon\\8.4\\com.videomaster.app-merged_res-37:\\layout_item_playlist.xml.flat",
-        "source": "C:\\Users\\JG\\.gradle\\daemon\\8.4\\com.videomaster.app-main-39:\\layout\\item_playlist.xml"
+        "merged": "com.videomaster.app-merged_res-37:/drawable_ic_builtin.xml.flat",
+        "source": "com.videomaster.app-main-39:/drawable/ic_builtin.xml"
     },
     {
         "merged": "com.videomaster.app-merged_res-37:/layout_activity_player.xml.flat",
         "source": "com.videomaster.app-main-39:/layout/activity_player.xml"
     },
     {
-        "merged": "C:\\Users\\JG\\.gradle\\daemon\\8.4\\com.videomaster.app-merged_res-37:\\drawable_ic_pause.xml.flat",
-        "source": "C:\\Users\\JG\\.gradle\\daemon\\8.4\\com.videomaster.app-main-39:\\drawable\\ic_pause.xml"
+        "merged": "com.videomaster.app-merged_res-37:/drawable_ic_rotate.xml.flat",
+        "source": "com.videomaster.app-main-39:/drawable/ic_rotate.xml"
     },
     {
-        "merged": "C:\\Users\\JG\\.gradle\\daemon\\8.4\\com.videomaster.app-merged_res-37:\\layout_activity_playlist.xml.flat",
-        "source": "C:\\Users\\JG\\.gradle\\daemon\\8.4\\com.videomaster.app-main-39:\\layout\\activity_playlist.xml"
+        "merged": "com.videomaster.app-merged_res-37:/layout_item_player_playlist.xml.flat",
+        "source": "com.videomaster.app-main-39:/layout/item_player_playlist.xml"
     },
     {
-        "merged": "C:\\Users\\JG\\.gradle\\daemon\\8.4\\com.videomaster.app-merged_res-37:\\drawable_ic_subtitle.xml.flat",
-        "source": "C:\\Users\\JG\\.gradle\\daemon\\8.4\\com.videomaster.app-main-39:\\drawable\\ic_subtitle.xml"
+        "merged": "com.videomaster.app-merged_res-37:/layout_activity_playlist_detail.xml.flat",
+        "source": "com.videomaster.app-main-39:/layout/activity_playlist_detail.xml"
     },
     {
-        "merged": "C:\\Users\\JG\\.gradle\\daemon\\8.4\\com.videomaster.app-merged_res-37:\\drawable_ic_lock.xml.flat",
-        "source": "C:\\Users\\JG\\.gradle\\daemon\\8.4\\com.videomaster.app-main-39:\\drawable\\ic_lock.xml"
+        "merged": "com.videomaster.app-merged_res-37:/drawable_ic_speed.xml.flat",
+        "source": "com.videomaster.app-main-39:/drawable/ic_speed.xml"
     },
     {
-        "merged": "C:\\Users\\JG\\.gradle\\daemon\\8.4\\com.videomaster.app-merged_res-37:\\xml_network_security_config.xml.flat",
-        "source": "C:\\Users\\JG\\.gradle\\daemon\\8.4\\com.videomaster.app-main-39:\\xml\\network_security_config.xml"
+        "merged": "com.videomaster.app-merged_res-37:/layout_item_playlist.xml.flat",
+        "source": "com.videomaster.app-main-39:/layout/item_playlist.xml"
     },
     {
-        "merged": "C:\\Users\\JG\\.gradle\\daemon\\8.4\\com.videomaster.app-merged_res-37:\\drawable_ic_lock_open.xml.flat",
-        "source": "C:\\Users\\JG\\.gradle\\daemon\\8.4\\com.videomaster.app-main-39:\\drawable\\ic_lock_open.xml"
+        "merged": "com.videomaster.app-merged_res-37:/drawable_ic_add.xml.flat",
+        "source": "com.videomaster.app-main-39:/drawable/ic_add.xml"
     },
     {
-        "merged": "C:\\Users\\JG\\.gradle\\daemon\\8.4\\com.videomaster.app-merged_res-37:\\drawable_ic_rotate.xml.flat",
-        "source": "C:\\Users\\JG\\.gradle\\daemon\\8.4\\com.videomaster.app-main-39:\\drawable\\ic_rotate.xml"
+        "merged": "com.videomaster.app-merged_res-37:/drawable_ic_forward.xml.flat",
+        "source": "com.videomaster.app-main-39:/drawable/ic_forward.xml"
     },
     {
-        "merged": "C:\\Users\\JG\\.gradle\\daemon\\8.4\\com.videomaster.app-merged_res-37:\\drawable_bg_video_thumbnail.xml.flat",
-        "source": "C:\\Users\\JG\\.gradle\\daemon\\8.4\\com.videomaster.app-main-39:\\drawable\\bg_video_thumbnail.xml"
+        "merged": "com.videomaster.app-merged_res-37:/drawable_ic_rewind.xml.flat",
+        "source": "com.videomaster.app-main-39:/drawable/ic_rewind.xml"
     },
     {
-        "merged": "C:\\Users\\JG\\.gradle\\daemon\\8.4\\com.videomaster.app-merged_res-37:\\drawable_ic_delete.xml.flat",
-        "source": "C:\\Users\\JG\\.gradle\\daemon\\8.4\\com.videomaster.app-main-39:\\drawable\\ic_delete.xml"
+        "merged": "com.videomaster.app-merged_res-37:/layout_activity_playlist.xml.flat",
+        "source": "com.videomaster.app-main-39:/layout/activity_playlist.xml"
     },
     {
-        "merged": "C:\\Users\\JG\\.gradle\\daemon\\8.4\\com.videomaster.app-merged_res-37:\\menu_bottom_nav_menu.xml.flat",
-        "source": "C:\\Users\\JG\\.gradle\\daemon\\8.4\\com.videomaster.app-main-39:\\menu\\bottom_nav_menu.xml"
+        "merged": "com.videomaster.app-merged_res-37:/layout_item_media_progress.xml.flat",
+        "source": "com.videomaster.app-main-39:/layout/item_media_progress.xml"
     },
     {
-        "merged": "C:\\Users\\JG\\.gradle\\daemon\\8.4\\com.videomaster.app-merged_res-37:\\drawable_ic_play.xml.flat",
-        "source": "C:\\Users\\JG\\.gradle\\daemon\\8.4\\com.videomaster.app-main-39:\\drawable\\ic_play.xml"
+        "merged": "com.videomaster.app-merged_res-37:/drawable_ic_mode_repeat_one.xml.flat",
+        "source": "com.videomaster.app-main-39:/drawable/ic_mode_repeat_one.xml"
     },
     {
-        "merged": "C:\\Users\\JG\\.gradle\\daemon\\8.4\\com.videomaster.app-merged_res-37:\\xml_file_paths.xml.flat",
-        "source": "C:\\Users\\JG\\.gradle\\daemon\\8.4\\com.videomaster.app-main-39:\\xml\\file_paths.xml"
+        "merged": "com.videomaster.app-merged_res-37:/drawable_ic_lock.xml.flat",
+        "source": "com.videomaster.app-main-39:/drawable/ic_lock.xml"
     },
     {
-        "merged": "C:\\Users\\JG\\.gradle\\daemon\\8.4\\com.videomaster.app-merged_res-37:\\mipmap-anydpi-v26_ic_launcher.xml.flat",
-        "source": "C:\\Users\\JG\\.gradle\\daemon\\8.4\\com.videomaster.app-main-39:\\mipmap-anydpi-v26\\ic_launcher.xml"
+        "merged": "com.videomaster.app-merged_res-37:/mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "com.videomaster.app-main-39:/mipmap-anydpi-v26/ic_launcher.xml"
     },
     {
-        "merged": "C:\\Users\\JG\\.gradle\\daemon\\8.4\\com.videomaster.app-merged_res-37:\\drawable_ic_add.xml.flat",
-        "source": "C:\\Users\\JG\\.gradle\\daemon\\8.4\\com.videomaster.app-main-39:\\drawable\\ic_add.xml"
+        "merged": "com.videomaster.app-merged_res-37:/drawable_ic_playlist.xml.flat",
+        "source": "com.videomaster.app-main-39:/drawable/ic_playlist.xml"
     },
     {
-        "merged": "C:\\Users\\JG\\.gradle\\daemon\\8.4\\com.videomaster.app-merged_res-37:\\drawable_ic_music.xml.flat",
-        "source": "C:\\Users\\JG\\.gradle\\daemon\\8.4\\com.videomaster.app-main-39:\\drawable\\ic_music.xml"
+        "merged": "com.videomaster.app-merged_res-37:/drawable_ic_play_circle.xml.flat",
+        "source": "com.videomaster.app-main-39:/drawable/ic_play_circle.xml"
     },
     {
-        "merged": "C:\\Users\\JG\\.gradle\\daemon\\8.4\\com.videomaster.app-merged_res-37:\\layout_item_media_progress.xml.flat",
-        "source": "C:\\Users\\JG\\.gradle\\daemon\\8.4\\com.videomaster.app-main-39:\\layout\\item_media_progress.xml"
+        "merged": "com.videomaster.app-merged_res-37:/drawable_ic_brightness.xml.flat",
+        "source": "com.videomaster.app-main-39:/drawable/ic_brightness.xml"
     },
     {
-        "merged": "C:\\Users\\JG\\.gradle\\daemon\\8.4\\com.videomaster.app-merged_res-37:\\drawable_ic_rewind.xml.flat",
-        "source": "C:\\Users\\JG\\.gradle\\daemon\\8.4\\com.videomaster.app-main-39:\\drawable\\ic_rewind.xml"
+        "merged": "com.videomaster.app-merged_res-37:/drawable_ic_play.xml.flat",
+        "source": "com.videomaster.app-main-39:/drawable/ic_play.xml"
     },
     {
-        "merged": "C:\\Users\\JG\\.gradle\\daemon\\8.4\\com.videomaster.app-merged_res-37:\\layout_activity_player.xml.flat",
-        "source": "C:\\Users\\JG\\.gradle\\daemon\\8.4\\com.videomaster.app-main-39:\\layout\\activity_player.xml"
+        "merged": "com.videomaster.app-merged_res-37:/drawable_ic_pause.xml.flat",
+        "source": "com.videomaster.app-main-39:/drawable/ic_pause.xml"
     },
     {
-        "merged": "C:\\Users\\JG\\.gradle\\daemon\\8.4\\com.videomaster.app-merged_res-37:\\layout_activity_playlist_detail.xml.flat",
-        "source": "C:\\Users\\JG\\.gradle\\daemon\\8.4\\com.videomaster.app-main-39:\\layout\\activity_playlist_detail.xml"
+        "merged": "com.videomaster.app-merged_res-37:/drawable_bg_video_thumbnail.xml.flat",
+        "source": "com.videomaster.app-main-39:/drawable/bg_video_thumbnail.xml"
     },
     {
-        "merged": "C:\\Users\\JG\\.gradle\\daemon\\8.4\\com.videomaster.app-merged_res-37:\\drawable_ic_forward.xml.flat",
-        "source": "C:\\Users\\JG\\.gradle\\daemon\\8.4\\com.videomaster.app-main-39:\\drawable\\ic_forward.xml"
+        "merged": "com.videomaster.app-merged_res-37:/drawable_ic_delete.xml.flat",
+        "source": "com.videomaster.app-main-39:/drawable/ic_delete.xml"
     },
     {
-        "merged": "C:\\Users\\JG\\.gradle\\daemon\\8.4\\com.videomaster.app-merged_res-37:\\drawable_ic_brightness.xml.flat",
-        "source": "C:\\Users\\JG\\.gradle\\daemon\\8.4\\com.videomaster.app-main-39:\\drawable\\ic_brightness.xml"
+        "merged": "com.videomaster.app-merged_res-37:/drawable_ic_subtitle.xml.flat",
+        "source": "com.videomaster.app-main-39:/drawable/ic_subtitle.xml"
     },
     {
-        "merged": "C:\\Users\\JG\\.gradle\\daemon\\8.4\\com.videomaster.app-merged_res-37:\\drawable_ic_builtin.xml.flat",
-        "source": "C:\\Users\\JG\\.gradle\\daemon\\8.4\\com.videomaster.app-main-39:\\drawable\\ic_builtin.xml"
+        "merged": "com.videomaster.app-merged_res-37:/mipmap-anydpi-v26_ic_launcher_round.xml.flat",
+        "source": "com.videomaster.app-main-39:/mipmap-anydpi-v26/ic_launcher_round.xml"
+    },
+    {
+        "merged": "com.videomaster.app-merged_res-37:/drawable_ic_launcher_foreground.xml.flat",
+        "source": "com.videomaster.app-main-39:/drawable/ic_launcher_foreground.xml"
+    },
+    {
+        "merged": "com.videomaster.app-merged_res-37:/drawable_ic_playlist_panel.xml.flat",
+        "source": "com.videomaster.app-main-39:/drawable/ic_playlist_panel.xml"
+    },
+    {
+        "merged": "com.videomaster.app-merged_res-37:/drawable_ic_mode_sequential.xml.flat",
+        "source": "com.videomaster.app-main-39:/drawable/ic_mode_sequential.xml"
+    },
+    {
+        "merged": "com.videomaster.app-merged_res-37:/drawable_ic_home.xml.flat",
+        "source": "com.videomaster.app-main-39:/drawable/ic_home.xml"
+    },
+    {
+        "merged": "com.videomaster.app-merged_res-37:/drawable_ic_mode_play_once.xml.flat",
+        "source": "com.videomaster.app-main-39:/drawable/ic_mode_play_once.xml"
+    },
+    {
+        "merged": "com.videomaster.app-merged_res-37:/drawable_selector_panel_item.xml.flat",
+        "source": "com.videomaster.app-main-39:/drawable/selector_panel_item.xml"
+    },
+    {
+        "merged": "com.videomaster.app-merged_res-37:/layout_activity_main.xml.flat",
+        "source": "com.videomaster.app-main-39:/layout/activity_main.xml"
     }
 ]

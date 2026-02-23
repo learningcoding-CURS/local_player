@@ -3178,6 +3178,10 @@ drawable ic_lock_open
 drawable ic_m3_chip_check
 drawable ic_m3_chip_checked_circle
 drawable ic_m3_chip_close
+drawable ic_mode_play_once
+drawable ic_mode_repeat_one
+drawable ic_mode_sequential
+drawable ic_mode_shuffle
 drawable ic_mtrl_checked_circle
 drawable ic_mtrl_chip_checked_black
 drawable ic_mtrl_chip_checked_circle
@@ -3187,6 +3191,7 @@ drawable ic_pause
 drawable ic_play
 drawable ic_play_circle
 drawable ic_playlist
+drawable ic_playlist_panel
 drawable ic_rewind
 drawable ic_rotate
 drawable ic_search_black_24
@@ -3272,6 +3277,7 @@ drawable notification_template_icon_bg
 drawable notification_template_icon_low_bg
 drawable notification_tile_bg
 drawable notify_panel_notification_icon_bg
+drawable selector_panel_item
 drawable test_level_drawable
 drawable tooltip_frame_dark
 drawable tooltip_frame_light
@@ -3380,9 +3386,12 @@ id bounceStart
 id brightnessBar
 id brightnessIndicator
 id btnAddToPlaylist
+id btnClosePanel
 id btnForward
 id btnLock
+id btnPlayMode
 id btnPlayPause
+id btnPlaylistPanel
 id btnRewind
 id btnRotate
 id btnSpeed
@@ -3709,6 +3718,7 @@ id peekHeight
 id percent
 id pin
 id playerView
+id playlistPanel
 id pooling_container_listener_holder_tag
 id position
 id postLayout
@@ -3730,6 +3740,7 @@ id right_icon
 id right_side
 id rounded
 id row_index_key
+id rvPlaylistPanel
 id save_non_transition_alpha
 id save_overlay_view
 id sawtooth
@@ -3856,13 +3867,14 @@ id tvItemIndex
 id tvItemProgress
 id tvItemTitle
 id tvLongPressHint
+id tvPanelItemIndex
+id tvPanelItemName
 id tvPlaylistCategory
 id tvPlaylistCount
 id tvPlaylistName
 id tvSize
 id tvSpeed
 id tvTitle
-id tvVolumeValue
 id unchecked
 id uniform
 id unlabeled
@@ -3878,8 +3890,6 @@ id view_tree_saved_state_registry_owner
 id view_tree_view_model_store_owner
 id visible
 id visible_removing_fragment_view_tag
-id volumeBar
-id volumeIndicator
 id west
 id when_playing
 id withText
@@ -4038,6 +4048,7 @@ layout exo_styled_settings_list_item
 layout exo_styled_sub_settings_list_item
 layout exo_track_selection_dialog
 layout item_media_progress
+layout item_player_playlist
 layout item_playlist
 layout item_video
 layout m3_alert_dialog
@@ -4158,6 +4169,8 @@ string btn_forward
 string btn_lock
 string btn_pause
 string btn_play
+string btn_play_mode
+string btn_playlist_panel
 string btn_rewind
 string btn_rotate
 string btn_speed
@@ -4232,6 +4245,8 @@ string exposed_dropdown_menu_content_description
 string fab_transformation_scrim_behavior
 string fab_transformation_sheet_behavior
 string hide_bottom_view_on_scroll_behavior
+string hint_swipe_landscape
+string hint_swipe_portrait
 string icon_content_description
 string item_view_role_description
 string library_title
@@ -4344,15 +4359,22 @@ string mtrl_timepicker_cancel
 string mtrl_timepicker_confirm
 string no_videos
 string open_video
+string panel_playlist_title
 string password_toggle_content_description
 string path_password_eye
 string path_password_eye_mask_strike_through
 string path_password_eye_mask_visible
 string path_password_strike_through
 string permission_denied
+string play_mode_once
+string play_mode_repeat_one
+string play_mode_sequential
+string play_mode_shuffle
 string playlist_add_media
+string playlist_add_media_multi
 string playlist_add_to
 string playlist_added
+string playlist_added_count
 string playlist_category_hint
 string playlist_create
 string playlist_delete
@@ -4376,6 +4398,7 @@ string search_menu_title
 string searchbar_scrolling_view_behavior
 string searchview_clear_text_content_description
 string searchview_navigation_content_description
+string shuffle_end
 string side_sheet_accessibility_pane_title
 string side_sheet_behavior
 string speed
