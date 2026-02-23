@@ -10,8 +10,9 @@
     android:paddingBottom="6dp"
     android:background="@drawable/selector_panel_item">
 
-    <!-- Thumbnail with fallback icon overlay -->
+    <!-- Thumbnail with fallback icon overlay (size set by adapter from settings) -->
     <FrameLayout
+        android:id="@+id/framePanelThumb"
         android:layout_width="72dp"
         android:layout_height="52dp"
         android:background="#1AFFFFFF">

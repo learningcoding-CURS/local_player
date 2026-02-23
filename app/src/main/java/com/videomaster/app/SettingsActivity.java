@@ -72,9 +72,11 @@ public class SettingsActivity extends AppCompatActivity {
     public static final String PREF_PLAYLIST_PANEL_WIDTH_DP    = "playlist_panel_width_dp";
     public static final String PREF_PLAYLIST_PANEL_HEIGHT_DP   = "playlist_panel_height_dp";
     public static final String PREF_PLAYLIST_PANEL_ORIENTATION = "playlist_panel_orientation";
+    public static final String PREF_PLAYLIST_PANEL_ITEM_SIZE_DP = "playlist_panel_item_size_dp";
     public static final int    DEFAULT_PLAYLIST_PANEL_BG_ALPHA  = 87;   // #DD ≈ 87%
     public static final int    DEFAULT_PLAYLIST_PANEL_WIDTH_DP   = 260;
     public static final int    DEFAULT_PLAYLIST_PANEL_HEIGHT_DP  = 300;
+    public static final int    DEFAULT_PLAYLIST_PANEL_ITEM_SIZE_DP = 72;  // 缩略图宽度 dp，高度按 52/72 比例
     public static final String PLAYLIST_PANEL_ORIENTATION_VERTICAL   = "VERTICAL";
     public static final String PLAYLIST_PANEL_ORIENTATION_HORIZONTAL = "HORIZONTAL";
     public static final String PANEL_DIR_TOP    = "TOP";
@@ -117,6 +119,7 @@ public class SettingsActivity extends AppCompatActivity {
     public static final String PREF_BTN_SUBTLIST_COLOR       = "btn_subtlist_color";
     public static final String PREF_BTN_ROTATE_COLOR         = "btn_rotate_color";
     public static final String PREF_BTN_SPEED_COLOR           = "btn_speed_color";
+    public static final String PREF_BTN_SPEED_STROKE_COLOR    = "btn_speed_stroke_color";  // 倍速图标外圈颜色
     public static final String PREF_BTN_SEEK_VISIBLE          = "btn_seek_visible";
     public static final String PREF_BTN_SEEK_COLOR           = "btn_seek_color";
     public static final String PREF_BTN_PLAYER_SETTINGS_VISIBLE = "btn_player_settings_visible";
@@ -240,8 +243,6 @@ public class SettingsActivity extends AppCompatActivity {
             prefs.edit().putString(PREF_TAB_ORDER, savedOrderStr).apply();
         }
         String savedDefault   = prefs.getString(PREF_DEFAULT_TAB, "builtin");
-        String savedPortrait  = prefs.getString(PREF_PORTRAIT_SWIPE, "VERTICAL");
-        String savedLandscape = prefs.getString(PREF_LANDSCAPE_SWIPE, "HORIZONTAL");
         String savedPanelDirPortrait  = prefs.getString(PREF_PANEL_DIR_PORTRAIT,  PANEL_DIR_RIGHT);
         String savedPanelDirLandscape = prefs.getString(PREF_PANEL_DIR_LANDSCAPE, PANEL_DIR_RIGHT);
         String savedViewMode  = prefs.getString(PREF_VIEW_MODE, VIEW_MODE_GRID);
@@ -274,6 +275,7 @@ public class SettingsActivity extends AppCompatActivity {
         int    savedPlaylistPanelBgAlpha = prefs.getInt(PREF_PLAYLIST_PANEL_BG_ALPHA, DEFAULT_PLAYLIST_PANEL_BG_ALPHA);
         int    savedPlaylistPanelWidth   = prefs.getInt(PREF_PLAYLIST_PANEL_WIDTH_DP,  DEFAULT_PLAYLIST_PANEL_WIDTH_DP);
         int    savedPlaylistPanelHeight  = prefs.getInt(PREF_PLAYLIST_PANEL_HEIGHT_DP, DEFAULT_PLAYLIST_PANEL_HEIGHT_DP);
+        int    savedPlaylistPanelItemSize = prefs.getInt(PREF_PLAYLIST_PANEL_ITEM_SIZE_DP, DEFAULT_PLAYLIST_PANEL_ITEM_SIZE_DP);
         String savedPlaylistPanelOrientation = prefs.getString(PREF_PLAYLIST_PANEL_ORIENTATION, PLAYLIST_PANEL_ORIENTATION_VERTICAL);
 
         tabOrder       = savedOrderStr.split(",");
@@ -354,18 +356,14 @@ public class SettingsActivity extends AppCompatActivity {
         LinearLayout shortcutOrderContainer = findViewById(R.id.shortcutOrderContainer);
         refreshShortcutOrderRows(shortcutOrderContainer);
 
-        // ── 列表/手势/面板 标签切换 ───────────────────────────────────────────
+        // ── 列表/面板 标签切换 ─────────────────────────────────────────────────
         {
             View sectionViewMode       = findViewById(R.id.sectionViewMode);
-            View sectionPortraitSwipe   = findViewById(R.id.sectionPortraitSwipe);
-            View sectionLandscapeSwipe  = findViewById(R.id.sectionLandscapeSwipe);
             View sectionPanelPortrait  = findViewById(R.id.sectionPanelPortrait);
             View sectionPanelLandscape = findViewById(R.id.sectionPanelLandscape);
             View sectionPlaylistPanel  = findViewById(R.id.sectionPlaylistPanel);
 
             TextView tabViewMode       = findViewById(R.id.tabViewMode);
-            TextView tabPortraitSwipe  = findViewById(R.id.tabPortraitSwipe);
-            TextView tabLandscapeSwipe  = findViewById(R.id.tabLandscapeSwipe);
             TextView tabPanelPortrait  = findViewById(R.id.tabPanelPortrait);
             TextView tabPanelLandscape = findViewById(R.id.tabPanelLandscape);
             TextView tabPlaylistPanel  = findViewById(R.id.tabPlaylistPanel);
@@ -373,8 +371,6 @@ public class SettingsActivity extends AppCompatActivity {
             View.OnClickListener generalTabToggle = v -> {
                 View section;
                 if (v == tabViewMode)        section = sectionViewMode;
-                else if (v == tabPortraitSwipe)  section = sectionPortraitSwipe;
-                else if (v == tabLandscapeSwipe) section = sectionLandscapeSwipe;
                 else if (v == tabPanelPortrait)  section = sectionPanelPortrait;
                 else if (v == tabPanelLandscape) section = sectionPanelLandscape;
                 else                             section = sectionPlaylistPanel;
@@ -387,8 +383,6 @@ public class SettingsActivity extends AppCompatActivity {
                 ((TextView) v).setBackgroundColor(wasVisible ? normalColor : activeColor);
             };
             tabViewMode.setOnClickListener(generalTabToggle);
-            tabPortraitSwipe.setOnClickListener(generalTabToggle);
-            tabLandscapeSwipe.setOnClickListener(generalTabToggle);
             tabPanelPortrait.setOnClickListener(generalTabToggle);
             tabPanelLandscape.setOnClickListener(generalTabToggle);
             tabPlaylistPanel.setOnClickListener(generalTabToggle);
@@ -412,24 +406,6 @@ public class SettingsActivity extends AppCompatActivity {
                 PREF_GRID_CELL_WIDTH_PLAYLIST, savedGridPlaylist, R.string.settings_grid_width_playlist);
         setupGridCellSeekBar(R.id.sbGridCellWidthPlaylistItems, R.id.tvGridCellWidthPlaylistItems,
                 PREF_GRID_CELL_WIDTH_PLAYLIST_ITEMS, savedGridPlaylistItems, R.string.settings_grid_width_playlist_items);
-
-        // ── Portrait swipe ────────────────────────────────────────────────────
-        RadioButton rbPortraitV = findViewById(R.id.rbPortraitVertical);
-        RadioButton rbPortraitH = findViewById(R.id.rbPortraitHorizontal);
-        rbPortraitV.setChecked("VERTICAL".equals(savedPortrait));
-        rbPortraitH.setChecked("HORIZONTAL".equals(savedPortrait));
-        ((RadioGroup) findViewById(R.id.rgPortraitSwipe)).setOnCheckedChangeListener((g, id) ->
-                prefs.edit().putString(PREF_PORTRAIT_SWIPE,
-                        id == R.id.rbPortraitHorizontal ? "HORIZONTAL" : "VERTICAL").apply());
-
-        // ── Landscape swipe ───────────────────────────────────────────────────
-        RadioButton rbLandH = findViewById(R.id.rbLandscapeHorizontal);
-        RadioButton rbLandV = findViewById(R.id.rbLandscapeVertical);
-        rbLandH.setChecked("HORIZONTAL".equals(savedLandscape));
-        rbLandV.setChecked("VERTICAL".equals(savedLandscape));
-        ((RadioGroup) findViewById(R.id.rgLandscapeSwipe)).setOnCheckedChangeListener((g, id) ->
-                prefs.edit().putString(PREF_LANDSCAPE_SWIPE,
-                        id == R.id.rbLandscapeVertical ? "VERTICAL" : "HORIZONTAL").apply());
 
         // ── 播放列表面板方向（竖屏） ────────────────────────────────────────────
         setupPanelDirGroup(
@@ -494,6 +470,21 @@ public class SettingsActivity extends AppCompatActivity {
             @Override public void onStartTrackingTouch(SeekBar sb) {}
             @Override public void onStopTrackingTouch(SeekBar sb) {
                 prefs.edit().putInt(PREF_PLAYLIST_PANEL_HEIGHT_DP, 200 + sb.getProgress()).apply();
+            }
+        });
+        savedPlaylistPanelItemSize = Math.max(40, Math.min(120, savedPlaylistPanelItemSize));
+        SeekBar sbPlaylistItemSize = findViewById(R.id.sbPlaylistPanelItemSize);
+        TextView tvPlaylistItemSizeLabel = findViewById(R.id.tvPlaylistPanelItemSizeLabel);
+        sbPlaylistItemSize.setMax(80);  // 40 + progress = 40..120 dp
+        sbPlaylistItemSize.setProgress(savedPlaylistPanelItemSize - 40);
+        tvPlaylistItemSizeLabel.setText(getString(R.string.settings_playlist_panel_item_size, savedPlaylistPanelItemSize));
+        sbPlaylistItemSize.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override public void onProgressChanged(SeekBar sb, int p, boolean user) {
+                tvPlaylistItemSizeLabel.setText(getString(R.string.settings_playlist_panel_item_size, 40 + p));
+            }
+            @Override public void onStartTrackingTouch(SeekBar sb) {}
+            @Override public void onStopTrackingTouch(SeekBar sb) {
+                prefs.edit().putInt(PREF_PLAYLIST_PANEL_ITEM_SIZE_DP, 40 + sb.getProgress()).apply();
             }
         });
         RadioButton rbPlaylistVertical   = findViewById(R.id.rbPlaylistPanelVertical);
@@ -875,6 +866,7 @@ public class SettingsActivity extends AppCompatActivity {
         ctrlPrefsVis   = new String[]{
                 PREF_BTN_LOCK_VISIBLE, PREF_BTN_PLAYMODE_VISIBLE,
                 PREF_BTN_PLAYLIST_VISIBLE, PREF_BTN_SPEED_VISIBLE,
+                null,  // 倍速外圈无显隐，仅颜色
                 PREF_BTN_SUBTITLE_TOGGLE_VISIBLE, PREF_BTN_SUBTITLE_VISIBLE,
                 PREF_BTN_SUBTLIST_VISIBLE, PREF_BTN_ROTATE_VISIBLE,
                 PREF_BTN_SEEK_VISIBLE, PREF_BTN_PLAYPAUSE_VISIBLE,
@@ -882,6 +874,7 @@ public class SettingsActivity extends AppCompatActivity {
         ctrlPrefsColor = new String[]{
                 PREF_BTN_LOCK_COLOR, PREF_BTN_PLAYMODE_COLOR,
                 PREF_BTN_PLAYLIST_COLOR, PREF_BTN_SPEED_COLOR,
+                PREF_BTN_SPEED_STROKE_COLOR,
                 PREF_BTN_SUBTITLE_TOGGLE_COLOR, PREF_BTN_SUBTITLE_COLOR,
                 PREF_BTN_SUBTLIST_COLOR, PREF_BTN_ROTATE_COLOR,
                 PREF_BTN_SEEK_COLOR, PREF_BTN_PLAYPAUSE_COLOR,
@@ -889,6 +882,7 @@ public class SettingsActivity extends AppCompatActivity {
         String[] ctrlDefColor   = {
                 DEFAULT_BTN_COLOR, DEFAULT_BTN_COLOR,
                 DEFAULT_PLAYLIST_BTN_COLOR, DEFAULT_BTN_COLOR,
+                "accent",  // 倍速外圈默认红色
                 DEFAULT_BTN_COLOR, DEFAULT_BTN_COLOR,
                 DEFAULT_BTN_COLOR, DEFAULT_BTN_COLOR, DEFAULT_BTN_COLOR,
                 DEFAULT_BTN_COLOR, DEFAULT_BTN_COLOR, DEFAULT_BTN_COLOR };
@@ -897,6 +891,7 @@ public class SettingsActivity extends AppCompatActivity {
                 getString(R.string.settings_ctrl_playmode),
                 getString(R.string.settings_ctrl_playlist),
                 getString(R.string.settings_ctrl_speed),
+                getString(R.string.settings_ctrl_speed_stroke),
                 getString(R.string.settings_ctrl_subtitle_toggle),
                 getString(R.string.settings_ctrl_subtitle),
                 getString(R.string.settings_ctrl_subtlist),

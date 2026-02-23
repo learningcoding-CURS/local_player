@@ -164,6 +164,7 @@
     <string name="settings_playlist_panel_bg_alpha">背景透明度：%d%%</string>
     <string name="settings_playlist_panel_width">宽度（左右滑出时）：%d dp</string>
     <string name="settings_playlist_panel_height">高度（上下滑出时）：%d dp</string>
+    <string name="settings_playlist_panel_item_size">视频方块大小：%d dp</string>
     <string name="settings_playlist_panel_orientation">列表排列方向</string>
     <string name="settings_playlist_panel_vertical">竖排</string>
     <string name="settings_playlist_panel_horizontal">横排</string>
@@ -203,6 +204,7 @@
     <string name="settings_ctrl_skip">切换按钮</string>
     <string name="settings_ctrl_player_settings">设置按钮</string>
     <string name="settings_ctrl_speed">倍速按钮</string>
+    <string name="settings_ctrl_speed_stroke">倍速外圈</string>
     <string name="settings_skip_btn_size">切换按钮大小：%ddp</string>
     <string name="settings_skip_btn_alpha">切换按钮透明度：%d%%</string>
     <string name="settings_skip_btn_offset">切换按钮上下偏移：%ddp</string>

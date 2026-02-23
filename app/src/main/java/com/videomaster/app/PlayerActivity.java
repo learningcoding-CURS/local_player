@@ -616,7 +616,7 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
         // ── Button order in top/center bar ────────────────────────────────
         applyButtonOrder(prefs);
 
-        // ── 播放列表面板（方向、尺寸、背景、排列；若面板已打开则实时更新）──
+        // ── 播放列表面板（方向、尺寸、背景、排列、视频方块大小；若面板已打开则实时更新）──
         if (playlistPanel != null && playlistUris != null && !playlistUris.isEmpty()) {
             String orientation = prefs.getString(SettingsActivity.PREF_PLAYLIST_PANEL_ORIENTATION,
                     SettingsActivity.PLAYLIST_PANEL_ORIENTATION_VERTICAL);
@@ -625,6 +625,10 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
             if (rvPlaylistPanel.getLayoutManager() instanceof LinearLayoutManager) {
                 ((LinearLayoutManager) rvPlaylistPanel.getLayoutManager()).setOrientation(layoutOrientation);
             }
+            int itemSizeDp = prefs.getInt(SettingsActivity.PREF_PLAYLIST_PANEL_ITEM_SIZE_DP,
+                    SettingsActivity.DEFAULT_PLAYLIST_PANEL_ITEM_SIZE_DP);
+            itemSizeDp = Math.max(40, Math.min(120, itemSizeDp));
+            if (panelAdapter != null) panelAdapter.setThumbSizeDp(itemSizeDp);
             if (isPanelVisible) {
                 applyPlaylistPanelLayout();
             }
@@ -860,7 +864,7 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
         btn.setImageTintList(android.content.res.ColorStateList.valueOf(resolveButtonColor(color)));
     }
 
-    /** Applies visibility and text color to the speed TextView from SharedPreferences. */
+    /** Applies visibility, text color, and stroke (outer ring) color to the speed TextView from SharedPreferences. */
     private void applySpeedButtonSettings(TextView tv, String visiblePrefKey,
                                           String colorPrefKey, String defaultColor,
                                           SharedPreferences prefs) {
@@ -869,6 +873,15 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
         tv.setVisibility(visible ? View.VISIBLE : View.GONE);
         String color = prefs.getString(colorPrefKey, defaultColor);
         tv.setTextColor(resolveButtonColor(color));
+        // 倍速外圈颜色：动态创建带描边的背景
+        String strokeColor = prefs.getString(SettingsActivity.PREF_BTN_SPEED_STROKE_COLOR, "accent");
+        int strokeColorInt = resolveButtonColor(strokeColor);
+        GradientDrawable bg = new GradientDrawable();
+        bg.setShape(GradientDrawable.RECTANGLE);
+        bg.setColor(0xCC1A1A2E);  // 与 bg_speed_badge 一致
+        bg.setCornerRadius(dpToPx(20));
+        bg.setStroke(dpToPx(1), strokeColorInt);
+        tv.setBackground(bg);
     }
 
     /** Applies color and alpha to the long-press 2.5× hint. Visibility is checked when showing. */
@@ -1127,6 +1140,9 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
         int layoutOrientation = SettingsActivity.PLAYLIST_PANEL_ORIENTATION_HORIZONTAL.equals(orientation)
                 ? RecyclerView.HORIZONTAL : RecyclerView.VERTICAL;
         rvPlaylistPanel.setLayoutManager(new LinearLayoutManager(this, layoutOrientation, false));
+        int thumbSizeDp = prefs.getInt(SettingsActivity.PREF_PLAYLIST_PANEL_ITEM_SIZE_DP,
+                SettingsActivity.DEFAULT_PLAYLIST_PANEL_ITEM_SIZE_DP);
+        thumbSizeDp = Math.max(40, Math.min(120, thumbSizeDp));
         panelAdapter = new PlayerPlaylistAdapter(playlistUris, playlistIndex,
                 index -> {
                     if (index != playlistIndex) {
@@ -1135,7 +1151,8 @@ public class PlayerActivity extends AppCompatActivity implements IPlayerEventLis
                         switchToPlaylistItem(playlistIndex);
                     }
                     closePlaylistPanel();
-                });
+                },
+                thumbSizeDp);
         rvPlaylistPanel.setAdapter(panelAdapter);
     }
 

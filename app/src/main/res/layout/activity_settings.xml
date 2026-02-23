@@ -72,7 +72,7 @@
 
             <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/divider" android:layout_marginTop="4dp" android:layout_marginBottom="4dp" />
 
-            <!-- ── 竖屏手势/横屏手势/面板竖屏/面板横屏（可折叠标签切换） ── -->
+            <!-- ── 面板竖屏/面板横屏/列表面板（可折叠标签切换） ── -->
             <LinearLayout
                 android:id="@+id/generalTabRow"
                 android:layout_width="match_parent"
@@ -81,26 +81,10 @@
                 android:paddingTop="4dp"
                 android:paddingBottom="4dp">
 
-                <TextView android:id="@+id/tabPortraitSwipe" android:layout_width="0dp" android:layout_weight="1" android:layout_height="36dp" android:text="竖屏手势" android:textColor="@color/textPrimary" android:textSize="12sp" android:gravity="center" android:background="@drawable/bg_speed_badge" android:layout_marginEnd="4dp" />
-                <TextView android:id="@+id/tabLandscapeSwipe" android:layout_width="0dp" android:layout_weight="1" android:layout_height="36dp" android:text="横屏手势" android:textColor="@color/textPrimary" android:textSize="12sp" android:gravity="center" android:background="@drawable/bg_speed_badge" android:layout_marginEnd="4dp" />
                 <TextView android:id="@+id/tabPanelPortrait" android:layout_width="0dp" android:layout_weight="1" android:layout_height="36dp" android:text="面板竖屏" android:textColor="@color/textPrimary" android:textSize="12sp" android:gravity="center" android:background="@drawable/bg_speed_badge" android:layout_marginEnd="4dp" />
                 <TextView android:id="@+id/tabPanelLandscape" android:layout_width="0dp" android:layout_weight="1" android:layout_height="36dp" android:text="面板横屏" android:textColor="@color/textPrimary" android:textSize="12sp" android:gravity="center" android:background="@drawable/bg_speed_badge" android:layout_marginEnd="4dp" />
                 <TextView android:id="@+id/tabPlaylistPanel" android:layout_width="0dp" android:layout_weight="1" android:layout_height="36dp" android:text="@string/settings_playlist_panel_tab" android:textColor="@color/textPrimary" android:textSize="12sp" android:gravity="center" android:background="@drawable/bg_speed_badge" />
 
-            </LinearLayout>
-
-            <LinearLayout android:id="@+id/sectionPortraitSwipe" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone">
-                <RadioGroup android:id="@+id/rgPortraitSwipe" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
-                    <RadioButton android:id="@+id/rbPortraitVertical" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="@string/swipe_vertical_desc" android:textColor="@color/textPrimary" android:paddingStart="4dp" android:paddingTop="6dp" android:paddingBottom="6dp" />
-                    <RadioButton android:id="@+id/rbPortraitHorizontal" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="@string/swipe_horizontal_desc" android:textColor="@color/textPrimary" android:paddingStart="4dp" android:paddingTop="6dp" android:paddingBottom="6dp" />
-                </RadioGroup>
-            </LinearLayout>
-
-            <LinearLayout android:id="@+id/sectionLandscapeSwipe" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone">
-                <RadioGroup android:id="@+id/rgLandscapeSwipe" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
-                    <RadioButton android:id="@+id/rbLandscapeHorizontal" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="@string/swipe_horizontal_desc" android:textColor="@color/textPrimary" android:paddingStart="4dp" android:paddingTop="6dp" android:paddingBottom="6dp" />
-                    <RadioButton android:id="@+id/rbLandscapeVertical" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="@string/swipe_vertical_desc" android:textColor="@color/textPrimary" android:paddingStart="4dp" android:paddingTop="6dp" android:paddingBottom="6dp" />
-                </RadioGroup>
             </LinearLayout>
 
             <LinearLayout android:id="@+id/sectionPanelPortrait" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone">
@@ -136,6 +120,8 @@
                 <SeekBar android:id="@+id/sbPlaylistPanelWidth" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="250" android:progressTint="@color/colorAccent" android:thumbTint="@color/colorAccent" android:layout_marginBottom="6dp" />
                 <TextView android:id="@+id/tvPlaylistPanelHeightLabel" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/colorAccentLight" android:textSize="13sp" android:paddingTop="4dp" android:paddingBottom="4dp" />
                 <SeekBar android:id="@+id/sbPlaylistPanelHeight" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="350" android:progressTint="@color/colorAccent" android:thumbTint="@color/colorAccent" android:layout_marginBottom="6dp" />
+                <TextView android:id="@+id/tvPlaylistPanelItemSizeLabel" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/colorAccentLight" android:textSize="13sp" android:paddingTop="4dp" android:paddingBottom="4dp" />
+                <SeekBar android:id="@+id/sbPlaylistPanelItemSize" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="80" android:progressTint="@color/colorAccent" android:thumbTint="@color/colorAccent" android:layout_marginBottom="6dp" />
                 <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/settings_playlist_panel_orientation" android:textColor="@color/colorAccentLight" android:textSize="13sp" android:paddingTop="8dp" android:paddingBottom="4dp" />
                 <RadioGroup android:id="@+id/rgPlaylistPanelOrientation" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
                     <RadioButton android:id="@+id/rbPlaylistPanelVertical" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="@string/settings_playlist_panel_vertical" android:textColor="@color/textPrimary" android:paddingStart="4dp" android:paddingTop="6dp" android:paddingBottom="6dp" />
@@ -143,7 +129,7 @@
                 </RadioGroup>
             </LinearLayout>
 
-            <!-- ── 列表模式（竖屏手势行下方、字幕大小上方） ── -->
+            <!-- ── 列表模式（面板行下方、字幕大小上方） ── -->
             <LinearLayout
                 android:id="@+id/listModeRow"
                 android:layout_width="match_parent"

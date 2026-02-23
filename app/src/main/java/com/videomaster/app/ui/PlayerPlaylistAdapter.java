@@ -11,6 +11,7 @@ import android.util.Size;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -41,6 +42,7 @@ public class PlayerPlaylistAdapter
     private final List<String>        uris;
     private       int                 currentIndex;
     private final OnItemClickListener listener;
+    private       int                 thumbSizeDp;  // 缩略图宽度 dp，高度按 52/72 比例
 
     // Thumbnail cache keyed by URI string
     private final Map<String, Bitmap> thumbCache    = new HashMap<>();
@@ -48,10 +50,19 @@ public class PlayerPlaylistAdapter
     private final Handler             mainHandler   = new Handler(Looper.getMainLooper());
 
     public PlayerPlaylistAdapter(List<String> uris, int currentIndex,
-                                 OnItemClickListener listener) {
+                                 OnItemClickListener listener, int thumbSizeDp) {
         this.uris         = uris;
         this.currentIndex = currentIndex;
         this.listener     = listener;
+        this.thumbSizeDp  = thumbSizeDp;
+    }
+
+    /** 更新缩略图尺寸并刷新显示（设置变更时调用） */
+    public void setThumbSizeDp(int dp) {
+        if (thumbSizeDp != dp) {
+            thumbSizeDp = dp;
+            notifyDataSetChanged();
+        }
     }
 
     /** Update the highlighted item without rebuilding the whole list. */
@@ -72,6 +83,17 @@ public class PlayerPlaylistAdapter
     @Override
     public void onBindViewHolder(@NonNull VH holder, int position) {
         String uriStr = uris.get(position);
+
+        // Thumbnail size from settings (width dp, height = width * 52/72)
+        if (holder.frameThumb != null && thumbSizeDp > 0) {
+            float density = holder.itemView.getResources().getDisplayMetrics().density;
+            int wPx = (int) (thumbSizeDp * density);
+            int hPx = (int) (thumbSizeDp * 52f / 72f * density);
+            ViewGroup.LayoutParams lp = holder.frameThumb.getLayoutParams();
+            lp.width = wPx;
+            lp.height = hPx;
+            holder.frameThumb.setLayoutParams(lp);
+        }
 
         // File name
         String name;
@@ -184,16 +206,18 @@ public class PlayerPlaylistAdapter
     // ── ViewHolder ─────────────────────────────────────────────────────────
 
     static class VH extends RecyclerView.ViewHolder {
-        final TextView  tvIndex;
-        final TextView  tvName;
-        final ImageView imgThumb;
-        final ImageView imgFallback;
+        final FrameLayout frameThumb;
+        final TextView   tvIndex;
+        final TextView   tvName;
+        final ImageView  imgThumb;
+        final ImageView  imgFallback;
 
         VH(@NonNull View v) {
             super(v);
-            tvIndex    = v.findViewById(R.id.tvPanelItemIndex);
-            tvName     = v.findViewById(R.id.tvPanelItemName);
-            imgThumb   = v.findViewById(R.id.imgPanelThumb);
+            frameThumb  = v.findViewById(R.id.framePanelThumb);
+            tvIndex     = v.findViewById(R.id.tvPanelItemIndex);
+            tvName      = v.findViewById(R.id.tvPanelItemName);
+            imgThumb    = v.findViewById(R.id.imgPanelThumb);
             imgFallback = v.findViewById(R.id.imgPanelThumbFallback);
         }
     }
