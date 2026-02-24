@@ -960,7 +960,7 @@ SubtitleManager.getInstance().registerParser(new MyCustomParser());
 |------|------|
 | `res/drawable/ic_skip_prev.xml` | 上一个视频矢量图标（⏮） |
 | `res/drawable/ic_skip_next.xml` | 下一个视频矢量图标（⏭） |
-
+1
 ---
 
 ### 5. 切换按钮全面可配置
